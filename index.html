@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLBDMIS - Final Version</title>
+    <title>SLBDMIS - Complete System</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -25,7 +25,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
         
-        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
         /* --- UTILS --- */
         .hidden { display: none !important; }
@@ -36,6 +36,7 @@
         .text-sm { font-size: 0.875rem; }
         .text-muted { color: var(--muted); }
         .p-4 { padding: 1rem; }
+        .w-full { width: 100%; }
         
         /* --- COMPONENTS --- */
         .card {
@@ -44,7 +45,9 @@
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
         }
+        .card:hover { border-color: rgba(255,255,255,0.1); }
 
         .btn {
             padding: 0.6rem 1.2rem;
@@ -91,12 +94,13 @@
         .nav-item.active, .nav-item:hover { background: var(--primary); color: white; }
 
         .tag-checkbox {
-            display: flex; align-items: center; gap: 10px; padding: 8px;
+            display: flex; align-items: center; gap: 10px; padding: 10px;
             background: var(--hover); border-radius: 6px; margin-bottom: 6px; cursor: pointer;
+            transition: background 0.2s;
         }
+        .tag-checkbox:hover { background: rgba(255,255,255,0.1); }
         .tag-checkbox input { width: auto; margin: 0; }
 
-        /* --- LOADER --- */
         .loader-overlay {
             position: fixed; inset: 0; background: var(--bg); z-index: 200;
             display: flex; align-items: center; justify-content: center;
@@ -118,7 +122,6 @@
             }
         }
 
-        /* --- LOGIN --- */
         .avatar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem; }
         .avatar-card { padding: 1.5rem; border-radius: 1rem; cursor: pointer; background: var(--card); border: 2px solid transparent; text-align: center; }
         .avatar-card.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
@@ -151,7 +154,7 @@
         <nav class="sidebar">
             <div class="flex" style="align-items: center; gap: 10px; margin-bottom: 2rem;">
                 <div style="background: var(--primary); padding: 8px; border-radius: 6px;"><i data-lucide="layout-grid"></i></div>
-                <div class="font-bold">SLBDMIS <span class="text-muted text-sm">v3.0</span></div>
+                <div class="font-bold">SLBDMIS <span class="text-muted text-sm">v3.1</span></div>
             </div>
             <div id="sidebar-links"></div>
             <div style="margin-top: auto;" class="nav-item" onclick="handleLogout()"><i data-lucide="log-out"></i> Logout</div>
@@ -164,7 +167,7 @@
                     <p class="text-muted text-sm">Welcome, <span id="user-display">User</span></p>
                 </div>
                 <div class="flex" style="gap: 10px;">
-                    <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus"></i> Create</button>
+                    <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus"></i> New Item</button>
                     <button onclick="renderPage(STATE.page)" class="btn btn-ghost"><i data-lucide="refresh-cw"></i></button>
                 </div>
             </header>
@@ -176,28 +179,31 @@
 
     <div id="create-modal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center;">
         <div class="card p-4" style="width: 90%; max-width: 500px;">
-            <h3 class="font-bold text-lg mb-4">Create New Item</h3>
+            <h3 class="font-bold text-lg mb-4 text-center">Create New</h3>
             
-            <div class="flex" style="gap: 10px; margin-bottom: 1rem;">
-                <button onclick="setCreateMode('task')" id="btn-mode-task" class="btn btn-primary w-full">Task</button>
-                <button onclick="setCreateMode('opp')" id="btn-mode-opp" class="btn btn-ghost w-full">Opportunity</button>
+            <div class="flex" style="gap: 10px; margin-bottom: 1rem; justify-content: center;">
+                <button onclick="setCreateMode('task')" id="btn-mode-task" class="btn btn-primary">Task</button>
+                <button onclick="setCreateMode('decision')" id="btn-mode-decision" class="btn btn-ghost">Decision</button>
+                <button onclick="setCreateMode('opp')" id="btn-mode-opp" class="btn btn-ghost">Opportunity</button>
             </div>
 
-            <input id="create-title" placeholder="Title">
-            <textarea id="create-desc" placeholder="Details..." rows="3"></textarea>
+            <input id="create-title" placeholder="Title / Subject">
+            <textarea id="create-desc" placeholder="Description / Details..." rows="3"></textarea>
             
             <div id="task-fields">
-                <select id="create-priority">
-                    <option value="Normal">Normal Priority</option>
-                    <option value="High">High Priority</option>
-                    <option value="Urgent">Urgent Priority</option>
-                </select>
-                <input type="date" id="create-date">
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <select id="create-priority">
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                    <input type="date" id="create-date">
+                </div>
             </div>
 
             <div id="opp-fields" class="hidden">
                 <label class="text-sm text-muted mb-2 block">Tag Members:</label>
-                <div id="tag-list" style="max-height: 150px; overflow-y: auto;"></div>
+                <div id="tag-list" style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;"></div>
             </div>
 
             <div class="flex" style="gap: 10px; margin-top: 1rem;">
@@ -219,7 +225,6 @@
     </div>
 
     <script>
-        // CONFIG
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const supabase = window.supabase.createClient(SB_URL, SB_KEY);
@@ -234,23 +239,14 @@
 
         const STATE = { user: null, page: 'overview', createMode: 'task', selectedAvatar: null };
 
-        // INIT & SESSION CHECK
         window.onload = () => {
             lucide.createIcons();
-            
-            // Check for saved session
-            const savedUserId = localStorage.getItem('slbd_user_id');
-            if (savedUserId) {
-                const user = TEAM.find(u => u.id === parseInt(savedUserId));
-                if (user) {
-                    STATE.user = user;
-                    initApp();
-                } else {
-                    renderLoginView();
-                }
-            } else {
-                renderLoginView();
+            const savedId = localStorage.getItem('slbd_uid');
+            if (savedId) {
+                const user = TEAM.find(u => u.id === parseInt(savedId));
+                if (user) { STATE.user = user; initApp(); return; }
             }
+            renderLoginView();
         };
 
         function renderLoginView() {
@@ -265,7 +261,6 @@
             `).join('');
         }
 
-        // AUTH
         function selectAvatar(id, el) {
             document.querySelectorAll('.avatar-card').forEach(e => e.classList.remove('selected'));
             el.classList.add('selected');
@@ -278,22 +273,18 @@
         function login() {
             if (document.getElementById('cid-input').value === STATE.selectedAvatar.cid) {
                 STATE.user = STATE.selectedAvatar;
-                // SAVE SESSION
-                localStorage.setItem('slbd_user_id', STATE.user.id);
+                localStorage.setItem('slbd_uid', STATE.user.id);
                 initApp();
             } else {
-                const err = document.getElementById('login-err');
-                err.innerText = "❌ Invalid CID";
-                setTimeout(() => err.innerText = '', 2000);
+                document.getElementById('login-err').innerText = "❌ Invalid CID";
             }
         }
 
         function handleLogout() {
-            localStorage.removeItem('slbd_user_id');
+            localStorage.removeItem('slbd_uid');
             location.reload();
         }
 
-        // NAVIGATION
         function initApp() {
             document.getElementById('app-loader').classList.add('hidden');
             document.getElementById('login-view').classList.add('hidden');
@@ -304,7 +295,8 @@
                 { id: 'overview', icon: 'layout-dashboard', label: 'Overview' },
                 { id: 'tasks', icon: 'check-square', label: 'Tasks' },
                 { id: 'attendance', icon: 'calendar', label: 'Attendance' },
-                { id: 'collab', icon: 'users', label: 'Collab' }
+                { id: 'decisions', icon: 'file-text', label: 'Decisions' },
+                { id: 'opportunities', icon: 'zap', label: 'Opportunities' }
             ];
             
             if(STATE.user.role === 'LEADER') links.push({ id: 'team', icon: 'bar-chart', label: 'Team' });
@@ -338,7 +330,8 @@
                 if(page === 'overview') await renderOverview(content);
                 else if(page === 'tasks') await renderTasks(content);
                 else if(page === 'attendance') await renderAttendance(content);
-                else if(page === 'collab') await renderCollab(content);
+                else if(page === 'decisions') await renderDecisions(content);
+                else if(page === 'opportunities') await renderOpportunities(content);
                 else if(page === 'team') await renderTeam(content);
                 lucide.createIcons();
             } catch(e) {
@@ -346,7 +339,7 @@
             }
         }
 
-        // RENDERERS
+        // --- FEATURE RENDERERS ---
         async function renderOverview(container) {
             const { data: tasks } = await supabase.from('tasks').select('*');
             const myTasks = STATE.user.role === 'MEMBER' ? tasks.filter(t => t.assignee_id === STATE.user.id) : tasks;
@@ -359,7 +352,7 @@
                         <div class="font-bold text-2xl text-primary">${myTasks.filter(t => t.status === 'Ongoing').length}</div>
                     </div>
                     <div class="card p-4">
-                        <div class="text-muted text-sm">Waiting Approval</div>
+                        <div class="text-muted text-sm">Pending Approval</div>
                         <div class="font-bold text-2xl text-warning">${waiting}</div>
                     </div>
                     <div class="card p-4">
@@ -407,7 +400,7 @@
                     
                     <div class="flex gap-2 mt-3">
                         ${t.status === 'Ongoing' && (t.assignee_id === STATE.user.id || STATE.user.role === 'LEADER') ? 
-                            `<button onclick="updateStatus('${t.id}', 'Done')" class="btn btn-success btn-sm">Done</button>` : ''}
+                            `<button onclick="updateStatus('${t.id}', 'Done')" class="btn btn-success btn-sm">Mark Done</button>` : ''}
                         ${t.status === 'Waiting' && STATE.user.role === 'LEADER' ? 
                             `<button onclick="openApprove('${t.id}')" class="btn btn-primary btn-sm">Approve</button>` : ''}
                         ${STATE.user.role === 'LEADER' || t.creator_id === STATE.user.id ? 
@@ -415,6 +408,80 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        async function renderDecisions(container) {
+            const { data: items } = await supabase.from('decisions').select('*, users!proposed_by(name)').order('created_at', {ascending: false});
+            if(!items.length) return container.innerHTML = '<div class="text-center text-muted">No decisions proposed yet.</div>';
+
+            container.innerHTML = items.map(d => `
+                <div class="card p-4 mb-4">
+                    <div class="flex" style="justify-content: space-between;">
+                        <h4 class="font-bold">${d.subject}</h4>
+                        ${d.is_verified ? '<span class="text-success text-sm font-bold">Verified ✅</span>' : '<span class="text-warning text-sm">Pending ⏳</span>'}
+                    </div>
+                    <p class="text-sm text-muted mt-2">${d.details}</p>
+                    <div class="text-xs text-muted mt-2">Proposed by: ${d.users.name}</div>
+                    <div class="flex gap-2 mt-3">
+                        ${!d.is_verified && STATE.user.role === 'LEADER' ? 
+                            `<button onclick="verifyDecision('${d.id}')" class="btn btn-success btn-sm">Verify</button>` : ''}
+                        ${STATE.user.role === 'LEADER' || d.proposed_by === STATE.user.id ? 
+                            `<button onclick="deleteItem('decisions', '${d.id}')" class="btn btn-danger btn-sm">Delete</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function renderOpportunities(container) {
+            const { data: items } = await supabase.from('opportunities').select('*, users!posted_by(name)').order('created_at', {ascending: false});
+            if(!items.length) return container.innerHTML = '<div class="text-center text-muted">No opportunities yet.</div>';
+
+            container.innerHTML = items.map(o => `
+                <div class="card p-4 mb-4">
+                    <h4 class="font-bold">${o.title}</h4>
+                    <p class="text-sm text-muted mt-1">${o.description || ''}</p>
+                    
+                    <div class="flex gap-2 mt-3 flex-wrap">
+                        <span class="text-xs text-muted">Tagged:</span>
+                        ${o.tagged_members && o.tagged_members.length > 0 ? o.tagged_members.map(mid => {
+                            const u = TEAM.find(x => x.id === mid);
+                            return `<span style="background: rgba(59,130,246,0.2); color: #3B82F6; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">@${u ? u.name.split(' ')[0] : 'User'}</span>`;
+                        }).join('') : '<span class="text-xs text-muted">None</span>'}
+                    </div>
+
+                    <div class="text-xs text-muted mt-2">Posted by ${o.users.name}</div>
+                    
+                    <div class="flex gap-2 mt-3">
+                        ${STATE.user.role === 'LEADER' || o.posted_by === STATE.user.id ? 
+                            `<button onclick="deleteItem('opportunities', '${o.id}')" class="btn btn-danger btn-sm">Delete</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function renderAttendance(container) {
+            const today = new Date().toISOString().split('T')[0];
+            const { data: myAtt } = await supabase.from('attendance').select('*').eq('user_id', STATE.user.id).eq('date', today).single();
+            const { data: history } = await supabase.from('attendance').select('*, users(name, avatar)').order('date', {ascending: false}).limit(20);
+
+            container.innerHTML = `
+                <div class="card p-6 flex" style="justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div><h3 class="font-bold">Today</h3><div class="text-muted text-sm">${today}</div></div>
+                    ${myAtt ? `<span class="btn btn-success">✅ Present</span>` : `<button onclick="markPresent()" class="btn btn-primary">Mark Present</button>`}
+                </div>
+                <h3 class="font-bold mb-2">Team Log</h3>
+                <div class="card p-0" style="overflow: hidden;">
+                    ${history.map(h => `
+                        <div class="p-3 flex" style="justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div class="flex" style="align-items: center; gap: 10px;">
+                                <span>${h.users.avatar}</span>
+                                <div><div class="font-bold text-sm">${h.users.name.split(' ')[0]}</div><div class="text-xs text-muted">${h.date}</div></div>
+                            </div>
+                            <span class="text-success text-sm">Present</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         async function renderTeam(container) {
@@ -447,53 +514,20 @@
             `;
         }
 
-        async function renderCollab(container) {
-            const { data: opps } = await supabase.from('opportunities').select('*, users!posted_by(name)');
-            container.innerHTML = opps.length ? opps.map(o => `
-                <div class="card p-4 mb-4">
-                    <h4 class="font-bold">${o.title}</h4>
-                    <p class="text-sm text-muted mt-1">${o.description || ''}</p>
-                    <div class="text-xs text-muted mt-2">Posted by ${o.users.name}</div>
-                    
-                    <div class="flex gap-2 mt-2">
-                        ${o.tagged_members ? o.tagged_members.map(mid => {
-                            const u = TEAM.find(x => x.id === mid);
-                            return `<span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">@${u ? u.name.split(' ')[0] : 'User'}</span>`;
-                        }).join('') : ''}
-                    </div>
-                    
-                    ${STATE.user.role === 'LEADER' || o.posted_by === STATE.user.id ? 
-                        `<button onclick="deleteItem('opportunities', '${o.id}')" class="btn btn-danger btn-sm mt-3">Delete</button>` : ''}
-                </div>
-            `).join('') : '<div class="text-center text-muted">No opportunities yet.</div>';
-        }
-
-        async function renderAttendance(container) {
-            const today = new Date().toISOString().split('T')[0];
-            const { data: myAtt } = await supabase.from('attendance').select('*').eq('user_id', STATE.user.id).eq('date', today).single();
-            container.innerHTML = `
-                <div class="card p-6 flex" style="justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <div><h3 class="font-bold">Today</h3><div class="text-muted text-sm">${today}</div></div>
-                    ${myAtt ? `<span class="btn btn-success">✅ Present</span>` : `<button onclick="markPresent()" class="btn btn-primary">Mark Present</button>`}
-                </div>
-                <h3 class="font-bold mb-2">Team History</h3>
-                <div class="card p-4">
-                    <p class="text-center text-muted">Attendance records are safe in Supabase.</p>
-                </div>
-            `;
-        }
-
-        // ACTIONS
+        // --- ACTIONS ---
         function setCreateMode(mode) {
             STATE.createMode = mode;
-            document.getElementById('btn-mode-task').className = mode === 'task' ? 'btn btn-primary w-full' : 'btn btn-ghost w-full';
-            document.getElementById('btn-mode-opp').className = mode === 'opp' ? 'btn btn-primary w-full' : 'btn btn-ghost w-full';
+            // Reset Buttons
+            ['task','decision','opp'].forEach(m => document.getElementById(`btn-mode-${m}`).className = 'btn btn-ghost');
+            document.getElementById(`btn-mode-${mode}`).className = 'btn btn-primary';
             
+            // Toggle Fields
+            document.getElementById('task-fields').classList.add('hidden');
+            document.getElementById('opp-fields').classList.add('hidden');
+
             if(mode === 'task') {
                 document.getElementById('task-fields').classList.remove('hidden');
-                document.getElementById('opp-fields').classList.add('hidden');
-            } else {
-                document.getElementById('task-fields').classList.add('hidden');
+            } else if(mode === 'opp') {
                 document.getElementById('opp-fields').classList.remove('hidden');
                 document.getElementById('tag-list').innerHTML = TEAM.filter(u => u.id !== STATE.user.id).map(u => `
                     <label class="tag-checkbox">
@@ -516,6 +550,11 @@
                     priority: document.getElementById('create-priority').value,
                     due_date: document.getElementById('create-date').value,
                     creator_id: STATE.user.id, status: 'Waiting'
+                });
+                error = e;
+            } else if (STATE.createMode === 'decision') {
+                const { error: e } = await supabase.from('decisions').insert({
+                    subject: title, details: desc, proposed_by: STATE.user.id
                 });
                 error = e;
             } else {
@@ -548,6 +587,11 @@
             renderPage('tasks');
         }
 
+        async function verifyDecision(id) {
+            await supabase.from('decisions').update({ is_verified: true, verified_by: STATE.user.id }).eq('id', id);
+            renderPage('decisions');
+        }
+
         async function deleteItem(table, id) {
             if(!confirm('Delete this item?')) return;
             await supabase.from(table).delete().eq('id', id);
@@ -557,6 +601,8 @@
         // HELPERS
         function openCreateModal() { 
             document.getElementById('create-modal').classList.remove('hidden'); 
+            document.getElementById('create-title').value = '';
+            document.getElementById('create-desc').value = '';
             setCreateMode('task'); 
         }
         function openApprove(id) {
