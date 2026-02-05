@@ -154,7 +154,7 @@
         <nav class="sidebar">
             <div class="flex" style="align-items: center; gap: 10px; margin-bottom: 2rem;">
                 <div style="background: var(--primary); padding: 8px; border-radius: 6px;"><i data-lucide="layout-grid"></i></div>
-                <div class="font-bold">SLBDMIS <span class="text-muted text-sm">v3.1</span></div>
+                <div class="font-bold">SLBDMIS <span class="text-muted text-sm">v3.2</span></div>
             </div>
             <div id="sidebar-links"></div>
             <div style="margin-top: auto;" class="nav-item" onclick="handleLogout()"><i data-lucide="log-out"></i> Logout</div>
@@ -225,9 +225,12 @@
     </div>
 
     <script>
+        // CONFIG
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
-        const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+        
+        // FIXED: Renamed variable to avoid "already declared" error
+        const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
 
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
@@ -239,6 +242,7 @@
 
         const STATE = { user: null, page: 'overview', createMode: 'task', selectedAvatar: null };
 
+        // INIT & SESSION CHECK
         window.onload = () => {
             lucide.createIcons();
             const savedId = localStorage.getItem('slbd_uid');
@@ -341,7 +345,7 @@
 
         // --- FEATURE RENDERERS ---
         async function renderOverview(container) {
-            const { data: tasks } = await supabase.from('tasks').select('*');
+            const { data: tasks } = await sbClient.from('tasks').select('*');
             const myTasks = STATE.user.role === 'MEMBER' ? tasks.filter(t => t.assignee_id === STATE.user.id) : tasks;
             const waiting = tasks.filter(t => t.status === 'Waiting').length;
             
@@ -380,7 +384,7 @@
         }
 
         async function renderTasks(container) {
-            let query = supabase.from('tasks').select('*, users!assignee_id(name)').order('created_at', {ascending: false});
+            let query = sbClient.from('tasks').select('*, users!assignee_id(name)').order('created_at', {ascending: false});
             if(STATE.user.role === 'MEMBER') query = query.or(`assignee_id.eq.${STATE.user.id},creator_id.eq.${STATE.user.id}`);
             const { data: tasks } = await query;
 
@@ -411,7 +415,7 @@
         }
 
         async function renderDecisions(container) {
-            const { data: items } = await supabase.from('decisions').select('*, users!proposed_by(name)').order('created_at', {ascending: false});
+            const { data: items } = await sbClient.from('decisions').select('*, users!proposed_by(name)').order('created_at', {ascending: false});
             if(!items.length) return container.innerHTML = '<div class="text-center text-muted">No decisions proposed yet.</div>';
 
             container.innerHTML = items.map(d => `
@@ -433,7 +437,7 @@
         }
 
         async function renderOpportunities(container) {
-            const { data: items } = await supabase.from('opportunities').select('*, users!posted_by(name)').order('created_at', {ascending: false});
+            const { data: items } = await sbClient.from('opportunities').select('*, users!posted_by(name)').order('created_at', {ascending: false});
             if(!items.length) return container.innerHTML = '<div class="text-center text-muted">No opportunities yet.</div>';
 
             container.innerHTML = items.map(o => `
@@ -461,8 +465,8 @@
 
         async function renderAttendance(container) {
             const today = new Date().toISOString().split('T')[0];
-            const { data: myAtt } = await supabase.from('attendance').select('*').eq('user_id', STATE.user.id).eq('date', today).single();
-            const { data: history } = await supabase.from('attendance').select('*, users(name, avatar)').order('date', {ascending: false}).limit(20);
+            const { data: myAtt } = await sbClient.from('attendance').select('*').eq('user_id', STATE.user.id).eq('date', today).single();
+            const { data: history } = await sbClient.from('attendance').select('*, users(name, avatar)').order('date', {ascending: false}).limit(20);
 
             container.innerHTML = `
                 <div class="card p-6 flex" style="justify-content: space-between; align-items: center; margin-bottom: 2rem;">
@@ -485,9 +489,9 @@
         }
 
         async function renderTeam(container) {
-            const { data: users } = await supabase.from('users').select('*').neq('role', 'LEADER');
-            const { data: tasks } = await supabase.from('tasks').select('*');
-            const { data: att } = await supabase.from('attendance').select('*');
+            const { data: users } = await sbClient.from('users').select('*').neq('role', 'LEADER');
+            const { data: tasks } = await sbClient.from('tasks').select('*');
+            const { data: att } = await sbClient.from('attendance').select('*');
 
             container.innerHTML = `
                 <div class="grid" style="gap: 1rem;">
@@ -545,7 +549,7 @@
 
             let error;
             if(STATE.createMode === 'task') {
-                const { error: e } = await supabase.from('tasks').insert({
+                const { error: e } = await sbClient.from('tasks').insert({
                     task_title: title, description: desc,
                     priority: document.getElementById('create-priority').value,
                     due_date: document.getElementById('create-date').value,
@@ -553,13 +557,13 @@
                 });
                 error = e;
             } else if (STATE.createMode === 'decision') {
-                const { error: e } = await supabase.from('decisions').insert({
+                const { error: e } = await sbClient.from('decisions').insert({
                     subject: title, details: desc, proposed_by: STATE.user.id
                 });
                 error = e;
             } else {
                 const tags = Array.from(document.querySelectorAll('.tag-input:checked')).map(cb => parseInt(cb.value));
-                const { error: e } = await supabase.from('opportunities').insert({
+                const { error: e } = await sbClient.from('opportunities').insert({
                     title: title, description: desc,
                     posted_by: STATE.user.id, tagged_members: tags
                 });
@@ -573,28 +577,28 @@
         async function confirmAssign() {
             const tid = document.getElementById('approve-id').value;
             const aid = document.getElementById('assign-select').value;
-            await supabase.from('tasks').update({ status: 'Ongoing', assignee_id: aid }).eq('id', tid);
+            await sbClient.from('tasks').update({ status: 'Ongoing', assignee_id: aid }).eq('id', tid);
             closeModal('approve-modal'); renderPage('tasks');
         }
 
         async function markPresent() {
-            await supabase.from('attendance').insert({ user_id: STATE.user.id, date: new Date().toISOString().split('T')[0] });
+            await sbClient.from('attendance').insert({ user_id: STATE.user.id, date: new Date().toISOString().split('T')[0] });
             renderPage('attendance');
         }
 
         async function updateStatus(id, status) {
-            await supabase.from('tasks').update({ status: status, completed_at: new Date().toISOString() }).eq('id', id);
+            await sbClient.from('tasks').update({ status: status, completed_at: new Date().toISOString() }).eq('id', id);
             renderPage('tasks');
         }
 
         async function verifyDecision(id) {
-            await supabase.from('decisions').update({ is_verified: true, verified_by: STATE.user.id }).eq('id', id);
+            await sbClient.from('decisions').update({ is_verified: true, verified_by: STATE.user.id }).eq('id', id);
             renderPage('decisions');
         }
 
         async function deleteItem(table, id) {
             if(!confirm('Delete this item?')) return;
-            await supabase.from(table).delete().eq('id', id);
+            await sbClient.from(table).delete().eq('id', id);
             renderPage(STATE.page);
         }
 
