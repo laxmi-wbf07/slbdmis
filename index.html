@@ -607,7 +607,14 @@
         const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co'; // Replace with your Supabase URL
         const SUPABASE_ANON_KEY = 'sb_publishable_O5kHLgvCYbrxig3dZslUjg_aCdqEGHK'; // Replace with your Supabase anon key
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+        
+        // Initialize Supabase client
+        function initSupabase() {
+            if (!supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        }
 
         // User Data
         const USERS = [
@@ -658,6 +665,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            initSupabase();
             renderAvatars();
             lucide.createIcons();
         });
@@ -798,6 +806,11 @@
             
             const contentArea = document.getElementById('contentArea');
             contentArea.innerHTML = '<div class="spinner"></div>';
+
+            if (!supabase) {
+                contentArea.innerHTML = `<div class="card"><p style="color: #EF4444;">Please configure Supabase credentials in the code first!</p></div>`;
+                return;
+            }
 
             try {
                 const { data: tasks, error } = await supabase
