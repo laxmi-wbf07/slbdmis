@@ -3,610 +3,757 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLBDMIS - SLBD Management Information System</title>
+    <title>SLBDMIS - Management Information System</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
+        /* --- DESIGN SYSTEM (Based on JSON Spec) --- */
         :root {
             --bg-dark: #0F172A;
             --surface: #1E293B;
             --surface-hover: #334155;
+            --border: #334155;
             --accent: #3B82F6;
+            --accent-hover: #2563EB;
             --success: #10B981;
             --warning: #FFC107;
             --danger: #EF4444;
             --text-main: #F8FAFC;
             --text-muted: #94A3B8;
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-main); }
         
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow-x: hidden; /* Prevent horizontal scroll */
         }
 
-        /* --- Login Screen --- */
-        #login-view {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
-            padding: 20px;
-        }
-
-        .login-card {
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .rounded { border-radius: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .font-bold { font-weight: 700; }
+        .text-muted { color: var(--text-muted); }
+        .text-accent { color: var(--accent); }
+        .w-full { width: 100%; }
+        
+        /* Glassmorphism Cards */
+        .card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 800px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        .avatars-grid {
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-ghost { background: transparent; color: var(--text-muted); }
+        .btn-ghost:hover { background: var(--surface-hover); color: white; }
+        .btn-success { background: var(--success); color: white; }
+
+        /* --- INPUTS --- */
+        input, select, textarea {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            width: 100%;
+            outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+        /* --- LOGIN SCREEN --- */
+        #login-view {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+        }
+        .avatar-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 1.5rem;
             margin: 2rem 0;
         }
-
-        .avatar-option {
+        .avatar-card {
             background: var(--surface);
-            padding: 1.5rem 0.5rem;
-            border-radius: 16px;
+            padding: 1rem;
+            border-radius: 1rem;
+            text-align: center;
             cursor: pointer;
             border: 2px solid transparent;
-            transition: all 0.2s;
+            transition: transform 0.2s, border-color 0.2s;
         }
+        .avatar-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .avatar-card.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        .avatar-img { font-size: 3rem; margin-bottom: 0.5rem; display: block; }
 
-        .avatar-option:hover { transform: translateY(-5px); background: var(--surface-hover); }
-        .avatar-option.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        /* --- DASHBOARD LAYOUT --- */
+        #dashboard-view { display: flex; min-height: 100vh; }
         
-        .avatar-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
-        .avatar-name { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
-
-        #cid-input-container {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            opacity: 0;
-        }
-
-        #cid-input-container.visible {
-            max-height: 150px;
-            opacity: 1;
-            margin-top: 1.5rem;
-        }
-
-        .input-box {
-            background: var(--surface);
-            border: 1px solid var(--surface-hover);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            width: 100%;
-            max-width: 300px;
-            text-align: center;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        .input-box:focus { border-color: var(--accent); }
-
-        /* --- Dashboard Layout --- */
-        #dashboard-view { display: none; min-height: 100vh; }
-        
+        /* Sidebar (Leader) */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
             position: fixed;
-            top: 0; bottom: 0; left: 0;
-            padding: 2rem;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            flex-direction: column;
+            height: 100vh;
+            overflow-y: auto;
             z-index: 50;
         }
-
-        .logo-area { margin-bottom: 3rem; display: flex; align-items: center; gap: 10px; }
-        .logo-text h2 { font-size: 1.25rem; font-weight: 700; color: white; }
-        .logo-text p { font-size: 0.75rem; color: var(--accent); letter-spacing: 1px; }
-
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
+            gap: 0.75rem;
+            padding: 0.75rem;
             color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
             cursor: pointer;
-            transition: all 0.2s;
+            margin-bottom: 0.25rem;
         }
+        .nav-item:hover, .nav-item.active { background: var(--surface-hover); color: white; }
+        .nav-item.active { background: var(--accent); }
 
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item.active { background: var(--accent); color: white; }
-
+        /* Main Content */
         .main-content {
-            margin-left: 260px;
+            flex: 1;
+            margin-left: 280px; /* Match sidebar width */
             padding: 2rem;
-            max-width: 1400px;
+            max-width: 1600px;
         }
-
-        /* --- Components --- */
-        .header-bar {
+        
+        /* Member Tabs (Mobile/Member layout) */
+        .tab-nav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 1rem;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border);
             margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
         }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .stat-value { font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
-        .stat-label { color: var(--text-muted); font-size: 0.9rem; }
-
-        .charts-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-container {
-            background: var(--surface);
-            padding: 1.5rem;
-            border-radius: 16px;
-            height: 350px;
-            position: relative;
-        }
-
-        /* --- Tables & Lists --- */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--surface);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .data-table th, .data-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 500; }
-        
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .badge.urgent { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
-        .badge.high { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
-        .badge.normal { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
-        .badge.done { background: rgba(16, 185, 129, 0.2); color: #10B981; }
-
-        /* --- Modals & Utilities --- */
-        .hidden { display: none !important; }
-        
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
+        .tab-item {
+            padding: 0.5rem 1rem;
+            color: var(--text-muted);
             cursor: pointer;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: opacity 0.2s;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
         }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn:hover { opacity: 0.9; }
+        .tab-item.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+
+        /* Status Badges */
+        .badge { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-urgent { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+        .badge-high { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+        .badge-normal { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
+        .badge-done { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+        .badge-waiting { background: rgba(148, 163, 184, 0.2); color: #94A3B8; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100; backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 2rem; border-radius: 1rem; width: 90%; max-width: 500px;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .sidebar { display: none; } /* Mobile sidebar logic omitted for brevity */
-            .main-content { margin-left: 0; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; padding: 1rem; padding-bottom: 80px; }
+            .mobile-nav { 
+                display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+                background: var(--surface); border-top: 1px solid var(--border);
+                padding: 0.5rem; justify-content: space-around; z-index: 90;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="login-view">
-        <div class="login-card">
-            <div style="margin-bottom: 2rem;">
-                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">SLBDMIS</h1>
-                <p style="color: var(--text-muted);">Lead-Filter Pro Tracking System</p>
-            </div>
-
-            <div class="avatars-grid" id="avatar-container">
+    <div id="app">
+        <div id="login-view">
+            <div class="card p-6" style="max-width: 800px; width: 90%;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="font-bold" style="font-size: 2rem;">SLBDMIS</h1>
+                    <p class="text-muted">Lead-Filter Pro Tracking System</p>
                 </div>
 
-            <div id="cid-input-container">
-                <input type="password" id="cid-input" class="input-box" placeholder="Enter CID to Login">
-                <p id="login-error" style="color: var(--danger); margin-top: 10px; font-size: 0.9rem;"></p>
+                <div class="avatar-grid" id="avatar-container"></div>
+
+                <div id="auth-input" class="hidden" style="text-align: center; animation: fadeIn 0.3s ease;">
+                    <input type="password" id="cid-input" placeholder="Enter CID" 
+                           style="max-width: 300px; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+                    <div id="login-error" class="text-danger text-sm" style="margin-top: 0.5rem; min-height: 20px;"></div>
+                    <button onclick="handleLogin()" class="btn btn-primary" style="margin-top: 1rem; width: 100%; max-width: 300px; justify-content: center;">
+                        Access Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard-view" class="hidden">
+            <nav id="desktop-sidebar" class="sidebar hidden">
+                <div class="flex items-center gap-2 mb-6">
+                    <i data-lucide="layout-dashboard" class="text-accent"></i>
+                    <span class="font-bold text-lg">SLBDMIS <span class="text-xs text-muted">Admin</span></span>
+                </div>
+                <div id="sidebar-links"></div>
+                <div class="mt-auto pt-6 border-t border-border">
+                    <div onclick="logout()" class="nav-item text-danger">
+                        <i data-lucide="log-out"></i> Logout
+                    </div>
+                </div>
+            </nav>
+
+            <main class="main-content">
+                <header class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 id="page-title" class="text-lg font-bold">Overview</h2>
+                        <p class="text-sm text-muted">Welcome, <span id="user-name">User</span></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openModal('task-modal')" class="btn btn-primary text-sm">
+                            <i data-lucide="plus"></i> <span class="hidden-mobile">New Task</span>
+                        </button>
+                        <button onclick="refreshData()" class="btn btn-ghost">
+                            <i data-lucide="refresh-cw"></i>
+                        </button>
+                    </div>
+                </header>
+
+                <div id="member-tabs" class="tab-nav hidden"></div>
+
+                <div id="content-area">
+                    </div>
+            </main>
+
+            <nav id="mobile-nav" class="mobile-nav hidden">
+                </nav>
+        </div>
+    </div>
+
+    <div id="task-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="font-bold text-lg mb-4">Create New Task</h3>
+            <div class="flex flex-col gap-4">
+                <input id="new-task-title" placeholder="Task Title (e.g., Update Homepage)" />
+                <textarea id="new-task-desc" placeholder="Description" rows="3"></textarea>
+                <div class="flex gap-2">
+                    <select id="new-task-project">
+                        <option value="General">General</option>
+                        <option value="Website">Website Revamp</option>
+                        <option value="Reports">Quarterly Reports</option>
+                    </select>
+                    <select id="new-task-priority">
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <input type="date" id="new-task-date" />
+                <button onclick="submitTask()" class="btn btn-primary justify-center">Create Suggestion</button>
+                <button onclick="closeModal('task-modal')" class="btn btn-ghost justify-center">Cancel</button>
             </div>
         </div>
     </div>
 
-    <div id="dashboard-view">
-        <nav class="sidebar">
-            <div class="logo-area">
-                <i data-lucide="activity" size="32" color="#3B82F6"></i>
-                <div class="logo-text">
-                    <h2>SLBDMIS</h2>
-                    <p>SYSTEM v2.0</p>
-                </div>
+    <div id="approval-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="font-bold text-lg mb-4">Approve & Assign Task</h3>
+            <input type="hidden" id="approve-task-id">
+            <div class="flex flex-col gap-4">
+                <p class="text-sm text-muted">Select a member to assign this task to:</p>
+                <select id="assign-member-select"></select>
+                <button onclick="confirmApproval()" class="btn btn-success justify-center">Approve & Assign</button>
+                <button onclick="closeModal('approval-modal')" class="btn btn-ghost justify-center">Cancel</button>
             </div>
-
-            <div id="nav-links">
-                </div>
-
-            <div style="margin-top: auto;">
-                <div class="nav-item" onclick="handleLogout()">
-                    <i data-lucide="log-out"></i>
-                    <span>Logout</span>
-                </div>
-            </div>
-        </nav>
-
-        <main class="main-content">
-            <div class="header-bar">
-                <div>
-                    <h2 id="page-title">Dashboard</h2>
-                    <p style="color: var(--text-muted);">Welcome back, <span id="user-name-display">User</span></p>
-                </div>
-                <button class="btn btn-primary" onclick="showCreateTaskModal()">
-                    <i data-lucide="plus"></i> New Task
-                </button>
-            </div>
-
-            <div id="content-area">
-                </div>
-        </main>
+        </div>
     </div>
 
     <script>
         // --- 1. CONFIGURATION ---
-        // REPLACE THESE WITH YOUR SUPABASE CREDENTIALS
-        const supabaseUrl = 'https://bzrkbjjgymdbbwpatfct.supabase.co'; 
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- 2. STATE ---
-        let currentUser = null;
-        let selectedAvatarId = null;
+        const STATE = {
+            user: null,
+            users: [
+                { id: 1, name: "Pema Ugyen Namdrol Jamtsho", avatar: "👨‍💼", cid: "11107008201", role: "LEADER", color: "#FF6B6B" },
+                { id: 2, name: "Jamphel Kuendhen", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER", color: "#4ECDC4" },
+                { id: 3, name: "Kuenley Thujee Yangchen", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER", color: "#45B7D1" },
+                { id: 4, name: "Laxmi Prasad Dhakal", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER", color: "#FFA07A" },
+                { id: 5, name: "Ngawang Jigme Dorji", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER", color: "#98D8C8" }
+            ],
+            selectedAvatar: null,
+            activePage: 'overview'
+        };
 
-        // --- 3. DATA & CONSTANTS ---
-        const USERS = [
-            { id: 1, name: "Pema Ugyen Namdrol Jamtsho", avatar: "👨‍💼", cid: "11107008201", role: "LEADER", color: "#FF6B6B" },
-            { id: 2, name: "Jamphel Kuendhen", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER", color: "#4ECDC4" },
-            { id: 3, name: "Kuenley Thujee Yangchen", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER", color: "#45B7D1" },
-            { id: 4, name: "Laxmi Prasad Dhakal", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER", color: "#FFA07A" },
-            { id: 5, name: "Ngawang Jigme Dorji", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER", color: "#98D8C8" }
-        ];
-
-        // --- 4. INITIALIZATION ---
+        // --- 3. INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
+            renderLogin();
             lucide.createIcons();
-            renderLoginScreen();
         });
 
-        // --- 5. AUTHENTICATION LOGIC ---
-        function renderLoginScreen() {
+        // --- 4. AUTH LOGIC ---
+        function renderLogin() {
             const container = document.getElementById('avatar-container');
-            container.innerHTML = USERS.map(u => `
-                <div class="avatar-option" onclick="selectAvatar(${u.id}, this)">
-                    <span class="avatar-emoji">${u.avatar}</span>
-                    <div class="avatar-name">${u.name.split(' ')[0]}</div>
+            container.innerHTML = STATE.users.map(u => `
+                <div class="avatar-card" onclick="selectAvatar(${u.id}, this)">
+                    <span class="avatar-img">${u.avatar}</span>
+                    <div class="text-sm font-bold">${u.name.split(' ')[0]}</div>
+                    <div class="text-xs text-muted">${u.role}</div>
                 </div>
             `).join('');
-            
-            // CID Input Listener
-            document.getElementById('cid-input').addEventListener('keypress', (e) => {
-                if(e.key === 'Enter') attemptLogin();
-            });
         }
 
-        function selectAvatar(id, element) {
-            selectedAvatarId = id;
-            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            
-            const inputCont = document.getElementById('cid-input-container');
-            inputCont.classList.add('visible');
+        function selectAvatar(id, el) {
+            document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            STATE.selectedAvatar = STATE.users.find(u => u.id === id);
+            document.getElementById('auth-input').classList.remove('hidden');
             document.getElementById('cid-input').value = '';
             document.getElementById('cid-input').focus();
-            document.getElementById('login-error').innerText = '';
         }
 
-        function attemptLogin() {
-            const cid = document.getElementById('cid-input').value.trim();
-            const user = USERS.find(u => u.id === selectedAvatarId);
-
-            if (user && user.cid === cid) {
-                currentUser = user;
-                document.getElementById('login-view').classList.add('hidden');
-                document.getElementById('dashboard-view').style.display = 'block';
-                initializeDashboard();
+        function handleLogin() {
+            const input = document.getElementById('cid-input').value.trim();
+            if (STATE.selectedAvatar && input === STATE.selectedAvatar.cid) {
+                STATE.user = STATE.selectedAvatar;
+                initDashboard();
             } else {
-                const errBox = document.getElementById('login-error');
-                errBox.innerText = "❌ Incorrect CID. Please try again.";
-                document.getElementById('cid-input').classList.add('shake'); // Add CSS shake if desired
+                const err = document.getElementById('login-error');
+                err.innerText = "❌ Incorrect CID";
+                setTimeout(() => err.innerText = "", 2000);
             }
         }
 
-        function handleLogout() {
-            currentUser = null;
-            selectedAvatarId = null;
+        function logout() {
             location.reload();
         }
 
-        // --- 6. DASHBOARD LOGIC ---
-        function initializeDashboard() {
-            document.getElementById('user-name-display').innerText = currentUser.name.split(' ')[0];
-            renderNavigation();
-            loadPage('overview');
+        // --- 5. DASHBOARD ROUTING ---
+        function initDashboard() {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.getElementById('user-name').innerText = STATE.user.name.split(' ')[0];
+
+            if (STATE.user.role === 'LEADER') {
+                document.getElementById('desktop-sidebar').classList.remove('hidden');
+                document.querySelector('.main-content').style.marginLeft = '280px';
+                renderLeaderNav();
+            } else {
+                document.getElementById('member-tabs').classList.remove('hidden');
+                document.getElementById('mobile-nav').classList.remove('hidden'); // Simplified mobile nav
+                document.querySelector('.main-content').style.marginLeft = '0';
+                renderMemberNav();
+            }
+            
+            navigate('overview');
         }
 
-        function renderNavigation() {
-            const nav = document.getElementById('nav-links');
-            let links = [
-                { id: 'overview', icon: 'layout-dashboard', label: 'Overview' },
-                { id: 'tasks', icon: 'check-square', label: 'Tasks' },
-                { id: 'attendance', icon: 'calendar', label: 'Attendance' }
+        function renderLeaderNav() {
+            const links = [
+                { id: 'overview', label: 'Overview', icon: 'layout-dashboard' },
+                { id: 'tasks', label: 'Task Analytics', icon: 'bar-chart-2' },
+                { id: 'approvals', label: 'Approval Queue', icon: 'check-square' },
+                { id: 'attendance', label: 'Attendance', icon: 'calendar' }
             ];
-
-            if (currentUser.role === 'LEADER') {
-                links.push({ id: 'decisions', icon: 'file-text', label: 'Decisions' });
-                links.push({ id: 'approvals', icon: 'clipboard-check', label: 'Approvals' });
-            } else {
-                links.push({ id: 'my-stats', icon: 'bar-chart-2', label: 'My Analytics' });
-            }
-
-            nav.innerHTML = links.map(l => `
-                <div class="nav-item" id="nav-${l.id}" onclick="loadPage('${l.id}')">
-                    <i data-lucide="${l.icon}"></i> <span>${l.label}</span>
+            
+            const container = document.getElementById('sidebar-links');
+            container.innerHTML = links.map(l => `
+                <div class="nav-item" id="nav-${l.id}" onclick="navigate('${l.id}')">
+                    <i data-lucide="${l.icon}"></i> ${l.label}
                 </div>
             `).join('');
-            lucide.createIcons();
         }
 
-        async function loadPage(pageId) {
-            // Update UI Active State
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`nav-${pageId}`)?.classList.add('active');
+        function renderMemberNav() {
+            const tabs = [
+                { id: 'overview', label: 'My Dashboard' },
+                { id: 'tasks', label: 'My Tasks' },
+                { id: 'decisions', label: 'Decisions' },
+                { id: 'attendance', label: 'Attendance' }
+            ];
+            document.getElementById('member-tabs').innerHTML = tabs.map(t => `
+                <div class="tab-item" id="tab-${t.id}" onclick="navigate('${t.id}')">${t.label}</div>
+            `).join('');
+
+            // Mobile Bottom Nav
+            document.getElementById('mobile-nav').innerHTML = tabs.map(t => `
+                 <div onclick="navigate('${t.id}')" class="text-center p-2 cursor-pointer">
+                    <div class="text-xs font-bold">${t.label}</div>
+                 </div>
+            `).join('');
+        }
+
+        async function navigate(pageId) {
+            STATE.activePage = pageId;
             
+            // Update Active UI Classes
+            document.querySelectorAll('.nav-item, .tab-item').forEach(el => el.classList.remove('active'));
+            if(document.getElementById(`nav-${pageId}`)) document.getElementById(`nav-${pageId}`).classList.add('active');
+            if(document.getElementById(`tab-${pageId}`)) document.getElementById(`tab-${pageId}`).classList.add('active');
+
             const content = document.getElementById('content-area');
-            const title = document.getElementById('page-title');
-            
-            content.innerHTML = '<div style="text-align:center; padding: 40px;"><div class="loader"></div> Loading...</div>';
+            content.innerHTML = '<div class="p-10 text-center text-muted">Loading...</div>';
+            document.getElementById('page-title').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
 
             try {
-                // Fetch Data based on page
-                if (pageId === 'overview') {
-                    title.innerText = 'Overview';
-                    await renderOverview(content);
-                } else if (pageId === 'tasks') {
-                    title.innerText = 'Task Management';
-                    await renderTasks(content);
-                } else if (pageId === 'attendance') {
-                    title.innerText = 'Attendance Tracker';
-                    await renderAttendance(content);
-                }
-                // Add other pages as needed
-                
+                if (pageId === 'overview') await renderOverview(content);
+                else if (pageId === 'tasks') await renderTaskPage(content);
+                else if (pageId === 'attendance') await renderAttendancePage(content);
+                else if (pageId === 'approvals') await renderApprovalQueue(content);
+                else if (pageId === 'decisions') await renderDecisionsPage(content);
                 lucide.createIcons();
             } catch (err) {
-                content.innerHTML = `<p style="color:var(--danger)">Error loading data: ${err.message}</p>`;
+                content.innerHTML = `<div class="text-danger">Error: ${err.message}</div>`;
             }
         }
 
-        // --- 7. RENDER FUNCTIONS ---
+        // --- 6. PAGE RENDERERS ---
 
         async function renderOverview(container) {
-            // Fetch stats from Supabase
+            // Fetch stats
             const { data: tasks } = await supabase.from('tasks').select('*');
-            const totalTasks = tasks?.length || 0;
-            const completed = tasks?.filter(t => t.status === 'Done').length || 0;
-            const waiting = tasks?.filter(t => t.status === 'Waiting').length || 0;
+            const { data: attendance } = await supabase.from('attendance').select('*').eq('date', new Date().toISOString().split('T')[0]);
+            
+            // Filter based on role
+            const myTasks = STATE.user.role === 'MEMBER' 
+                ? tasks.filter(t => t.assignee_id === STATE.user.id) 
+                : tasks;
 
+            const pendingCount = tasks.filter(t => t.status === 'Waiting').length;
+            const completedCount = myTasks.filter(t => t.status === 'Done').length;
+            const activeCount = myTasks.filter(t => t.status === 'Ongoing').length;
+            
             container.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Tasks</div>
-                        <div class="stat-value" style="color: var(--accent)">${totalTasks}</div>
+                <div class="charts-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top:0;">
+                    <div class="card p-6">
+                        <div class="text-muted text-sm">Active Tasks</div>
+                        <div class="text-3xl font-bold text-accent">${activeCount}</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Completed</div>
-                        <div class="stat-value" style="color: var(--success)">${completed}</div>
+                    <div class="card p-6">
+                        <div class="text-muted text-sm">Completed</div>
+                        <div class="text-3xl font-bold text-success">${completedCount}</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Pending Approval</div>
-                        <div class="stat-value" style="color: var(--warning)">${waiting}</div>
+                    <div class="card p-6">
+                        <div class="text-muted text-sm">${STATE.user.role === 'LEADER' ? 'Waiting Approval' : 'My Suggestions'}</div>
+                        <div class="text-3xl font-bold text-warning">${pendingCount}</div>
+                    </div>
+                    <div class="card p-6">
+                        <div class="text-muted text-sm">Attendance Today</div>
+                        <div class="text-3xl font-bold">${attendance ? Math.round((attendance.length / STATE.users.length) * 100) : 0}%</div>
                     </div>
                 </div>
 
-                <div class="charts-section">
-                    <div class="chart-container">
-                        <h3>Task Status Distribution</h3>
+                <div class="charts-grid">
+                    <div class="card p-6 chart-container">
+                        <h3 class="font-bold mb-4">Task Status</h3>
                         <canvas id="statusChart"></canvas>
                     </div>
-                    <div class="chart-container">
-                        <h3>Priority Breakdown</h3>
+                    <div class="card p-6 chart-container">
+                        <h3 class="font-bold mb-4">Priority Breakdown</h3>
                         <canvas id="priorityChart"></canvas>
                     </div>
                 </div>
             `;
 
-            // Render Charts
+            // Charts
             new Chart(document.getElementById('statusChart'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Done', 'Ongoing', 'Waiting'],
                     datasets: [{
-                        data: [completed, tasks.filter(t=>t.status==='Ongoing').length, waiting],
+                        data: [
+                            tasks.filter(t => t.status === 'Done').length,
+                            tasks.filter(t => t.status === 'Ongoing').length,
+                            tasks.filter(t => t.status === 'Waiting').length
+                        ],
                         backgroundColor: ['#10B981', '#3B82F6', '#94A3B8'],
                         borderWidth: 0
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
 
             new Chart(document.getElementById('priorityChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['Urgent', 'High', 'Normal', 'Low'],
+                    labels: ['Urgent', 'High', 'Normal'],
                     datasets: [{
                         label: 'Tasks',
                         data: [
-                            tasks.filter(t=>t.priority==='Urgent').length,
-                            tasks.filter(t=>t.priority==='High').length,
-                            tasks.filter(t=>t.priority==='Normal').length,
-                            tasks.filter(t=>t.priority==='Low').length
+                            tasks.filter(t => t.priority === 'Urgent').length,
+                            tasks.filter(t => t.priority === 'High').length,
+                            tasks.filter(t => t.priority === 'Normal').length
                         ],
-                        backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6', '#10B981']
+                        backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6']
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
         }
 
-        async function renderTasks(container) {
+        async function renderTaskPage(container) {
             let query = supabase.from('tasks').select('*, users!assignee_id(name, avatar)');
-            
-            // If Member, only show relevant tasks
-            if (currentUser.role === 'MEMBER') {
-                query = query.or(`assignee_id.eq.${currentUser.id},creator_id.eq.${currentUser.id}`);
+            if (STATE.user.role === 'MEMBER') {
+                query = query.or(`assignee_id.eq.${STATE.user.id},creator_id.eq.${STATE.user.id}`);
             }
-
-            const { data: tasks, error } = await query.order('created_at', { ascending: false });
-
-            if (error) throw error;
+            const { data: tasks } = await query.order('created_at', { ascending: false });
 
             container.innerHTML = `
-                <div class="data-table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Task Title</th>
-                                <th>Assignee</th>
-                                <th>Priority</th>
-                                <th>Status</th>
-                                <th>Due Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tasks.map(t => `
-                                <tr>
-                                    <td>
-                                        <div style="font-weight:600">${t.task_title}</div>
-                                        <div style="font-size:0.8rem; color:var(--text-muted)">${t.project_name || 'No Project'}</div>
-                                    </td>
-                                    <td>${t.users ? t.users.avatar + ' ' + t.users.name.split(' ')[0] : 'Unassigned'}</td>
-                                    <td><span class="badge ${t.priority.toLowerCase()}">${t.priority}</span></td>
-                                    <td><span class="badge ${t.status === 'Done' ? 'done' : 'normal'}">${t.status}</span></td>
-                                    <td>${t.due_date || '-'}</td>
-                                    <td>
-                                        ${t.status !== 'Done' ? `<button class="btn btn-primary" style="padding:4px 8px; font-size:0.8rem" onclick="markDone('${t.id}')">Done</button>` : '✅'}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="flex flex-col gap-4">
+                    ${tasks.length === 0 ? '<div class="text-center p-10 text-muted">No tasks found</div>' : ''}
+                    ${tasks.map(t => `
+                        <div class="card p-4 flex flex-col md:flex-row justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="badge badge-${t.priority.toLowerCase()}">${t.priority}</span>
+                                    <span class="badge badge-${t.status === 'Done' ? 'done' : t.status === 'Waiting' ? 'waiting' : 'normal'}">${t.status}</span>
+                                </div>
+                                <h4 class="font-bold text-lg">${t.task_title}</h4>
+                                <p class="text-sm text-muted">${t.description || 'No description'}</p>
+                                <div class="text-xs text-muted mt-2">
+                                    Due: ${t.due_date || 'N/A'} • Assigned to: ${t.users ? t.users.name : 'Unassigned'}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                ${t.status === 'Ongoing' && (t.assignee_id === STATE.user.id || STATE.user.role === 'LEADER') ? 
+                                    `<button onclick="updateTaskStatus('${t.id}', 'Done')" class="btn btn-success btn-sm"><i data-lucide="check"></i> Done</button>` : ''}
+                                ${STATE.user.role === 'LEADER' && t.status === 'Done' ? 
+                                    `<button class="btn btn-ghost btn-sm" disabled>Verified</button>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
 
-        async function renderAttendance(container) {
-            const today = new Date().toISOString().split('T')[0];
+        async function renderApprovalQueue(container) {
+            const { data: tasks } = await supabase.from('tasks').select('*, users!creator_id(name)').eq('status', 'Waiting');
             
-            // Check if I marked today
-            const { data: myAtt } = await supabase
-                .from('attendance')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .eq('date', today)
-                .single();
-
             container.innerHTML = `
-                <div style="display:flex; gap: 20px; align-items:center; margin-bottom: 30px; background: var(--surface); padding: 20px; border-radius: 16px;">
+                <div class="flex flex-col gap-4">
+                    ${tasks.length === 0 ? '<div class="card p-10 text-center text-muted">No pending approvals 🎉</div>' : ''}
+                    ${tasks.map(t => `
+                        <div class="card p-4 border-l-4 border-warning">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold">${t.task_title}</h4>
+                                    <p class="text-sm text-muted">Proposed by ${t.users.name}</p>
+                                    <p class="text-sm mt-1">${t.description}</p>
+                                </div>
+                                <button onclick="openApprovalModal('${t.id}')" class="btn btn-primary">Approve</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function renderAttendancePage(container) {
+            const today = new Date().toISOString().split('T')[0];
+            const { data: myAtt } = await supabase.from('attendance').select('*').eq('user_id', STATE.user.id).eq('date', today).single();
+            
+            let html = `
+                <div class="card p-6 mb-6 flex justify-between items-center bg-gradient-to-r from-surface to-surface-hover">
                     <div>
-                        <h3 style="margin-bottom: 5px;">Today's Attendance</h3>
-                        <p style="color:var(--text-muted)">${new Date().toDateString()}</p>
+                        <h3 class="font-bold text-lg">Today's Status</h3>
+                        <p class="text-muted">${new Date().toDateString()}</p>
                     </div>
-                    <div style="margin-left: auto;">
+                    <div>
                         ${myAtt 
-                            ? `<button class="btn btn-primary" disabled>✅ Marked as ${myAtt.status}</button>`
-                            : `<button class="btn btn-primary" onclick="markAttendance('Present')">👋 Mark Present</button>`
+                            ? `<span class="badge badge-done text-lg px-4 py-2">✅ ${myAtt.status}</span>`
+                            : `<button onclick="markAttendance('Present')" class="btn btn-primary">👋 Mark Present</button>`
                         }
                     </div>
                 </div>
-                
-                <h3>Recent History</h3>
-                <p style="color:var(--text-muted)">Loading history...</p>
+            `;
+
+            if (STATE.user.role === 'LEADER') {
+                const { data: allAtt } = await supabase.from('attendance').select('*, users(name, avatar)').order('date', { ascending: false }).limit(20);
+                html += `
+                    <h3 class="font-bold mb-4">Team Log</h3>
+                    <div class="card overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-surface-hover text-muted text-sm">
+                                <tr><th class="p-3">User</th><th class="p-3">Date</th><th class="p-3">Status</th></tr>
+                            </thead>
+                            <tbody>
+                                ${allAtt.map(a => `
+                                    <tr class="border-b border-white/5">
+                                        <td class="p-3 flex items-center gap-2"><span>${a.users.avatar}</span> ${a.users.name.split(' ')[0]}</td>
+                                        <td class="p-3">${a.date}</td>
+                                        <td class="p-3"><span class="badge badge-normal">${a.status}</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
+            }
+            container.innerHTML = html;
         }
 
-        // --- 8. ACTIONS ---
-        
+        async function renderDecisionsPage(container) {
+            const { data: decisions } = await supabase.from('decisions').select('*, users!proposed_by(name)').order('created_at', { ascending: false });
+            
+            container.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3>Decision Log</h3>
+                    <button class="btn btn-primary text-sm" onclick="alert('Feature: Open Proposal Modal')">Propose</button>
+                </div>
+                <div class="flex flex-col gap-4">
+                    ${decisions.map(d => `
+                        <div class="card p-4">
+                            <div class="flex justify-between">
+                                <h4 class="font-bold">${d.subject}</h4>
+                                ${d.is_verified ? '<span class="badge badge-done">Verified</span>' : '<span class="badge badge-waiting">Pending</span>'}
+                            </div>
+                            <p class="text-sm text-muted mt-1">${d.details}</p>
+                            <div class="text-xs text-muted mt-2">Proposed by: ${d.users.name}</div>
+                            ${!d.is_verified && STATE.user.role === 'LEADER' ? 
+                                `<button onclick="verifyDecision('${d.id}')" class="btn btn-success btn-sm mt-3">Verify</button>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // --- 7. ACTIONS & HELPERS ---
+
+        async function submitTask() {
+            const title = document.getElementById('new-task-title').value;
+            const desc = document.getElementById('new-task-desc').value;
+            const project = document.getElementById('new-task-project').value;
+            const priority = document.getElementById('new-task-priority').value;
+            const due = document.getElementById('new-task-date').value;
+
+            if(!title) return alert('Title required');
+
+            const { error } = await supabase.from('tasks').insert({
+                task_title: title,
+                description: desc,
+                project_name: project,
+                priority: priority,
+                due_date: due,
+                creator_id: STATE.user.id,
+                status: 'Waiting'
+            });
+
+            if (error) alert(error.message);
+            else {
+                closeModal('task-modal');
+                refreshData();
+                alert('Suggestion sent to Leader!');
+            }
+        }
+
+        function openApprovalModal(taskId) {
+            document.getElementById('approve-task-id').value = taskId;
+            const select = document.getElementById('assign-member-select');
+            select.innerHTML = STATE.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+            openModal('approval-modal');
+        }
+
+        async function confirmApproval() {
+            const taskId = document.getElementById('approve-task-id').value;
+            const assigneeId = document.getElementById('assign-member-select').value;
+            
+            const { error } = await supabase.from('tasks').update({
+                status: 'Ongoing',
+                assignee_id: assigneeId,
+                updated_at: new Date().toISOString()
+            }).eq('id', taskId);
+
+            if (error) alert(error.message);
+            else {
+                closeModal('approval-modal');
+                refreshData();
+            }
+        }
+
+        async function updateTaskStatus(id, status) {
+            const updateData = { status: status };
+            if (status === 'Done') updateData.completed_at = new Date().toISOString();
+            
+            const { error } = await supabase.from('tasks').update(updateData).eq('id', id);
+            if (error) alert(error.message);
+            else refreshData();
+        }
+
         async function markAttendance(status) {
             const { error } = await supabase.from('attendance').insert({
-                user_id: currentUser.id,
+                user_id: STATE.user.id,
                 status: status,
                 date: new Date().toISOString().split('T')[0]
             });
-
-            if (error) alert('Error marking attendance: ' + error.message);
-            else loadPage('attendance');
+            if (error) alert('Already marked for today!');
+            else refreshData();
         }
 
-        async function markDone(taskId) {
-            if (!confirm("Mark this task as completed?")) return;
-            
-            const { error } = await supabase.from('tasks').update({
-                status: 'Done',
-                completed_at: new Date().toISOString()
-            }).eq('id', taskId);
-
-            if (error) alert('Error: ' + error.message);
-            else loadPage('tasks');
+        async function verifyDecision(id) {
+            const { error } = await supabase.from('decisions').update({
+                is_verified: true,
+                verified_by: STATE.user.id,
+                verified_at: new Date().toISOString()
+            }).eq('id', id);
+            if(error) alert(error.message);
+            else refreshData();
         }
 
-        function showCreateTaskModal() {
-            alert("Feature: Open 'Create Task' Modal\n(Implement this by unhiding a modal div)");
-            // Implementation note: You can add a hidden div with a form and toggle it here
+        function refreshData() {
+            navigate(STATE.activePage);
         }
 
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     </script>
 </body>
 </html>
