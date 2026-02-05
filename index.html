@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SLBDMIS - Ultimate</title>
+    <title>SLBDMIS - Perfected</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,6 +22,7 @@
             --text: #F8FAFC;
             --muted: #94A3B8;
             --border: rgba(255,255,255,0.08);
+            --safe-top: env(safe-area-inset-top, 20px);
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
@@ -29,19 +30,18 @@
         
         body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- UTILS --- */
+        /* --- COMPONENTS --- */
         .hidden { display: none !important; }
         .flex { display: flex; }
         .grid { display: grid; }
+        .p-4 { padding: 1rem; }
         .text-center { text-align: center; }
         .font-bold { font-weight: 700; }
         .text-xs { font-size: 0.75rem; }
         .text-sm { font-size: 0.875rem; }
         .text-muted { color: var(--muted); }
-        .p-4 { padding: 1rem; }
         .w-full { width: 100%; }
-        
-        /* --- COMPONENTS --- */
+
         .card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -51,14 +51,13 @@
         }
 
         .btn {
-            padding: 0.75rem 1.2rem;
+            padding: 0.7rem 1.2rem;
             border-radius: 0.6rem;
             border: none;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center;
-            transition: all 0.2s;
-            font-size: 0.9rem;
+            transition: all 0.2s; font-size: 0.9rem;
         }
         .btn-primary { background: var(--primary); color: white; }
         .btn-danger { background: var(--danger); color: white; }
@@ -75,8 +74,18 @@
             width: 100%;
             outline: none;
             margin-bottom: 1rem;
-            font-size: 16px; /* Prevents iOS zoom */
+            font-size: 16px;
         }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--success); color: white; padding: 12px 24px;
+            border-radius: 50px; font-weight: 600; z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        #toast.show { opacity: 1; top: 30px; }
 
         /* --- LAYOUT --- */
         .sidebar {
@@ -88,7 +97,7 @@
         .main-content {
             margin-left: 260px; padding: 2rem; width: calc(100% - 260px);
             height: 100vh; overflow-y: auto; 
-            padding-bottom: calc(80px + var(--safe-bottom)); /* Ensure scrolling clears nav */
+            padding-bottom: calc(90px + var(--safe-bottom)); 
         }
 
         .nav-item {
@@ -99,15 +108,15 @@
         .nav-item.active { background: var(--primary); color: white; }
         .nav-item:hover:not(.active) { background: var(--hover); }
 
-        /* --- MOBILE NAV BAR --- */
+        /* --- MOBILE SPECIFIC --- */
         .mobile-nav {
             display: none;
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(30, 41, 59, 0.98);
             backdrop-filter: blur(15px);
-            padding: 12px 20px;
-            padding-bottom: calc(12px + var(--safe-bottom));
-            justify-content: space-between;
+            padding: 10px 10px;
+            padding-bottom: calc(10px + var(--safe-bottom));
+            justify-content: space-around;
             border-top: 1px solid var(--border);
             z-index: 100;
             box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
@@ -115,10 +124,10 @@
         
         .mobile-nav-item {
             display: flex; flex-direction: column; align-items: center;
-            color: var(--muted); font-size: 0.65rem; gap: 5px;
-            padding: 5px 12px; border-radius: 8px;
+            color: var(--muted); font-size: 0.65rem; gap: 4px;
+            padding: 6px 10px; border-radius: 8px; flex: 1;
         }
-        .mobile-nav-item.active { color: var(--primary); }
+        .mobile-nav-item.active { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
         .mobile-nav-item.active svg { stroke: var(--primary); stroke-width: 2.5px; }
 
         /* --- TAGGING UI --- */
@@ -140,13 +149,16 @@
         .rank-2 { background: linear-gradient(135deg, #94A3B8, #64748B); color: white; }
         .rank-3 { background: linear-gradient(135deg, #B45309, #78350F); color: white; }
 
-        /* --- RESPONSIVE --- */
+        /* --- RESPONSIVE MEDIA QUERIES --- */
         @media (max-width: 768px) {
             .sidebar { display: none; }
-            .main-content { margin-left: 0; width: 100%; padding: 1rem; }
+            .main-content { margin-left: 0; width: 100%; padding: 1rem; padding-top: calc(10px + var(--safe-top)); }
             .mobile-nav { display: flex; }
             .avatar-grid { grid-template-columns: repeat(2, 1fr) !important; }
             #avatar-container .avatar-card:nth-last-child(1):nth-child(odd) { grid-column: span 2; }
+            /* Mobile Header Adjustments */
+            header { flex-direction: row !important; align-items: center; }
+            #logout-btn-mobile { display: flex !important; }
         }
 
         /* --- LOGIN & LOADER --- */
@@ -160,6 +172,8 @@
     </style>
 </head>
 <body>
+
+    <div id="toast">✅ Success!</div>
 
     <div id="app-loader" class="loader-overlay"><div class="spinner"></div></div>
 
@@ -196,9 +210,9 @@
                     <h2 id="page-title" class="font-bold" style="font-size: 1.5rem;">Overview</h2>
                     <p class="text-muted text-sm">Hi, <span id="user-display">User</span> <span style="color:var(--success); font-size:0.7rem;">● LIVE</span></p>
                 </div>
-                <div class="flex" style="gap: 8px;">
+                <div class="flex" style="gap: 8px; align-items: center;">
                     <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus"></i> <span style="display:none; @media(min-width:600px){display:inline;}">New</span></button>
-                    <button onclick="renderPage(STATE.page)" class="btn btn-ghost"><i data-lucide="refresh-cw"></i></button>
+                    <button id="logout-btn-mobile" onclick="handleLogout()" class="btn btn-danger" style="display:none; padding: 0.7rem;"><i data-lucide="log-out"></i></button>
                 </div>
             </header>
             <div id="content-area"></div>
@@ -264,8 +278,8 @@
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
             { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER" },
-            { id: 4, name: "Laxmi", avatar: "👨‍🔬", cid: "11103002151", role: "MEMBER" }, // Male Scientist
-            { id: 5, name: "Ngawang", avatar: "👩", cid: "10801003243", role: "MEMBER" } // Girl
+            { id: 4, name: "Laxmi", avatar: "👨‍🔬", cid: "11103002151", role: "MEMBER" },
+            { id: 5, name: "Ngawang", avatar: "👩", cid: "10801003243", role: "MEMBER" }
         ];
 
         const STATE = { user: null, page: 'overview', createMode: 'task', selectedAvatar: null };
@@ -281,6 +295,14 @@
             }
             renderLoginView();
         };
+
+        // --- UX UTILS ---
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
 
         // --- AUTO SYNC ---
         function startAutoSync() {
@@ -304,6 +326,7 @@
             `).join('');
         }
 
+        // --- AUTH ---
         function selectAvatar(id, el) {
             document.querySelectorAll('.avatar-card').forEach(e => e.classList.remove('selected'));
             el.classList.add('selected');
@@ -324,11 +347,14 @@
         }
 
         function handleLogout() {
-            localStorage.removeItem('slbd_uid');
-            clearInterval(refreshInterval);
-            location.reload();
+            if(confirm('Log out of SLBDMIS?')) {
+                localStorage.removeItem('slbd_uid');
+                clearInterval(refreshInterval);
+                location.reload();
+            }
         }
 
+        // --- NAV ---
         function initApp() {
             document.getElementById('app-loader').classList.add('hidden');
             document.getElementById('login-view').classList.add('hidden');
@@ -343,6 +369,7 @@
                 { id: 'collab', icon: 'users', label: 'Opportunities' }
             ];
             
+            // Bottom Nav (Max 5 items for best fit)
             const renderNav = (target, isMobile) => {
                 document.getElementById(target).innerHTML = links.map(l => `
                     <div class="${isMobile ? 'mobile-nav-item' : 'nav-item'}" id="${isMobile ? 'm-' : ''}nav-${l.id}" onclick="setPage('${l.id}')">
@@ -362,7 +389,7 @@
             STATE.page = page;
             document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(e => e.classList.remove('active'));
             document.querySelectorAll(`#nav-${page}, #m-nav-${page}`).forEach(e => e.classList.add('active'));
-            document.getElementById('page-title').innerText = page.charAt(0).toUpperCase() + page.slice(1);
+            document.getElementById('page-title').innerText = page === 'overview' ? 'Overview & Rank' : page.charAt(0).toUpperCase() + page.slice(1);
             renderPage(page, false);
         }
 
@@ -391,7 +418,7 @@
             const today = new Date().toISOString().split('T')[0];
             const attToday = attendance.filter(a => a.date === today);
 
-            // Calculate Rankings (Leader God Mode View + Everyone View)
+            // Calculate Rankings (For God Mode)
             const users = TEAM.filter(u => u.role !== 'LEADER');
             const rankings = users.map(u => {
                 const uTasks = tasks.filter(t => t.assignee_id === u.id);
@@ -399,6 +426,7 @@
                 const ongoing = uTasks.filter(t => t.status === 'Ongoing');
                 const uDecisions = decisions.filter(d => d.proposed_by === u.id).length;
                 const uAtt = attendance.filter(a => a.user_id === u.id).length;
+                // Weighted Score: Task=5, Decision=3, Attendance=2
                 const score = (completed * 5) + (uDecisions * 3) + (uAtt * 2);
                 return { ...u, score, completed, ongoing, uDecisions, uAtt };
             }).sort((a,b) => b.score - a.score);
@@ -425,7 +453,7 @@
                     <canvas id="overviewChart"></canvas>
                 </div>
 
-                <h3 class="font-bold mb-4 text-sm text-muted">TEAM PERFORMANCE RANKING</h3>
+                <h3 class="font-bold mb-4 text-sm text-muted">TEAM RANKING (GOD MODE)</h3>
                 <div class="flex flex-col gap-3">
                     ${rankings.map((u, index) => `
                         <div class="card p-4">
@@ -556,6 +584,7 @@
             `;
         }
 
+        // --- HELPERS ---
         function renderTags(ids) {
             if(!ids || ids.length === 0) return '';
             return `<div class="flex gap-1 mt-2 flex-wrap">
@@ -573,6 +602,7 @@
             document.getElementById(`btn-mode-${mode}`).className = 'btn btn-primary text-xs';
             document.getElementById('task-fields').classList.toggle('hidden', mode !== 'task');
             document.getElementById('tag-label').innerText = mode === 'task' ? 'ASSIGN TO / TAG:' : 'TAG MEMBERS:';
+            
             document.getElementById('tag-list').innerHTML = TEAM.filter(u => u.id !== STATE.user.id).map(u => `
                 <label class="tag-row">
                     <input type="checkbox" value="${u.id}" class="tag-input">
@@ -585,29 +615,32 @@
         async function submitCreate() {
             const title = document.getElementById('create-title').value;
             const desc = document.getElementById('create-desc').value;
-            if(!title) return alert('Title required');
+            if(!title) return showToast('❌ Title required');
 
             const tags = Array.from(document.querySelectorAll('.tag-input:checked')).map(cb => parseInt(cb.value));
             const isLeader = STATE.user.role === 'LEADER';
+            
             let error;
-
             if(STATE.createMode === 'task') {
                 const mainAssignee = (tags.length > 0) ? tags[0] : null; 
-                // Leader assigning = Ongoing. Member suggesting = Waiting.
+                // Leader Logic: If Leader assigns -> Auto Ongoing. Member suggests -> Waiting.
                 const status = (isLeader && mainAssignee) ? 'Ongoing' : 'Waiting';
 
                 const { error: e } = await sbClient.from('tasks').insert({
                     task_title: title, description: desc,
                     priority: document.getElementById('create-priority').value,
                     due_date: document.getElementById('create-date').value,
-                    creator_id: STATE.user.id, status: status, 
-                    assignee_id: mainAssignee, tagged_members: tags
+                    creator_id: STATE.user.id, 
+                    status: status, 
+                    assignee_id: mainAssignee,
+                    tagged_members: tags
                 });
                 error = e;
             } else if (STATE.createMode === 'decision') {
-                // Leader Logic: Auto verify own decisions
+                // Leader Logic: Leader decision = Auto Verified
                 const isVerified = isLeader;
                 const verifiedBy = isLeader ? STATE.user.id : null;
+
                 const { error: e } = await sbClient.from('decisions').insert({
                     subject: title, details: desc, proposed_by: STATE.user.id, tagged_members: tags,
                     is_verified: isVerified, verified_by: verifiedBy
@@ -615,13 +648,18 @@
                 error = e;
             } else {
                 const { error: e } = await sbClient.from('opportunities').insert({
-                    title: title, description: desc, posted_by: STATE.user.id, tagged_members: tags
+                    title: title, description: desc,
+                    posted_by: STATE.user.id, tagged_members: tags
                 });
                 error = e;
             }
 
-            if(error) alert(error.message);
-            else { closeModal('create-modal'); renderPage(STATE.page, true); }
+            if(error) showToast('❌ Error: ' + error.message);
+            else { 
+                closeModal('create-modal'); 
+                renderPage(STATE.page, true);
+                showToast('✅ Created Successfully');
+            }
         }
 
         async function confirmAssign() {
@@ -629,27 +667,32 @@
             const aid = document.getElementById('assign-select').value;
             await sbClient.from('tasks').update({ status: 'Ongoing', assignee_id: aid }).eq('id', tid);
             closeModal('approve-modal'); renderPage('tasks', true);
+            showToast('✅ Task Assigned');
         }
 
         async function markPresent() {
             await sbClient.from('attendance').insert({ user_id: STATE.user.id, date: new Date().toISOString().split('T')[0] });
             renderPage('attendance', true);
+            showToast('✅ Marked Present');
         }
 
         async function updateStatus(id, status) {
             await sbClient.from('tasks').update({ status: status, completed_at: new Date().toISOString() }).eq('id', id);
             renderPage('tasks', true);
+            showToast('✅ Status Updated');
         }
 
         async function verifyDecision(id) {
             await sbClient.from('decisions').update({ is_verified: true, verified_by: STATE.user.id }).eq('id', id);
             renderPage('decisions', true);
+            showToast('✅ Verified');
         }
 
         async function deleteItem(table, id) {
-            if(!confirm('Delete?')) return;
+            if(!confirm('Delete this item?')) return;
             await sbClient.from(table).delete().eq('id', id);
             renderPage(STATE.page, true);
+            showToast('🗑️ Deleted');
         }
 
         function openCreateModal() { 
