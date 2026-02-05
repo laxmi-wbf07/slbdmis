@@ -73,7 +73,7 @@
             width: 100%;
             outline: none;
             margin-bottom: 1rem;
-            font-size: 16px; /* Prevents zoom on iPhone */
+            font-size: 16px; 
         }
 
         /* --- LAYOUT --- */
@@ -85,7 +85,7 @@
         
         .main-content {
             margin-left: 260px; padding: 2rem; width: calc(100% - 260px);
-            min-height: 100vh; padding-bottom: 100px; /* Space for mobile nav */
+            min-height: 100vh; padding-bottom: 100px; 
         }
 
         .nav-item {
@@ -119,11 +119,26 @@
         .mobile-nav-item.active svg { stroke: var(--primary); }
 
         /* --- TAGGING UI --- */
-        .tag-checkbox {
-            display: flex; align-items: center; gap: 10px; padding: 12px;
+        .tag-row {
+            display: flex; align-items: center; gap: 10px; padding: 10px;
             background: var(--hover); border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+            transition: background 0.2s;
         }
-        .tag-checkbox input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); }
+        .tag-row:hover { background: rgba(255,255,255,0.1); }
+        .tag-row input { width: 20px; height: 20px; margin: 0; accent-color: var(--primary); }
+
+        /* --- LEADERBOARD --- */
+        .rank-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 15px; border-bottom: 1px solid var(--border);
+        }
+        .rank-badge {
+            width: 30px; height: 30px; border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center; font-weight: bold; background: var(--hover);
+        }
+        .rank-1 { background: #F59E0B; color: black; }
+        .rank-2 { background: #94A3B8; color: black; }
+        .rank-3 { background: #B45309; color: white; }
 
         /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
@@ -168,7 +183,7 @@
         <nav class="sidebar">
             <div class="flex" style="align-items: center; gap: 10px; margin-bottom: 2rem;">
                 <div style="background: var(--primary); padding: 8px; border-radius: 8px;"><i data-lucide="layout-grid" color="white"></i></div>
-                <div><div class="font-bold">SLBDMIS</div><div class="text-xs text-muted">v4.0 God Mode</div></div>
+                <div><div class="font-bold">SLBDMIS</div><div class="text-xs text-muted">v5.0 God Mode</div></div>
             </div>
             <div id="sidebar-links"></div>
             <div style="margin-top: auto;" class="nav-item" onclick="handleLogout()"><i data-lucide="log-out"></i> Logout</div>
@@ -181,7 +196,7 @@
                     <p class="text-muted text-sm">Hi, <span id="user-display">User</span></p>
                 </div>
                 <div class="flex" style="gap: 10px;">
-                    <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus"></i> <span style="display:none; @media(min-width:600px){display:inline;}">New</span></button>
+                    <button onclick="openCreateModal()" class="btn btn-primary"><i data-lucide="plus"></i> <span style="display:none; @media(min-width:600px){display:inline;}">Create</span></button>
                     <button onclick="renderPage(STATE.page)" class="btn btn-ghost"><i data-lucide="refresh-cw"></i></button>
                 </div>
             </header>
@@ -219,8 +234,8 @@
             </div>
 
             <div style="margin-top: 10px;">
-                <label class="text-xs text-muted mb-2 block font-bold">TAG TEAM MEMBERS:</label>
-                <div id="tag-list" style="max-height: 120px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 5px;"></div>
+                <label class="text-xs text-muted mb-2 block font-bold" id="tag-label">TAG / ASSIGN MEMBERS:</label>
+                <div id="tag-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 5px;"></div>
             </div>
 
             <button onclick="submitCreate()" class="btn btn-success w-full" style="margin-top: 1.5rem;">Submit</button>
@@ -244,12 +259,13 @@
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
 
+        // Updated Team as per request
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
             { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER" },
-            { id: 4, name: "Laxmi", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER" },
-            { id: 5, name: "Ngawang", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER" }
+            { id: 4, name: "Laxmi", avatar: "🧑‍🔬", cid: "11103002151", role: "MEMBER" }, // Scientist
+            { id: 5, name: "Ngawang", avatar: "👩", cid: "10801003243", role: "MEMBER" } // Girl
         ];
 
         const STATE = { user: null, page: 'overview', createMode: 'task', selectedAvatar: null };
@@ -317,7 +333,7 @@
                 { id: 'collab', icon: 'users', label: 'Collab' }
             ];
             
-            if(STATE.user.role === 'LEADER') links.push({ id: 'team', icon: 'crown', label: 'Team God Mode' });
+            if(STATE.user.role === 'LEADER') links.push({ id: 'rank', icon: 'crown', label: 'Team Rank' });
 
             const renderNav = (target, isMobile) => {
                 document.getElementById(target).innerHTML = links.map(l => `
@@ -327,7 +343,6 @@
                     </div>
                 `).join('');
                 if(isMobile) {
-                    // Add logout to mobile nav
                     document.getElementById(target).innerHTML += `
                         <div class="mobile-nav-item" onclick="handleLogout()">
                             <i data-lucide="log-out" size="20"></i><span>Exit</span>
@@ -345,7 +360,7 @@
             STATE.page = page;
             document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(e => e.classList.remove('active'));
             document.querySelectorAll(`#nav-${page}, #m-nav-${page}`).forEach(e => e.classList.add('active'));
-            document.getElementById('page-title').innerText = page === 'team' ? 'Team God Mode' : page.charAt(0).toUpperCase() + page.slice(1);
+            document.getElementById('page-title').innerText = page === 'rank' ? 'Team Rankings' : page.charAt(0).toUpperCase() + page.slice(1);
             renderPage(page);
         }
 
@@ -359,7 +374,7 @@
                 else if(page === 'attendance') await renderAttendance(content);
                 else if(page === 'decisions') await renderDecisions(content);
                 else if(page === 'collab') await renderCollab(content);
-                else if(page === 'team') await renderTeam(content);
+                else if(page === 'rank') await renderRank(content);
                 lucide.createIcons();
             } catch(e) {
                 content.innerHTML = `<div class="text-danger text-center">Error: ${e.message}</div>`;
@@ -492,39 +507,49 @@
             `;
         }
 
-        async function renderTeam(container) {
-            // GOD MODE
+        async function renderRank(container) {
+            // GOD MODE CALCULATIONS
             const { data: users } = await sbClient.from('users').select('*').neq('role', 'LEADER');
             const { data: tasks } = await sbClient.from('tasks').select('*');
-            const { data: att } = await sbClient.from('attendance').select('*');
+            const { data: decisions } = await sbClient.from('decisions').select('*');
+            const { data: attendance } = await sbClient.from('attendance').select('*');
 
-            container.innerHTML = `<div class="grid" style="gap: 1rem;">
-                ${users.map(u => {
-                    const uTasks = tasks.filter(t => t.assignee_id === u.id);
-                    const activeTasks = uTasks.filter(t => t.status === 'Ongoing');
-                    const uAtt = att.filter(a => a.user_id === u.id).length;
-                    
-                    return `
-                        <div class="card p-4">
-                            <div class="flex" style="justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <div class="flex" style="align-items: center; gap: 10px;">
-                                    <div style="font-size: 2rem;">${u.avatar}</div>
-                                    <div>
-                                        <div class="font-bold">${u.name}</div>
-                                        <div class="text-xs text-muted">${uTasks.filter(t => t.status === 'Done').length} Completed • ${uAtt} Days Present</div>
-                                    </div>
+            // Calculate Scores
+            const rankings = users.map(u => {
+                const uTasks = tasks.filter(t => t.assignee_id === u.id);
+                const completed = uTasks.filter(t => t.status === 'Done').length;
+                const active = uTasks.filter(t => t.status === 'Ongoing');
+                const uDecisions = decisions.filter(d => d.proposed_by === u.id).length;
+                const uAtt = attendance.filter(a => a.user_id === u.id).length;
+                
+                // Score Formula: (Tasks*5) + (Decisions*3) + (Attendance*2)
+                const score = (completed * 5) + (uDecisions * 3) + (uAtt * 2);
+                return { ...u, score, completed, uDecisions, uAtt, active };
+            }).sort((a,b) => b.score - a.score);
+
+            container.innerHTML = `<div class="flex flex-col gap-3">
+                ${rankings.map((u, index) => `
+                    <div class="card p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="rank-badge rank-${index+1}">${index+1}</div>
+                                <div class="text-2xl">${u.avatar}</div>
+                                <div>
+                                    <div class="font-bold">${u.name}</div>
+                                    <div class="text-xs text-muted">Score: ${u.score}</div>
                                 </div>
                             </div>
-                            
-                            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
-                                <div class="text-xs font-bold text-muted mb-2">CURRENTLY WORKING ON:</div>
-                                ${activeTasks.length ? activeTasks.map(t => `
-                                    <div class="text-sm" style="margin-bottom: 4px;">• ${t.task_title} <span class="text-xs text-warning">(${t.priority})</span></div>
-                                `).join('') : '<div class="text-xs text-muted italic">No active tasks</div>'}
+                            <div class="text-right">
+                                <div class="text-xs text-muted">Tasks: <b class="text-success">${u.completed}</b></div>
+                                <div class="text-xs text-muted">Decisions: <b>${u.uDecisions}</b></div>
                             </div>
                         </div>
-                    `;
-                }).join('')}
+                        <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px;">
+                            <div class="text-xs font-bold text-muted mb-1">WORKING ON:</div>
+                            ${u.active.length ? u.active.map(t => `<div class="text-xs">• ${t.task_title}</div>`).join('') : '<div class="text-xs italic text-muted">No active tasks</div>'}
+                        </div>
+                    </div>
+                `).join('')}
             </div>`;
         }
 
@@ -545,12 +570,14 @@
             ['task','decision','opp'].forEach(m => document.getElementById(`btn-mode-${m}`).className = 'btn btn-ghost text-xs');
             document.getElementById(`btn-mode-${mode}`).className = 'btn btn-primary text-xs';
             document.getElementById('task-fields').classList.toggle('hidden', mode !== 'task');
+            document.getElementById('tag-label').innerText = mode === 'task' ? 'ASSIGN TO / TAG:' : 'TAG MEMBERS:';
             
-            // Generate Tag List for all modes
+            // Build Tag List
             document.getElementById('tag-list').innerHTML = TEAM.filter(u => u.id !== STATE.user.id).map(u => `
-                <label class="tag-checkbox">
+                <label class="tag-row">
                     <input type="checkbox" value="${u.id}" class="tag-input">
-                    <span>${u.avatar} ${u.name.split(' ')[0]}</span>
+                    <span style="font-size:1.2rem">${u.avatar}</span> 
+                    <span class="text-sm">${u.name.split(' ')[0]}</span>
                 </label>
             `).join('');
         }
@@ -561,14 +588,21 @@
             if(!title) return alert('Title required');
 
             const tags = Array.from(document.querySelectorAll('.tag-input:checked')).map(cb => parseInt(cb.value));
+            
             let error;
-
             if(STATE.createMode === 'task') {
+                // If Leader creates & tags someone -> Auto Assign to them
+                const isLeader = STATE.user.role === 'LEADER';
+                const mainAssignee = (tags.length > 0 && isLeader) ? tags[0] : (isLeader ? STATE.user.id : null);
+                const status = (isLeader) ? 'Ongoing' : 'Waiting';
+
                 const { error: e } = await sbClient.from('tasks').insert({
                     task_title: title, description: desc,
                     priority: document.getElementById('create-priority').value,
                     due_date: document.getElementById('create-date').value,
-                    creator_id: STATE.user.id, status: 'Waiting', tagged_members: tags
+                    creator_id: STATE.user.id, status: status, 
+                    assignee_id: mainAssignee,
+                    tagged_members: tags
                 });
                 error = e;
             } else if (STATE.createMode === 'decision') {
