@@ -7,8 +7,6 @@
     
     <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         * {
@@ -19,24 +17,13 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #F8FAFC;
             min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Login Page Styles */
-        .login-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
         }
 
         .login-card {
@@ -45,7 +32,7 @@
             border-radius: 20px;
             padding: 40px;
             max-width: 600px;
-            width: 90%;
+            width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -57,26 +44,19 @@
         .login-header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #fff 0%, #a8c0ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .login-header p {
-            color: rgba(255, 255, 255, 0.8);
         }
 
         .avatars-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .avatar-card {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
-            padding: 15px;
+            padding: 20px 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -94,30 +74,22 @@
         }
 
         .avatar-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
+            font-size: 3rem;
+            margin-bottom: 8px;
         }
 
         .avatar-name {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
-            word-wrap: break-word;
         }
 
-        .cid-input-container {
+        .cid-container {
             display: none;
-            margin-top: 20px;
-            animation: slideDown 0.3s ease;
         }
 
-        .cid-input-container.show {
+        .cid-container.show {
             display: block;
+            animation: slideDown 0.3s ease;
         }
 
         @keyframes slideDown {
@@ -131,18 +103,7 @@
             }
         }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .input-group input {
+        input {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -150,52 +111,41 @@
             background: rgba(255, 255, 255, 0.1);
             color: white;
             font-size: 1rem;
+            margin-bottom: 15px;
         }
 
-        .input-group input::placeholder {
+        input::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
 
-        .btn {
-            padding: 12px 24px;
+        button {
+            width: 100%;
+            padding: 12px;
             border-radius: 8px;
             border: none;
-            cursor: pointer;
+            background: #3B82F6;
+            color: white;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .btn-primary {
-            background: #3B82F6;
-            color: white;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
+        button:hover {
             background: #2563EB;
         }
 
-        .error-message {
+        .error {
             color: #EF4444;
-            font-size: 0.9rem;
+            text-align: center;
             margin-top: 10px;
             display: none;
-            text-align: center;
         }
 
-        .error-message.show {
+        .error.show {
             display: block;
-            animation: shake 0.5s ease;
         }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        /* Dashboard hidden by default */
         .dashboard {
             display: none;
         }
@@ -203,112 +153,72 @@
         .dashboard.active {
             display: block;
         }
+
+        .status {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10B981;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <!-- Login Page -->
-    <div class="login-container" id="loginPage">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>🎯 SLBDMIS</h1>
-                <p>Lead-Filter Pro Tracking System</p>
-            </div>
+    <div class="login-card" id="loginCard">
+        <div class="login-header">
+            <h1>🎯 SLBDMIS</h1>
+            <p>Lead-Filter Pro Tracking System</p>
+        </div>
 
-            <div class="avatars-grid" id="avatarsGrid">
-                <!-- Avatars will be populated by JavaScript -->
-            </div>
+        <div class="avatars-grid" id="avatarsGrid"></div>
 
-            <div class="cid-input-container" id="cidInputContainer">
-                <div class="input-group">
-                    <label>Enter your CID</label>
-                    <input type="text" id="cidInput" placeholder="11107008201" maxlength="11">
-                </div>
-                <button class="btn btn-primary" onclick="login()">Login</button>
-                <div class="error-message" id="errorMessage"></div>
-            </div>
+        <div class="cid-container" id="cidContainer">
+            <input type="text" id="cidInput" placeholder="Enter your CID (11 digits)" maxlength="11">
+            <button onclick="login()">Login</button>
+            <div class="error" id="errorMsg"></div>
         </div>
     </div>
 
-    <!-- Dashboard (initially hidden) -->
     <div class="dashboard" id="dashboard">
-        <div class="container">
-            <h1>Welcome to Dashboard</h1>
-            <button class="btn btn-primary" onclick="logout()">Logout</button>
-            <div id="contentArea"></div>
+        <div class="login-card">
+            <h2 id="welcomeMsg"></h2>
+            <div class="status" id="statusMsg"></div>
+            <button onclick="logout()" style="margin-top: 20px;">Logout</button>
         </div>
     </div>
 
     <script>
         // ============================================
-        // SUPABASE CONFIGURATION - DO NOT DUPLICATE!
+        // SUPABASE CONFIGURATION
         // ============================================
         const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         
-        // Initialize Supabase client (ONLY ONCE!)
+        // Initialize Supabase - ONLY ONE TIME!
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ============================================
         // USER DATA
         // ============================================
         const USERS = [
-            {
-                id: 1,
-                name: "Pema Ugyen Namdrol Jamtsho",
-                avatar: "👨‍💼",
-                cid: "11107008201",
-                role: "LEADER",
-                color: "#FF6B6B"
-            },
-            {
-                id: 2,
-                name: "Jamphel Kuendhen",
-                avatar: "👨‍💻",
-                cid: "11302003634",
-                role: "MEMBER",
-                color: "#4ECDC4"
-            },
-            {
-                id: 3,
-                name: "Kuenley Thujee Yangchen",
-                avatar: "👩‍💻",
-                cid: "11006001849",
-                role: "MEMBER",
-                color: "#45B7D1"
-            },
-            {
-                id: 4,
-                name: "Laxmi Prasad Dhakal",
-                avatar: "👨‍🔧",
-                cid: "11103002151",
-                role: "MEMBER",
-                color: "#FFA07A"
-            },
-            {
-                id: 5,
-                name: "Ngawang Jigme Dorji",
-                avatar: "👨‍🎓",
-                cid: "10801003243",
-                role: "MEMBER",
-                color: "#98D8C8"
-            }
+            { id: 1, name: "Pema", avatar: "👨‍💼", cid: "11107008201", role: "LEADER", color: "#FF6B6B" },
+            { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER", color: "#4ECDC4" },
+            { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER", color: "#45B7D1" },
+            { id: 4, name: "Laxmi", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER", color: "#FFA07A" },
+            { id: 5, name: "Ngawang", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER", color: "#98D8C8" }
         ];
 
-        // ============================================
-        // STATE MANAGEMENT
-        // ============================================
         let currentUser = null;
-        let selectedAvatarId = null;
+        let selectedUserId = null;
 
         // ============================================
-        // INITIALIZE ON PAGE LOAD
+        // INITIALIZE
         // ============================================
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Page loaded, initializing...');
-            console.log('Supabase initialized:', supabase ? 'Yes' : 'No');
-            console.log('Number of users:', USERS.length);
+            console.log('✅ Page loaded');
+            console.log('✅ Supabase initialized:', supabase ? 'Yes' : 'No');
+            console.log('✅ Users loaded:', USERS.length);
             renderAvatars();
-            checkSavedSession();
         });
 
         // ============================================
@@ -316,108 +226,95 @@
         // ============================================
         function renderAvatars() {
             const grid = document.getElementById('avatarsGrid');
-            if (!grid) {
-                console.error('Avatars grid not found!');
-                return;
-            }
-            
-            console.log('Rendering avatars for', USERS.length, 'users');
-            
             grid.innerHTML = USERS.map(user => `
-                <div class="avatar-card" onclick="selectAvatar(${user.id})">
-                    <div class="avatar-icon" style="background: ${user.color}">
-                        ${user.avatar}
-                    </div>
-                    <div class="avatar-name">${user.name.split(' ')[0]}</div>
+                <div class="avatar-card" onclick="selectUser(${user.id})">
+                    <div class="avatar-icon">${user.avatar}</div>
+                    <div class="avatar-name">${user.name}</div>
                 </div>
             `).join('');
-            
-            console.log('Avatars rendered successfully');
+            console.log('✅ Avatars rendered');
         }
 
         // ============================================
-        // SELECT AVATAR
+        // SELECT USER
         // ============================================
-        function selectAvatar(userId) {
-            console.log('Avatar selected:', userId);
-            selectedAvatarId = userId;
-            document.querySelectorAll('.avatar-card').forEach(card => card.classList.remove('selected'));
+        function selectUser(userId) {
+            selectedUserId = userId;
+            document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
             event.currentTarget.classList.add('selected');
-            document.getElementById('cidInputContainer').classList.add('show');
+            document.getElementById('cidContainer').classList.add('show');
             document.getElementById('cidInput').focus();
+            console.log('✅ User selected:', userId);
         }
 
         // ============================================
         // LOGIN
         // ============================================
-        async function login() {
-            const cidInput = document.getElementById('cidInput').value.trim();
-            const errorMessage = document.getElementById('errorMessage');
+        function login() {
+            const cid = document.getElementById('cidInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            
+            errorMsg.classList.remove('show');
 
-            errorMessage.classList.remove('show');
-
-            if (!selectedAvatarId) {
-                errorMessage.textContent = 'Please select an avatar first.';
-                errorMessage.classList.add('show');
+            if (!selectedUserId) {
+                errorMsg.textContent = 'Please select an avatar first';
+                errorMsg.classList.add('show');
                 return;
             }
 
-            if (!cidInput) {
-                errorMessage.textContent = 'Please enter your CID.';
-                errorMessage.classList.add('show');
+            if (!cid) {
+                errorMsg.textContent = 'Please enter your CID';
+                errorMsg.classList.add('show');
                 return;
             }
 
-            const user = USERS.find(u => u.id === selectedAvatarId && u.cid === cidInput);
+            const user = USERS.find(u => u.id === selectedUserId && u.cid === cid);
 
             if (user) {
-                console.log('Login successful for:', user.name);
                 currentUser = user;
-                localStorage.setItem('currentUser', JSON.stringify(user));
                 showDashboard();
             } else {
-                errorMessage.textContent = 'Invalid CID. Please try again.';
-                errorMessage.classList.add('show');
+                errorMsg.textContent = 'Invalid CID. Please try again.';
+                errorMsg.classList.add('show');
             }
         }
 
         // ============================================
         // SHOW DASHBOARD
         // ============================================
-        function showDashboard() {
-            document.getElementById('loginPage').style.display = 'none';
+        async function showDashboard() {
+            document.getElementById('loginCard').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
-            loadDashboardData();
-        }
-
-        // ============================================
-        // LOAD DASHBOARD DATA
-        // ============================================
-        async function loadDashboardData() {
-            const contentArea = document.getElementById('contentArea');
-            contentArea.innerHTML = `
-                <h2>Welcome, ${currentUser.name}!</h2>
-                <p>Role: ${currentUser.role}</p>
-                <p>Testing database connection...</p>
-            `;
-
+            document.getElementById('welcomeMsg').textContent = `Welcome, ${currentUser.name}!`;
+            
+            // Test database connection
+            document.getElementById('statusMsg').textContent = 'Testing database connection...';
+            
             try {
-                // Test database connection
                 const { data, error } = await supabase
                     .from('users')
-                    .select('*')
+                    .select('count')
                     .limit(1);
 
                 if (error) {
-                    console.error('Database error:', error);
-                    contentArea.innerHTML += `<p style="color: #EF4444;">Database connection failed: ${error.message}</p>`;
+                    document.getElementById('statusMsg').innerHTML = `
+                        ❌ Database Error: ${error.message}<br>
+                        <small>Check your Supabase credentials</small>
+                    `;
+                    document.getElementById('statusMsg').style.background = 'rgba(239, 68, 68, 0.2)';
+                    document.getElementById('statusMsg').style.color = '#EF4444';
                 } else {
-                    console.log('Database connected successfully');
-                    contentArea.innerHTML += `<p style="color: #10B981;">✅ Database connected successfully!</p>`;
+                    document.getElementById('statusMsg').innerHTML = `
+                        ✅ Database Connected Successfully!<br>
+                        <small>Role: ${currentUser.role}</small>
+                    `;
                 }
             } catch (err) {
-                console.error('Error:', err);
-                contentArea.innerHTML += `<p style="color: #EF4444;">Error: ${err.message}</p>`;
+                document.getElementById('statusMsg').innerHTML = `
+                    ❌ Error: ${err.message}
+                `;
+                document.getElementById('statusMsg').style.background = 'rgba(239, 68, 68, 0.2)';
+                document.getElementById('statusMsg').style.color = '#EF4444';
             }
         }
 
@@ -426,33 +323,17 @@
         // ============================================
         function logout() {
             currentUser = null;
-            selectedAvatarId = null;
-            localStorage.removeItem('currentUser');
+            selectedUserId = null;
             document.getElementById('dashboard').classList.remove('active');
-            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('loginCard').style.display = 'block';
             document.getElementById('cidInput').value = '';
-            document.getElementById('cidInputContainer').classList.remove('show');
+            document.getElementById('cidContainer').classList.remove('show');
             renderAvatars();
         }
 
-        // ============================================
-        // CHECK SAVED SESSION
-        // ============================================
-        function checkSavedSession() {
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showDashboard();
-            }
-        }
-
-        // ============================================
-        // KEYBOARD SUPPORT
-        // ============================================
+        // Enter key support
         document.getElementById('cidInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                login();
-            }
+            if (e.key === 'Enter') login();
         });
     </script>
 </body>
