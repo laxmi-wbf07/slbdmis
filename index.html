@@ -3,331 +3,610 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLBDMIS v2.0 - FIXED VERSION</title>
+    <title>SLBDMIS - SLBD Management Information System</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0F172A;
+            --surface: #1E293B;
+            --surface-hover: #334155;
+            --accent: #3B82F6;
+            --success: #10B981;
+            --warning: #FFC107;
+            --danger: #EF4444;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* --- Login Screen --- */
+        #login-view {
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
             padding: 20px;
         }
-        .version-banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #10B981;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
+
         .login-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
             padding: 40px;
-            max-width: 700px;
+            border-radius: 24px;
             width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 60px;
-        }
-        h1 {
+            max-width: 800px;
             text-align: center;
-            font-size: 3rem;
-            margin-bottom: 10px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .subtitle {
-            text-align: center;
-            opacity: 0.9;
-            margin-bottom: 40px;
-        }
+
         .avatars-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
         }
-        .avatar-card {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            padding: 20px 10px;
-            text-align: center;
+
+        .avatar-option {
+            background: var(--surface);
+            padding: 1.5rem 0.5rem;
+            border-radius: 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
+            border: 2px solid transparent;
+            transition: all 0.2s;
         }
-        .avatar-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.25);
+
+        .avatar-option:hover { transform: translateY(-5px); background: var(--surface-hover); }
+        .avatar-option.selected { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+        
+        .avatar-emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+        .avatar-name { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+
+        #cid-input-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            opacity: 0;
         }
-        .avatar-card.selected {
-            border-color: #10B981;
-            background: rgba(16, 185, 129, 0.3);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+
+        #cid-input-container.visible {
+            max-height: 150px;
+            opacity: 1;
+            margin-top: 1.5rem;
         }
-        .avatar-icon {
-            font-size: 3rem;
-            margin-bottom: 8px;
+
+        .input-box {
+            background: var(--surface);
+            border: 1px solid var(--surface-hover);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        .avatar-name {
+        
+        .input-box:focus { border-color: var(--accent); }
+
+        /* --- Dashboard Layout --- */
+        #dashboard-view { display: none; min-height: 100vh; }
+        
+        .sidebar {
+            width: 260px;
+            background: var(--surface);
+            position: fixed;
+            top: 0; bottom: 0; left: 0;
+            padding: 2rem;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .logo-area { margin-bottom: 3rem; display: flex; align-items: center; gap: 10px; }
+        .logo-text h2 { font-size: 1.25rem; font-weight: 700; color: white; }
+        .logo-text p { font-size: 0.75rem; color: var(--accent); letter-spacing: 1px; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active { background: var(--accent); color: white; }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 2rem;
+            max-width: 1400px;
+        }
+
+        /* --- Components --- */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-value { font-size: 2rem; font-weight: 700; margin: 0.5rem 0; }
+        .stat-label { color: var(--text-muted); font-size: 0.9rem; }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 16px;
+            height: 350px;
+            position: relative;
+        }
+
+        /* --- Tables & Lists --- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .data-table th { background: rgba(0,0,0,0.2); color: var(--text-muted); font-weight: 500; }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 600;
         }
-        .cid-section {
-            display: none;
-        }
-        .cid-section.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        input::placeholder { color: rgba(255, 255, 255, 0.6); }
-        input:focus {
-            outline: none;
-            border-color: #10B981;
-            background: rgba(255, 255, 255, 0.2);
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            background: #10B981;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        button:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
-        }
-        .error {
-            background: rgba(239, 68, 68, 0.2);
-            color: #FEE2E2;
-            padding: 12px;
+        .badge.urgent { background: rgba(239, 68, 68, 0.2); color: #EF4444; }
+        .badge.high { background: rgba(245, 158, 11, 0.2); color: #F59E0B; }
+        .badge.normal { background: rgba(59, 130, 246, 0.2); color: #3B82F6; }
+        .badge.done { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+
+        /* --- Modals & Utilities --- */
+        .hidden { display: none !important; }
+        
+        .btn {
+            padding: 10px 20px;
             border-radius: 8px;
-            text-align: center;
-            margin-top: 15px;
-            display: none;
-            border: 1px solid #EF4444;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: opacity 0.2s;
         }
-        .error.show { display: block; animation: shake 0.5s ease; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-        .dashboard {
-            display: none;
-            text-align: center;
-        }
-        .dashboard.active { display: block; }
-        .welcome {
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-        .status-box {
-            background: rgba(16, 185, 129, 0.2);
-            border: 2px solid #10B981;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        @media (max-width: 600px) {
-            .avatars-grid { grid-template-columns: repeat(3, 1fr); }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn:hover { opacity: 0.9; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; } /* Mobile sidebar logic omitted for brevity */
+            .main-content { margin-left: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="version-banner">
-        ✅ VERSION 2.0 - FIXED - NO DUPLICATES - IF YOU SEE THIS, NEW FILE LOADED! ✅
-    </div>
 
-    <div class="login-card" id="loginCard">
-        <h1>🎯 SLBDMIS</h1>
-        <p class="subtitle">Lead-Filter Pro Tracking System</p>
-
-        <div class="avatars-grid" id="avatarsGrid"></div>
-
-        <div class="cid-section" id="cidSection">
-            <input type="text" id="cidInput" placeholder="Enter 11-digit CID" maxlength="11">
-            <button onclick="handleLogin()">🔐 LOGIN</button>
-            <div class="error" id="errorBox"></div>
-        </div>
-    </div>
-
-    <div class="dashboard" id="dashboardView">
+    <div id="login-view">
         <div class="login-card">
-            <div class="welcome" id="welcomeText"></div>
-            <div class="status-box" id="statusBox"></div>
-            <button onclick="handleLogout()">🚪 LOGOUT</button>
+            <div style="margin-bottom: 2rem;">
+                <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">SLBDMIS</h1>
+                <p style="color: var(--text-muted);">Lead-Filter Pro Tracking System</p>
+            </div>
+
+            <div class="avatars-grid" id="avatar-container">
+                </div>
+
+            <div id="cid-input-container">
+                <input type="password" id="cid-input" class="input-box" placeholder="Enter CID to Login">
+                <p id="login-error" style="color: var(--danger); margin-top: 10px; font-size: 0.9rem;"></p>
+            </div>
         </div>
+    </div>
+
+    <div id="dashboard-view">
+        <nav class="sidebar">
+            <div class="logo-area">
+                <i data-lucide="activity" size="32" color="#3B82F6"></i>
+                <div class="logo-text">
+                    <h2>SLBDMIS</h2>
+                    <p>SYSTEM v2.0</p>
+                </div>
+            </div>
+
+            <div id="nav-links">
+                </div>
+
+            <div style="margin-top: auto;">
+                <div class="nav-item" onclick="handleLogout()">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="header-bar">
+                <div>
+                    <h2 id="page-title">Dashboard</h2>
+                    <p style="color: var(--text-muted);">Welcome back, <span id="user-name-display">User</span></p>
+                </div>
+                <button class="btn btn-primary" onclick="showCreateTaskModal()">
+                    <i data-lucide="plus"></i> New Task
+                </button>
+            </div>
+
+            <div id="content-area">
+                </div>
+        </main>
     </div>
 
     <script>
-        console.log('%c🎯 SLBDMIS v2.0 LOADED', 'color: #10B981; font-size: 20px; font-weight: bold;');
-        console.log('%c✅ This is the NEW FIXED version', 'color: #10B981; font-size: 16px;');
-        
-        // SINGLE SUPABASE INITIALIZATION - LINE 149
-        const SUPABASE_CONFIG = {
-            url: 'https://bzrkbjjgymdbbwpatfct.supabase.co',
-            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw'
-        };
-        const db = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        // --- 1. CONFIGURATION ---
+        // REPLACE THESE WITH YOUR SUPABASE CREDENTIALS
+        const supabaseUrl = 'https://bzrkbjjgymdbbwpatfct.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        const TEAM = [
-            { id: 1, name: "Pema", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
-            { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
-            { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER" },
-            { id: 4, name: "Laxmi", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER" },
-            { id: 5, name: "Ngawang", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER" }
+        // --- 2. STATE ---
+        let currentUser = null;
+        let selectedAvatarId = null;
+
+        // --- 3. DATA & CONSTANTS ---
+        const USERS = [
+            { id: 1, name: "Pema Ugyen Namdrol Jamtsho", avatar: "👨‍💼", cid: "11107008201", role: "LEADER", color: "#FF6B6B" },
+            { id: 2, name: "Jamphel Kuendhen", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER", color: "#4ECDC4" },
+            { id: 3, name: "Kuenley Thujee Yangchen", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER", color: "#45B7D1" },
+            { id: 4, name: "Laxmi Prasad Dhakal", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER", color: "#FFA07A" },
+            { id: 5, name: "Ngawang Jigme Dorji", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER", color: "#98D8C8" }
         ];
 
-        let activeUser = null;
-        let selectedId = null;
+        // --- 4. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderLoginScreen();
+        });
 
-        document.addEventListener('DOMContentLoaded', init);
-
-        function init() {
-            console.log('✅ Initializing...');
-            console.log('✅ Database ready:', db ? 'YES' : 'NO');
-            console.log('✅ Team members:', TEAM.length);
-            displayAvatars();
-        }
-
-        function displayAvatars() {
-            const grid = document.getElementById('avatarsGrid');
-            grid.innerHTML = TEAM.map(member => `
-                <div class="avatar-card" onclick="pickAvatar(${member.id})">
-                    <div class="avatar-icon">${member.avatar}</div>
-                    <div class="avatar-name">${member.name}</div>
+        // --- 5. AUTHENTICATION LOGIC ---
+        function renderLoginScreen() {
+            const container = document.getElementById('avatar-container');
+            container.innerHTML = USERS.map(u => `
+                <div class="avatar-option" onclick="selectAvatar(${u.id}, this)">
+                    <span class="avatar-emoji">${u.avatar}</span>
+                    <div class="avatar-name">${u.name.split(' ')[0]}</div>
                 </div>
             `).join('');
-            console.log('✅ Avatars displayed');
-        }
-
-        function pickAvatar(id) {
-            selectedId = id;
-            document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
-            event.currentTarget.classList.add('selected');
-            document.getElementById('cidSection').classList.add('show');
-            document.getElementById('cidInput').focus();
-            console.log('✅ Avatar selected:', id);
-        }
-
-        function handleLogin() {
-            const cid = document.getElementById('cidInput').value.trim();
-            const errBox = document.getElementById('errorBox');
             
-            errBox.classList.remove('show');
+            // CID Input Listener
+            document.getElementById('cid-input').addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') attemptLogin();
+            });
+        }
 
-            if (!selectedId) {
-                showError('👆 Please select an avatar first');
-                return;
-            }
+        function selectAvatar(id, element) {
+            selectedAvatarId = id;
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            
+            const inputCont = document.getElementById('cid-input-container');
+            inputCont.classList.add('visible');
+            document.getElementById('cid-input').value = '';
+            document.getElementById('cid-input').focus();
+            document.getElementById('login-error').innerText = '';
+        }
 
-            if (!cid || cid.length !== 11) {
-                showError('Please enter your 11-digit CID');
-                return;
-            }
+        function attemptLogin() {
+            const cid = document.getElementById('cid-input').value.trim();
+            const user = USERS.find(u => u.id === selectedAvatarId);
 
-            const member = TEAM.find(m => m.id === selectedId && m.cid === cid);
-
-            if (member) {
-                activeUser = member;
-                console.log('✅ Login successful:', member.name);
-                showDashboard();
+            if (user && user.cid === cid) {
+                currentUser = user;
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('dashboard-view').style.display = 'block';
+                initializeDashboard();
             } else {
-                showError('❌ Invalid CID. Please try again.');
-            }
-        }
-
-        function showError(msg) {
-            const errBox = document.getElementById('errorBox');
-            errBox.textContent = msg;
-            errBox.classList.add('show');
-        }
-
-        async function showDashboard() {
-            document.getElementById('loginCard').style.display = 'none';
-            document.getElementById('dashboardView').classList.add('active');
-            document.getElementById('welcomeText').textContent = `Welcome, ${activeUser.name}! 👋`;
-            
-            const statusBox = document.getElementById('statusBox');
-            statusBox.innerHTML = '<p>🔄 Testing database connection...</p>';
-
-            try {
-                const { data, error } = await db.from('users').select('count').limit(1);
-
-                if (error) {
-                    statusBox.innerHTML = `
-                        <p style="color: #FEE2E2;">❌ Database Error</p>
-                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
-                    `;
-                    statusBox.style.background = 'rgba(239, 68, 68, 0.2)';
-                    statusBox.style.borderColor = '#EF4444';
-                } else {
-                    statusBox.innerHTML = `
-                        <p style="font-size: 1.5rem; margin-bottom: 10px;">✅ Connected!</p>
-                        <p>Database: <strong>Active</strong></p>
-                        <p>Role: <strong>${activeUser.role}</strong></p>
-                    `;
-                }
-            } catch (err) {
-                statusBox.innerHTML = `
-                    <p style="color: #FEE2E2;">❌ Connection Error</p>
-                    <p style="font-size: 0.9rem;">${err.message}</p>
-                `;
-                statusBox.style.background = 'rgba(239, 68, 68, 0.2)';
-                statusBox.style.borderColor = '#EF4444';
+                const errBox = document.getElementById('login-error');
+                errBox.innerText = "❌ Incorrect CID. Please try again.";
+                document.getElementById('cid-input').classList.add('shake'); // Add CSS shake if desired
             }
         }
 
         function handleLogout() {
-            activeUser = null;
-            selectedId = null;
-            document.getElementById('dashboardView').classList.remove('active');
-            document.getElementById('loginCard').style.display = 'block';
-            document.getElementById('cidInput').value = '';
-            document.getElementById('cidSection').classList.remove('show');
-            displayAvatars();
-            console.log('✅ Logged out');
+            currentUser = null;
+            selectedAvatarId = null;
+            location.reload();
         }
 
-        document.getElementById('cidInput').addEventListener('keypress', e => {
-            if (e.key === 'Enter') handleLogin();
-        });
+        // --- 6. DASHBOARD LOGIC ---
+        function initializeDashboard() {
+            document.getElementById('user-name-display').innerText = currentUser.name.split(' ')[0];
+            renderNavigation();
+            loadPage('overview');
+        }
 
-        console.log('✅ All systems ready!');
+        function renderNavigation() {
+            const nav = document.getElementById('nav-links');
+            let links = [
+                { id: 'overview', icon: 'layout-dashboard', label: 'Overview' },
+                { id: 'tasks', icon: 'check-square', label: 'Tasks' },
+                { id: 'attendance', icon: 'calendar', label: 'Attendance' }
+            ];
+
+            if (currentUser.role === 'LEADER') {
+                links.push({ id: 'decisions', icon: 'file-text', label: 'Decisions' });
+                links.push({ id: 'approvals', icon: 'clipboard-check', label: 'Approvals' });
+            } else {
+                links.push({ id: 'my-stats', icon: 'bar-chart-2', label: 'My Analytics' });
+            }
+
+            nav.innerHTML = links.map(l => `
+                <div class="nav-item" id="nav-${l.id}" onclick="loadPage('${l.id}')">
+                    <i data-lucide="${l.icon}"></i> <span>${l.label}</span>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function loadPage(pageId) {
+            // Update UI Active State
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`nav-${pageId}`)?.classList.add('active');
+            
+            const content = document.getElementById('content-area');
+            const title = document.getElementById('page-title');
+            
+            content.innerHTML = '<div style="text-align:center; padding: 40px;"><div class="loader"></div> Loading...</div>';
+
+            try {
+                // Fetch Data based on page
+                if (pageId === 'overview') {
+                    title.innerText = 'Overview';
+                    await renderOverview(content);
+                } else if (pageId === 'tasks') {
+                    title.innerText = 'Task Management';
+                    await renderTasks(content);
+                } else if (pageId === 'attendance') {
+                    title.innerText = 'Attendance Tracker';
+                    await renderAttendance(content);
+                }
+                // Add other pages as needed
+                
+                lucide.createIcons();
+            } catch (err) {
+                content.innerHTML = `<p style="color:var(--danger)">Error loading data: ${err.message}</p>`;
+            }
+        }
+
+        // --- 7. RENDER FUNCTIONS ---
+
+        async function renderOverview(container) {
+            // Fetch stats from Supabase
+            const { data: tasks } = await supabase.from('tasks').select('*');
+            const totalTasks = tasks?.length || 0;
+            const completed = tasks?.filter(t => t.status === 'Done').length || 0;
+            const waiting = tasks?.filter(t => t.status === 'Waiting').length || 0;
+
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Tasks</div>
+                        <div class="stat-value" style="color: var(--accent)">${totalTasks}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Completed</div>
+                        <div class="stat-value" style="color: var(--success)">${completed}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending Approval</div>
+                        <div class="stat-value" style="color: var(--warning)">${waiting}</div>
+                    </div>
+                </div>
+
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Task Status Distribution</h3>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Priority Breakdown</h3>
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            `;
+
+            // Render Charts
+            new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Done', 'Ongoing', 'Waiting'],
+                    datasets: [{
+                        data: [completed, tasks.filter(t=>t.status==='Ongoing').length, waiting],
+                        backgroundColor: ['#10B981', '#3B82F6', '#94A3B8'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            new Chart(document.getElementById('priorityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Urgent', 'High', 'Normal', 'Low'],
+                    datasets: [{
+                        label: 'Tasks',
+                        data: [
+                            tasks.filter(t=>t.priority==='Urgent').length,
+                            tasks.filter(t=>t.priority==='High').length,
+                            tasks.filter(t=>t.priority==='Normal').length,
+                            tasks.filter(t=>t.priority==='Low').length
+                        ],
+                        backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6', '#10B981']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        async function renderTasks(container) {
+            let query = supabase.from('tasks').select('*, users!assignee_id(name, avatar)');
+            
+            // If Member, only show relevant tasks
+            if (currentUser.role === 'MEMBER') {
+                query = query.or(`assignee_id.eq.${currentUser.id},creator_id.eq.${currentUser.id}`);
+            }
+
+            const { data: tasks, error } = await query.order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            container.innerHTML = `
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Task Title</th>
+                                <th>Assignee</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tasks.map(t => `
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:600">${t.task_title}</div>
+                                        <div style="font-size:0.8rem; color:var(--text-muted)">${t.project_name || 'No Project'}</div>
+                                    </td>
+                                    <td>${t.users ? t.users.avatar + ' ' + t.users.name.split(' ')[0] : 'Unassigned'}</td>
+                                    <td><span class="badge ${t.priority.toLowerCase()}">${t.priority}</span></td>
+                                    <td><span class="badge ${t.status === 'Done' ? 'done' : 'normal'}">${t.status}</span></td>
+                                    <td>${t.due_date || '-'}</td>
+                                    <td>
+                                        ${t.status !== 'Done' ? `<button class="btn btn-primary" style="padding:4px 8px; font-size:0.8rem" onclick="markDone('${t.id}')">Done</button>` : '✅'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        async function renderAttendance(container) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Check if I marked today
+            const { data: myAtt } = await supabase
+                .from('attendance')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('date', today)
+                .single();
+
+            container.innerHTML = `
+                <div style="display:flex; gap: 20px; align-items:center; margin-bottom: 30px; background: var(--surface); padding: 20px; border-radius: 16px;">
+                    <div>
+                        <h3 style="margin-bottom: 5px;">Today's Attendance</h3>
+                        <p style="color:var(--text-muted)">${new Date().toDateString()}</p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        ${myAtt 
+                            ? `<button class="btn btn-primary" disabled>✅ Marked as ${myAtt.status}</button>`
+                            : `<button class="btn btn-primary" onclick="markAttendance('Present')">👋 Mark Present</button>`
+                        }
+                    </div>
+                </div>
+                
+                <h3>Recent History</h3>
+                <p style="color:var(--text-muted)">Loading history...</p>
+                `;
+        }
+
+        // --- 8. ACTIONS ---
+        
+        async function markAttendance(status) {
+            const { error } = await supabase.from('attendance').insert({
+                user_id: currentUser.id,
+                status: status,
+                date: new Date().toISOString().split('T')[0]
+            });
+
+            if (error) alert('Error marking attendance: ' + error.message);
+            else loadPage('attendance');
+        }
+
+        async function markDone(taskId) {
+            if (!confirm("Mark this task as completed?")) return;
+            
+            const { error } = await supabase.from('tasks').update({
+                status: 'Done',
+                completed_at: new Date().toISOString()
+            }).eq('id', taskId);
+
+            if (error) alert('Error: ' + error.message);
+            else loadPage('tasks');
+        }
+
+        function showCreateTaskModal() {
+            alert("Feature: Open 'Create Task' Modal\n(Implement this by unhiding a modal div)");
+            // Implementation note: You can add a hidden div with a form and toggle it here
+        }
+
     </script>
 </body>
 </html>
