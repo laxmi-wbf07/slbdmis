@@ -324,7 +324,9 @@
         // --- 1. CONFIGURATION ---
         const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Use 'sbClient' to avoid conflict with global 'supabase' variable from CDN
+        const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- 2. APP STATE ---
         const APP_STATE = {
@@ -344,7 +346,7 @@
         // --- 3. INIT ---
         window.onload = () => {
             renderLoginScreen();
-            lucide.createIcons();
+            if(window.lucide) lucide.createIcons();
         };
 
         // --- 4. AUTHENTICATION ---
@@ -441,8 +443,9 @@
                 else if (pageId === 'attendance') await renderAttendance(content);
                 else if (pageId === 'decisions') await renderDecisions(content);
                 else if (pageId === 'opportunities') await renderOpportunities(content);
-                lucide.createIcons();
+                if(window.lucide) lucide.createIcons();
             } catch (err) {
+                console.error(err);
                 content.innerHTML = `<div class="text-center text-muted">Error: ${err.message}</div>`;
             }
         }
@@ -451,8 +454,8 @@
 
         async function renderOverview(container) {
             // Fetch Data
-            const { data: tasks } = await supabase.from('tasks').select('*');
-            const { data: attendance } = await supabase.from('attendance').select('*').eq('date', new Date().toISOString().split('T')[0]);
+            const { data: tasks } = await sbClient.from('tasks').select('*');
+            const { data: attendance } = await sbClient.from('attendance').select('*').eq('date', new Date().toISOString().split('T')[0]);
             
             const myTasks = APP_STATE.currentUser.role === 'MEMBER' 
                 ? tasks.filter(t => t.assignee_id === APP_STATE.currentUser.id)
@@ -496,39 +499,41 @@
             `;
 
             // Charts
-            new Chart(document.getElementById('statusChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Done', 'Ongoing', 'Waiting'],
-                    datasets: [{
-                        data: [done, tasks.filter(t=>t.status==='Ongoing').length, waiting],
-                        backgroundColor: ['#10B981', '#3B82F6', '#94A3B8'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8' } } } }
-            });
+            if(window.Chart) {
+                new Chart(document.getElementById('statusChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Done', 'Ongoing', 'Waiting'],
+                        datasets: [{
+                            data: [done, tasks.filter(t=>t.status==='Ongoing').length, waiting],
+                            backgroundColor: ['#10B981', '#3B82F6', '#94A3B8'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8' } } } }
+                });
 
-            new Chart(document.getElementById('priorityChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['Urgent', 'High', 'Normal'],
-                    datasets: [{
-                        label: 'Tasks',
-                        data: [
-                            tasks.filter(t=>t.priority==='Urgent').length,
-                            tasks.filter(t=>t.priority==='High').length,
-                            tasks.filter(t=>t.priority==='Normal').length
-                        ],
-                        backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6']
-                    }]
-                },
-                options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8' } }, x: { grid: { display: false }, ticks: { color: '#94A3B8' } } }, plugins: { legend: { display: false } } }
-            });
+                new Chart(document.getElementById('priorityChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Urgent', 'High', 'Normal'],
+                        datasets: [{
+                            label: 'Tasks',
+                            data: [
+                                tasks.filter(t=>t.priority==='Urgent').length,
+                                tasks.filter(t=>t.priority==='High').length,
+                                tasks.filter(t=>t.priority==='Normal').length
+                            ],
+                            backgroundColor: ['#EF4444', '#F59E0B', '#3B82F6']
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94A3B8' } }, x: { grid: { display: false }, ticks: { color: '#94A3B8' } } }, plugins: { legend: { display: false } } }
+                });
+            }
         }
 
         async function renderTasks(container) {
-            let query = supabase.from('tasks').select('*, users!assignee_id(name)').order('created_at', { ascending: false });
+            let query = sbClient.from('tasks').select('*, users!assignee_id(name)').order('created_at', { ascending: false });
             
             if (APP_STATE.currentUser.role === 'MEMBER') {
                 query = query.or(`assignee_id.eq.${APP_STATE.currentUser.id},creator_id.eq.${APP_STATE.currentUser.id}`);
@@ -564,7 +569,7 @@
         }
 
         async function renderApprovals(container) {
-            const { data: tasks } = await supabase.from('tasks').select('*, users!creator_id(name)').eq('status', 'Waiting');
+            const { data: tasks } = await sbClient.from('tasks').select('*, users!creator_id(name)').eq('status', 'Waiting');
 
             if (!tasks || tasks.length === 0) {
                 container.innerHTML = '<div class="text-center text-muted p-6">No tasks waiting for approval.</div>';
@@ -586,8 +591,8 @@
 
         async function renderAttendance(container) {
             const today = new Date().toISOString().split('T')[0];
-            const { data: myAtt } = await supabase.from('attendance').select('*').eq('user_id', APP_STATE.currentUser.id).eq('date', today).single();
-            const { data: history } = await supabase.from('attendance').select('*, users(name, avatar)').order('date', {ascending: false}).limit(10);
+            const { data: myAtt } = await sbClient.from('attendance').select('*').eq('user_id', APP_STATE.currentUser.id).eq('date', today).single();
+            const { data: history } = await sbClient.from('attendance').select('*, users(name, avatar)').order('date', {ascending: false}).limit(10);
 
             container.innerHTML = `
                 <div class="card p-6 mb-6 flex" style="justify-content: space-between; align-items: center; background: linear-gradient(to right, rgba(59, 130, 246, 0.1), transparent);">
@@ -619,7 +624,7 @@
         }
 
         async function renderDecisions(container) {
-            const { data: decisions } = await supabase.from('decisions').select('*, users!proposed_by(name)').order('created_at', { ascending: false });
+            const { data: decisions } = await sbClient.from('decisions').select('*, users!proposed_by(name)').order('created_at', { ascending: false });
 
             container.innerHTML = `
                 <div class="mb-4">
@@ -641,7 +646,7 @@
         }
 
         async function renderOpportunities(container) {
-            const { data: opps } = await supabase.from('opportunities').select('*');
+            const { data: opps } = await sbClient.from('opportunities').select('*');
             container.innerHTML = `
                 <div class="card p-6 text-center text-muted">
                     <i data-lucide="construction" size="40" style="margin-bottom: 10px;"></i>
@@ -661,7 +666,7 @@
 
             if(!title) return alert('Title is required');
 
-            const { error } = await supabase.from('tasks').insert({
+            const { error } = await sbClient.from('tasks').insert({
                 task_title: title,
                 description: desc,
                 project_name: project,
@@ -689,7 +694,7 @@
             const taskId = document.getElementById('approve-task-id').value;
             const assigneeId = document.getElementById('assignee-select').value;
             
-            await supabase.from('tasks').update({
+            await sbClient.from('tasks').update({
                 status: 'Ongoing',
                 assignee_id: assigneeId
             }).eq('id', taskId);
@@ -700,12 +705,12 @@
 
         async function updateTaskStatus(id, status) {
             if(!confirm('Mark this task as done?')) return;
-            await supabase.from('tasks').update({ status: status, completed_at: new Date().toISOString() }).eq('id', id);
+            await sbClient.from('tasks').update({ status: status, completed_at: new Date().toISOString() }).eq('id', id);
             navigate('tasks');
         }
 
         async function markAttendance() {
-            const { error } = await supabase.from('attendance').insert({
+            const { error } = await sbClient.from('attendance').insert({
                 user_id: APP_STATE.currentUser.id,
                 date: new Date().toISOString().split('T')[0],
                 status: 'Present'
@@ -715,7 +720,7 @@
         }
 
         async function verifyDecision(id) {
-            await supabase.from('decisions').update({ is_verified: true, verified_by: APP_STATE.currentUser.id }).eq('id', id);
+            await sbClient.from('decisions').update({ is_verified: true, verified_by: APP_STATE.currentUser.id }).eq('id', id);
             navigate('decisions');
         }
 
