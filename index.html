@@ -3,338 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLBDMIS - Lead-Filter Pro Tracking System</title>
-    
-    <!-- External Libraries -->
+    <title>SLBDMIS v2.0 - FIXED VERSION</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #F8FAFC;
+            color: white;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-
+        .version-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #10B981;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
         .login-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 40px;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 60px;
         }
-
-        .login-header {
+        h1 {
             text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .login-header h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 10px;
         }
-
+        .subtitle {
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
         .avatars-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
-
         .avatar-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 15px;
             padding: 20px 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 3px solid transparent;
         }
-
         .avatar-card:hover {
-            transform: scale(1.05);
-            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.25);
         }
-
         .avatar-card.selected {
-            border-color: #3B82F6;
-            background: rgba(59, 130, 246, 0.2);
+            border-color: #10B981;
+            background: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
         }
-
         .avatar-icon {
             font-size: 3rem;
             margin-bottom: 8px;
         }
-
         .avatar-name {
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
         }
-
-        .cid-container {
+        .cid-section {
             display: none;
         }
-
-        .cid-container.show {
+        .cid-section.show {
             display: block;
-            animation: slideDown 0.3s ease;
+            animation: slideIn 0.3s ease;
         }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
         input {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin-bottom: 15px;
+            text-align: center;
         }
-
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+        input::placeholder { color: rgba(255, 255, 255, 0.6); }
+        input:focus {
+            outline: none;
+            border-color: #10B981;
+            background: rgba(255, 255, 255, 0.2);
         }
-
         button {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 10px;
             border: none;
-            background: #3B82F6;
+            background: #10B981;
             color: white;
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-
         button:hover {
-            background: #2563EB;
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
         }
-
         .error {
-            color: #EF4444;
+            background: rgba(239, 68, 68, 0.2);
+            color: #FEE2E2;
+            padding: 12px;
+            border-radius: 8px;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
             display: none;
+            border: 1px solid #EF4444;
         }
-
-        .error.show {
-            display: block;
+        .error.show { display: block; animation: shake 0.5s ease; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
-
         .dashboard {
             display: none;
+            text-align: center;
         }
-
-        .dashboard.active {
-            display: block;
+        .dashboard.active { display: block; }
+        .welcome {
+            font-size: 2rem;
+            margin-bottom: 20px;
         }
-
-        .status {
+        .status-box {
             background: rgba(16, 185, 129, 0.2);
-            color: #10B981;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+            border: 2px solid #10B981;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        @media (max-width: 600px) {
+            .avatars-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
 <body>
+    <div class="version-banner">
+        ✅ VERSION 2.0 - FIXED - NO DUPLICATES - IF YOU SEE THIS, NEW FILE LOADED! ✅
+    </div>
+
     <div class="login-card" id="loginCard">
-        <div class="login-header">
-            <h1>🎯 SLBDMIS</h1>
-            <p>Lead-Filter Pro Tracking System</p>
-        </div>
+        <h1>🎯 SLBDMIS</h1>
+        <p class="subtitle">Lead-Filter Pro Tracking System</p>
 
         <div class="avatars-grid" id="avatarsGrid"></div>
 
-        <div class="cid-container" id="cidContainer">
-            <input type="text" id="cidInput" placeholder="Enter your CID (11 digits)" maxlength="11">
-            <button onclick="login()">Login</button>
-            <div class="error" id="errorMsg"></div>
+        <div class="cid-section" id="cidSection">
+            <input type="text" id="cidInput" placeholder="Enter 11-digit CID" maxlength="11">
+            <button onclick="handleLogin()">🔐 LOGIN</button>
+            <div class="error" id="errorBox"></div>
         </div>
     </div>
 
-    <div class="dashboard" id="dashboard">
+    <div class="dashboard" id="dashboardView">
         <div class="login-card">
-            <h2 id="welcomeMsg"></h2>
-            <div class="status" id="statusMsg"></div>
-            <button onclick="logout()" style="margin-top: 20px;">Logout</button>
+            <div class="welcome" id="welcomeText"></div>
+            <div class="status-box" id="statusBox"></div>
+            <button onclick="handleLogout()">🚪 LOGOUT</button>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // SUPABASE CONFIGURATION
-        // ============================================
-        const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
+        console.log('%c🎯 SLBDMIS v2.0 LOADED', 'color: #10B981; font-size: 20px; font-weight: bold;');
+        console.log('%c✅ This is the NEW FIXED version', 'color: #10B981; font-size: 16px;');
         
-        // Initialize Supabase - ONLY ONE TIME!
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // SINGLE SUPABASE INITIALIZATION - LINE 149
+        const SUPABASE_CONFIG = {
+            url: 'https://bzrkbjjgymdbbwpatfct.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw'
+        };
+        const db = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
 
-        // ============================================
-        // USER DATA
-        // ============================================
-        const USERS = [
-            { id: 1, name: "Pema", avatar: "👨‍💼", cid: "11107008201", role: "LEADER", color: "#FF6B6B" },
-            { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER", color: "#4ECDC4" },
-            { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER", color: "#45B7D1" },
-            { id: 4, name: "Laxmi", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER", color: "#FFA07A" },
-            { id: 5, name: "Ngawang", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER", color: "#98D8C8" }
+        const TEAM = [
+            { id: 1, name: "Pema", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
+            { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
+            { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER" },
+            { id: 4, name: "Laxmi", avatar: "👨‍🔧", cid: "11103002151", role: "MEMBER" },
+            { id: 5, name: "Ngawang", avatar: "👨‍🎓", cid: "10801003243", role: "MEMBER" }
         ];
 
-        let currentUser = null;
-        let selectedUserId = null;
+        let activeUser = null;
+        let selectedId = null;
 
-        // ============================================
-        // INITIALIZE
-        // ============================================
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('✅ Page loaded');
-            console.log('✅ Supabase initialized:', supabase ? 'Yes' : 'No');
-            console.log('✅ Users loaded:', USERS.length);
-            renderAvatars();
-        });
+        document.addEventListener('DOMContentLoaded', init);
 
-        // ============================================
-        // RENDER AVATARS
-        // ============================================
-        function renderAvatars() {
+        function init() {
+            console.log('✅ Initializing...');
+            console.log('✅ Database ready:', db ? 'YES' : 'NO');
+            console.log('✅ Team members:', TEAM.length);
+            displayAvatars();
+        }
+
+        function displayAvatars() {
             const grid = document.getElementById('avatarsGrid');
-            grid.innerHTML = USERS.map(user => `
-                <div class="avatar-card" onclick="selectUser(${user.id})">
-                    <div class="avatar-icon">${user.avatar}</div>
-                    <div class="avatar-name">${user.name}</div>
+            grid.innerHTML = TEAM.map(member => `
+                <div class="avatar-card" onclick="pickAvatar(${member.id})">
+                    <div class="avatar-icon">${member.avatar}</div>
+                    <div class="avatar-name">${member.name}</div>
                 </div>
             `).join('');
-            console.log('✅ Avatars rendered');
+            console.log('✅ Avatars displayed');
         }
 
-        // ============================================
-        // SELECT USER
-        // ============================================
-        function selectUser(userId) {
-            selectedUserId = userId;
+        function pickAvatar(id) {
+            selectedId = id;
             document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
             event.currentTarget.classList.add('selected');
-            document.getElementById('cidContainer').classList.add('show');
+            document.getElementById('cidSection').classList.add('show');
             document.getElementById('cidInput').focus();
-            console.log('✅ User selected:', userId);
+            console.log('✅ Avatar selected:', id);
         }
 
-        // ============================================
-        // LOGIN
-        // ============================================
-        function login() {
+        function handleLogin() {
             const cid = document.getElementById('cidInput').value.trim();
-            const errorMsg = document.getElementById('errorMsg');
+            const errBox = document.getElementById('errorBox');
             
-            errorMsg.classList.remove('show');
+            errBox.classList.remove('show');
 
-            if (!selectedUserId) {
-                errorMsg.textContent = 'Please select an avatar first';
-                errorMsg.classList.add('show');
+            if (!selectedId) {
+                showError('👆 Please select an avatar first');
                 return;
             }
 
-            if (!cid) {
-                errorMsg.textContent = 'Please enter your CID';
-                errorMsg.classList.add('show');
+            if (!cid || cid.length !== 11) {
+                showError('Please enter your 11-digit CID');
                 return;
             }
 
-            const user = USERS.find(u => u.id === selectedUserId && u.cid === cid);
+            const member = TEAM.find(m => m.id === selectedId && m.cid === cid);
 
-            if (user) {
-                currentUser = user;
+            if (member) {
+                activeUser = member;
+                console.log('✅ Login successful:', member.name);
                 showDashboard();
             } else {
-                errorMsg.textContent = 'Invalid CID. Please try again.';
-                errorMsg.classList.add('show');
+                showError('❌ Invalid CID. Please try again.');
             }
         }
 
-        // ============================================
-        // SHOW DASHBOARD
-        // ============================================
+        function showError(msg) {
+            const errBox = document.getElementById('errorBox');
+            errBox.textContent = msg;
+            errBox.classList.add('show');
+        }
+
         async function showDashboard() {
             document.getElementById('loginCard').style.display = 'none';
-            document.getElementById('dashboard').classList.add('active');
-            document.getElementById('welcomeMsg').textContent = `Welcome, ${currentUser.name}!`;
+            document.getElementById('dashboardView').classList.add('active');
+            document.getElementById('welcomeText').textContent = `Welcome, ${activeUser.name}! 👋`;
             
-            // Test database connection
-            document.getElementById('statusMsg').textContent = 'Testing database connection...';
-            
+            const statusBox = document.getElementById('statusBox');
+            statusBox.innerHTML = '<p>🔄 Testing database connection...</p>';
+
             try {
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('count')
-                    .limit(1);
+                const { data, error } = await db.from('users').select('count').limit(1);
 
                 if (error) {
-                    document.getElementById('statusMsg').innerHTML = `
-                        ❌ Database Error: ${error.message}<br>
-                        <small>Check your Supabase credentials</small>
+                    statusBox.innerHTML = `
+                        <p style="color: #FEE2E2;">❌ Database Error</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">${error.message}</p>
                     `;
-                    document.getElementById('statusMsg').style.background = 'rgba(239, 68, 68, 0.2)';
-                    document.getElementById('statusMsg').style.color = '#EF4444';
+                    statusBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                    statusBox.style.borderColor = '#EF4444';
                 } else {
-                    document.getElementById('statusMsg').innerHTML = `
-                        ✅ Database Connected Successfully!<br>
-                        <small>Role: ${currentUser.role}</small>
+                    statusBox.innerHTML = `
+                        <p style="font-size: 1.5rem; margin-bottom: 10px;">✅ Connected!</p>
+                        <p>Database: <strong>Active</strong></p>
+                        <p>Role: <strong>${activeUser.role}</strong></p>
                     `;
                 }
             } catch (err) {
-                document.getElementById('statusMsg').innerHTML = `
-                    ❌ Error: ${err.message}
+                statusBox.innerHTML = `
+                    <p style="color: #FEE2E2;">❌ Connection Error</p>
+                    <p style="font-size: 0.9rem;">${err.message}</p>
                 `;
-                document.getElementById('statusMsg').style.background = 'rgba(239, 68, 68, 0.2)';
-                document.getElementById('statusMsg').style.color = '#EF4444';
+                statusBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                statusBox.style.borderColor = '#EF4444';
             }
         }
 
-        // ============================================
-        // LOGOUT
-        // ============================================
-        function logout() {
-            currentUser = null;
-            selectedUserId = null;
-            document.getElementById('dashboard').classList.remove('active');
+        function handleLogout() {
+            activeUser = null;
+            selectedId = null;
+            document.getElementById('dashboardView').classList.remove('active');
             document.getElementById('loginCard').style.display = 'block';
             document.getElementById('cidInput').value = '';
-            document.getElementById('cidContainer').classList.remove('show');
-            renderAvatars();
+            document.getElementById('cidSection').classList.remove('show');
+            displayAvatars();
+            console.log('✅ Logged out');
         }
 
-        // Enter key support
-        document.getElementById('cidInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') login();
+        document.getElementById('cidInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') handleLogin();
         });
+
+        console.log('✅ All systems ready!');
     </script>
 </body>
 </html>
