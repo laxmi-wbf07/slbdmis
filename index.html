@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Final V6</title>
+    <title>SLBDMIS | Live V7</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -12,170 +12,169 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* THEME: NEON DARK */
-        :root { --bg-app: #0b0e14; --glass: rgba(22, 27, 34, 0.8); --border: rgba(255, 255, 255, 0.1); --primary: #3b82f6; --green: #2ea043; --purple: #a371f7; }
-        body { background-color: var(--bg-app); color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 80px; }
+        /* VISUAL STYLE */
+        :root { --bg: #0d1117; --glass: rgba(22, 27, 34, 0.95); --border: rgba(48, 54, 61, 0.7); --accent: #238636; --blue: #2f81f7; }
+        body { background-color: var(--bg); color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 80px; }
         
-        .glass-panel { background: var(--glass); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-        .form-control, .form-select { background-color: rgba(1, 4, 9, 0.6); border: 1px solid var(--border); color: white; border-radius: 6px; }
-        .form-control:focus { background-color: #0d1117; border-color: var(--primary); color: white; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
+        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        .glass-box-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); padding: 10px 15px; font-weight: 600; font-size: 0.9rem; }
         
-        /* CHECKBOX STYLING */
-        .custom-check-box { display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
-        .custom-check-box:hover { background: rgba(255,255,255,0.06); border-color: var(--primary); }
-        .custom-check-box input { margin-right: 12px; transform: scale(1.3); }
-
-        /* MOMENTUM GRAPH */
-        .trend-up { color: var(--green); } .trend-down { color: #f85149; }
-        .live-pulse { width: 8px; height: 8px; background: var(--green); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.7); } 100% { box-shadow: 0 0 0 6px rgba(46, 160, 67, 0); } }
-
-        /* LAYOUT */
-        .sidebar { width: 260px; height: 100vh; position: fixed; background: #010409; border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 20px; z-index: 100; }
+        .form-control, .form-select { background: #010409; border: 1px solid #30363d; color: white; font-size: 0.9rem; }
+        .form-control:focus { background: #010409; border-color: var(--blue); color: white; box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15); }
+        
+        /* Sidebar */
+        .sidebar { width: 250px; height: 100vh; position: fixed; background: #010409; border-right: 1px solid #30363d; display: none; flex-direction: column; padding: 15px; z-index: 99; }
         .main-content { margin: 0; padding: 15px; }
-        @media (min-width: 992px) { .sidebar { display: flex; } .main-content { margin-left: 260px; padding: 30px; } body { padding-bottom: 0; } .mobile-nav { display: none; } }
+        @media (min-width: 992px) { .sidebar { display: flex; } .main-content { margin-left: 250px; padding: 30px; } body { padding-bottom: 0; } .mobile-nav { display: none; } }
 
-        /* AVATAR */
-        .avatar-circle { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; }
-        .avatar-circle.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.2); }
-        
-        details summary { cursor: pointer; padding: 10px; border-radius: 6px; list-style: none; font-weight: 600; color: #8b949e; }
-        details summary:hover { background: rgba(255,255,255,0.05); color: white; }
+        /* Utilities */
+        .avatar-btn { width: 60px; height: 60px; border-radius: 50%; background: #21262d; border: 2px solid transparent; font-size: 30px; display: grid; place-items: center; cursor: pointer; transition: 0.2s; }
+        .avatar-btn.active { border-color: var(--blue); background: rgba(56, 139, 253, 0.2); }
+        .status-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; border: 1px solid; }
+        .live-dot { height: 8px; width: 8px; background-color: #2ea043; border-radius: 50%; display: inline-block; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.4); } 50% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(46, 160, 67, 0); } 100% { opacity: 1; } }
+
+        /* Checkboxes */
+        .member-check { display: flex; align-items: center; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .member-check:hover { border-color: var(--blue); }
+        .member-check input { margin-right: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 9999;">
-        <div id="appToast" class="toast align-items-center text-bg-dark border border-secondary rounded-pill px-4 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex"><div class="toast-body fw-bold" id="toast-msg">Notification</div></div>
-        </div>
-    </div>
-
-    <div id="view-login" class="min-vh-100 d-flex align-items-center justify-content-center p-3">
-        <div class="glass-panel p-4 w-100" style="max-width: 400px;">
-            <div class="text-center mb-4">
-                <h2 class="fw-bold text-white">SLBDMIS <span class="text-primary">V6</span></h2>
-                <p class="text-muted small">Select your identity to begin</p>
-            </div>
-            <div id="login-avatars" class="d-flex flex-wrap justify-content-center gap-3 mb-4"></div>
-            <div id="login-form" class="d-none animate-fade-in">
-                <input type="password" id="input-cid" class="form-control text-center fs-5 fw-bold mb-3" placeholder="Enter CID" maxlength="11">
-                <button onclick="attemptLogin()" class="btn btn-primary w-100 fw-bold py-2">Access Dashboard</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-dashboard" class="d-none">
-        <nav class="sidebar">
-            <div class="d-flex align-items-center gap-2 mb-4 px-2">
-                <div class="bg-primary rounded p-1"><i data-lucide="activity" class="text-white"></i></div>
-                <h5 class="m-0 fw-bold text-white">SLBDMIS</h5>
-            </div>
-            <div id="sidebar-menu" class="d-flex flex-column gap-2 flex-grow-1"></div>
-            <div class="mt-auto">
-                <div class="d-flex align-items-center gap-2 px-2 mb-3">
-                    <div id="sb-avatar" class="fs-4"></div>
-                    <div class="small fw-bold text-white" id="sb-name">User</div>
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 10000;">
+        <div id="liveToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <span id="toast-icon">ℹ️</span>
+                    <strong id="toast-msg">System Notification</strong>
                 </div>
-                <button onclick="logout()" class="btn btn-outline-danger w-100 btn-sm">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold text-white mb-0">SLBDMIS <span style="color:var(--blue)">LIVE</span></h1>
+            <p class="text-muted small">Momentum & Activity Tracker</p>
+        </div>
+        <div class="glass-box p-4 w-100" style="max-width: 400px;">
+            <div class="text-center text-muted small mb-3">SELECT IDENTITY</div>
+            <div id="auth-list" class="d-flex flex-wrap justify-content-center gap-3 mb-4"></div>
+            
+            <div id="auth-pin" class="d-none">
+                <input type="password" id="inp-cid" class="form-control text-center fs-5 fw-bold mb-3" placeholder="Enter CID" maxlength="11">
+                <button onclick="doLogin()" class="btn btn-primary w-100 fw-bold">Authenticate</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-app" class="d-none">
+        <nav class="sidebar">
+            <div class="mb-4 px-2 d-flex align-items-center gap-2">
+                <div class="bg-primary rounded-circle p-1" style="width:10px; height:10px;"></div>
+                <span class="fw-bold text-white tracking-tight">SLBDMIS</span>
+            </div>
+            
+            <div id="nav-links" class="d-flex flex-column gap-1 flex-grow-1"></div>
+            
+            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
+                <div class="d-flex align-items-center gap-2 px-2 mb-3">
+                    <div id="u-avatar" class="fs-5"></div>
+                    <div class="lh-1">
+                        <div id="u-name" class="fw-bold text-white small">User</div>
+                        <div id="u-role" class="text-muted" style="font-size:10px">Role</div>
+                    </div>
+                </div>
+                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Logout</button>
             </div>
         </nav>
 
         <main class="main-content">
             <header class="d-flex justify-content-between align-items-center mb-4">
-                <h4 id="page-title" class="fw-bold m-0 text-white">Overview</h4>
-                <button onclick="openCreateModal()" class="btn btn-primary rounded-pill px-3 shadow fw-bold d-flex align-items-center gap-2">
-                    <i data-lucide="plus-circle" size="18"></i> <span>Create</span>
-                </button>
+                <h4 id="page-header" class="fw-bold m-0 text-white">Overview</h4>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="small text-muted d-none d-sm-block"><span class="live-dot me-1"></span>Sync: <span id="sync-time">Just now</span></div>
+                    <button onclick="openCreate()" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm">
+                        <i data-lucide="plus-circle" size="16"></i> New
+                    </button>
+                </div>
             </header>
             
-            <div id="app-content"></div>
+            <div id="content-area"></div>
         </main>
 
-        <nav class="mobile-nav fixed-bottom d-lg-none bg-black border-top border-secondary">
-            <div class="container-fluid pt-2">
-                <div class="row text-center" id="mobile-menu"></div>
-            </div>
+        <nav class="mobile-nav fixed-bottom d-lg-none bg-dark border-top border-secondary">
+            <div class="row text-center m-0" id="mob-links"></div>
         </nav>
     </div>
 
-    <div class="modal fade" id="modalCreate" tabindex="-1">
+    <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-panel border-0">
+            <div class="modal-content glass-box border-0">
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold mb-3">Create New Item</h5>
-                    
-                    <div class="d-flex gap-2 mb-3 p-1 bg-black bg-opacity-50 rounded">
-                        <button onclick="setCreateType('task')" id="btn-type-task" class="btn btn-sm btn-primary flex-grow-1 fw-bold">Task</button>
-                        <button onclick="setCreateType('decision')" id="btn-type-decision" class="btn btn-sm text-secondary flex-grow-1 fw-bold">Decision</button>
+                    <h6 class="fw-bold mb-3 text-white">New Entry</h6>
+                    <div class="btn-group w-100 mb-3">
+                        <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm btn-primary">Task</button>
+                        <button onclick="setMode('decision')" id="btn-m-dec" class="btn btn-sm btn-outline-secondary">Decision</button>
                     </div>
-
-                    <input type="text" id="new-title" class="form-control mb-2 fw-bold" placeholder="Title / Subject">
-                    <textarea id="new-desc" class="form-control mb-3" rows="3" placeholder="Description & Requirements"></textarea>
                     
-                    <div id="task-fields">
+                    <input type="text" id="n-title" class="form-control mb-2" placeholder="Title">
+                    <textarea id="n-desc" class="form-control mb-3" rows="3" placeholder="Details"></textarea>
+                    
+                    <div id="div-task-opts">
                         <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="small text-muted fw-bold">Priority</label>
-                                <select id="new-prio" class="form-select"><option>Normal</option><option>High</option><option>Urgent</option></select>
-                            </div>
-                            <div class="col-6">
-                                <label class="small text-muted fw-bold">Due Date</label>
-                                <input type="date" id="new-date" class="form-control">
-                            </div>
+                            <div class="col-6"><select id="n-prio" class="form-select"><option>Normal</option><option>High</option></select></div>
+                            <div class="col-6"><input type="date" id="n-date" class="form-control"></div>
                         </div>
-                        
-                        <label class="small text-muted fw-bold mb-2">ASSIGN MEMBERS (Check to select)</label>
-                        <div id="assign-list" class="d-flex flex-column gap-1" style="max-height: 150px; overflow-y: auto;">
-                            </div>
+                        <label class="small text-muted fw-bold mb-2">Assign To:</label>
+                        <div id="n-members" class="d-flex flex-column gap-1 mb-3" style="max-height:120px; overflow-y:auto"></div>
                     </div>
 
-                    <button onclick="submitItem()" class="btn btn-success w-100 fw-bold mt-3">Publish Request</button>
+                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Publish</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modalProof" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal fade" id="modProof" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-panel border-0">
+            <div class="modal-content glass-box border-0">
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold mb-2">Submit for Review</h5>
-                    <p class="small text-muted">Please confirm you have uploaded the required files.</p>
-                    <input type="hidden" id="proof-task-id">
+                    <h6 class="fw-bold mb-2">Submit Task</h6>
+                    <p class="small text-muted">Ensure files are on Google Drive before submitting.</p>
+                    <input type="hidden" id="p-tid">
+                    
+                    <a href="https://drive.google.com/drive/u/0/" target="_blank" onclick="notify('Opening Drive...', '📂')" class="btn btn-outline-light w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
+                        <i data-lucide="external-link" size="14"></i> Open Drive
+                    </a>
 
-                    <div class="d-grid gap-2 mb-3">
-                        <a href="https://drive.google.com/drive/u/0/" target="_blank" class="btn btn-outline-light d-flex align-items-center gap-2 justify-content-center">
-                            <i data-lucide="folder" class="text-warning"></i> Open Google Drive
-                        </a>
-                    </div>
-
-                    <div class="bg-black bg-opacity-25 p-3 rounded mb-3">
-                        <label class="small fw-bold text-info mb-2">SUBMISSION CHECKLIST:</label>
+                    <div class="bg-dark p-3 rounded border border-secondary border-opacity-25 mb-3">
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="chk-1" onchange="checkProofState()">
-                            <label class="form-check-label small" for="chk-1">I have uploaded files to the correct folder.</label>
+                            <input class="form-check-input" type="checkbox" id="chk1" onchange="validateProof()">
+                            <label class="form-check-label small" for="chk1">Files uploaded successfully</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="chk-2" onchange="checkProofState()">
-                            <label class="form-check-label small" for="chk-2">I have double-checked the file names.</label>
+                            <input class="form-check-input" type="checkbox" id="chk2" onchange="validateProof()">
+                            <label class="form-check-label small" for="chk2">Correct naming convention used</label>
                         </div>
                     </div>
 
-                    <button id="btn-final-done" onclick="submitForReview()" class="btn btn-secondary w-100 fw-bold" disabled>Submit to Leader</button>
-                    <button onclick="bsModalProof.hide()" class="btn btn-link text-white w-100 mt-2 text-decoration-none">Cancel</button>
+                    <div class="d-flex gap-2">
+                        <button onclick="closeProof()" class="btn btn-light flex-grow-1">Cancel</button>
+                        <button id="btn-submit-proof" onclick="apiSubmit()" class="btn btn-success flex-grow-1 fw-bold" disabled>Submit</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- SUPABASE CONFIG ---
-        const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // --- TEAM DATA ---
+        // --- 1. CONFIGURATION ---
+        const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
+        const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+        
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
@@ -184,184 +183,221 @@
             { id: 5, name: "Ngawang", avatar: "👩", cid: "10801003243", role: "MEMBER" }
         ];
 
-        // --- STATE & INIT ---
-        const STATE = { user: null, page: 'overview', createType: 'task' };
-        let bsModalCreate, bsModalProof;
+        const STATE = { user: null, page: 'home', mode: 'task', timer: null };
+        const MODALS = {};
 
+        // --- 2. INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
-            bsModalCreate = new bootstrap.Modal('#modalCreate');
-            bsModalProof = new bootstrap.Modal('#modalProof');
-            
-            // Check Session
-            const savedID = localStorage.getItem('slbd_uid_v6');
-            if(savedID) {
-                const u = TEAM.find(x => x.id == savedID);
-                if(u) { STATE.user = u; initApp(); return; }
+            MODALS.create = new bootstrap.Modal('#modCreate');
+            MODALS.proof = new bootstrap.Modal('#modProof');
+
+            const storedID = localStorage.getItem('slbd_uid_v7');
+            if (storedID) {
+                STATE.user = TEAM.find(u => u.id == storedID);
+                if(STATE.user) { startApp(); return; }
             }
-            showLogin();
+            renderAuth();
         };
 
-        // --- AUTH ---
-        function showLogin() {
-            document.getElementById('view-login').classList.remove('d-none');
-            document.getElementById('login-avatars').innerHTML = TEAM.map(u => `
-                <div class="d-flex flex-column align-items-center gap-2" onclick="pickUser(${u.id}, this)">
-                    <div class="avatar-circle shadow">${u.avatar}</div>
+        // --- 3. AUTHENTICATION LOGIC ---
+        function renderAuth() {
+            document.getElementById('view-auth').classList.remove('d-none');
+            document.getElementById('auth-list').innerHTML = TEAM.map(u => `
+                <div class="d-flex flex-column align-items-center gap-2" onclick="selectUser(${u.id}, this)">
+                    <div class="avatar-btn shadow">${u.avatar}</div>
                     <span class="small fw-bold text-muted">${u.name.split(' ')[0]}</span>
                 </div>
             `).join('');
         }
 
-        function pickUser(id, el) {
-            document.querySelectorAll('.avatar-circle').forEach(b => b.classList.remove('selected'));
-            el.querySelector('.avatar-circle').classList.add('selected');
+        function selectUser(id, el) {
+            document.querySelectorAll('.avatar-btn').forEach(x => x.classList.remove('active'));
+            el.querySelector('.avatar-btn').classList.add('active');
             STATE.selUser = TEAM.find(u => u.id === id);
-            document.getElementById('login-form').classList.remove('d-none');
+            document.getElementById('auth-pin').classList.remove('d-none');
+            document.getElementById('inp-cid').focus();
         }
 
-        function attemptLogin() {
-            if(document.getElementById('input-cid').value === STATE.selUser.cid) {
-                STATE.user = STATE.selUser;
-                localStorage.setItem('slbd_uid_v6', STATE.user.id);
-                initApp();
-            } else { toast('❌ Incorrect CID'); }
+        function doLogin() {
+            notify('Authenticating...', '🔒');
+            setTimeout(() => {
+                if(document.getElementById('inp-cid').value === STATE.selUser.cid) {
+                    STATE.user = STATE.selUser;
+                    localStorage.setItem('slbd_uid_v7', STATE.user.id);
+                    document.getElementById('view-auth').classList.add('d-none');
+                    notify('Welcome Back', '👋');
+                    startApp();
+                } else {
+                    notify('Invalid CID', '❌');
+                }
+            }, 800);
         }
 
-        function logout() { localStorage.removeItem('slbd_uid_v6'); location.reload(); }
+        function logout() {
+            if(confirm('Log out?')) {
+                localStorage.removeItem('slbd_uid_v7');
+                location.reload();
+            }
+        }
 
-        // --- NAVIGATION ---
-        function initApp() {
-            document.getElementById('view-login').classList.add('d-none');
-            document.getElementById('view-dashboard').classList.remove('d-none');
-            document.getElementById('sb-avatar').innerText = STATE.user.avatar;
-            document.getElementById('sb-name').innerText = STATE.user.name.split(' ')[0];
+        // --- 4. APP ENGINE ---
+        function startApp() {
+            document.getElementById('view-app').classList.remove('d-none');
+            
+            // Sidebar User Info
+            document.getElementById('u-avatar').innerHTML = STATE.user.avatar;
+            document.getElementById('u-name').innerText = STATE.user.name;
+            document.getElementById('u-role').innerText = STATE.user.role;
 
-            const menus = [
-                {id:'overview', i:'bar-chart-2', t:'Momentum'},
-                {id:'tasks', i:'check-circle', t:'Tasks'},
-                {id:'att', i:'clock', t:'Check-In'},
-                {id:'dec', i:'file-text', t:'Decisions'}
+            // Nav Rendering
+            const pages = [
+                {id: 'home', t: 'Overview', i: 'activity'},
+                {id: 'task', t: 'Tasks', i: 'check-circle'},
+                {id: 'att', t: 'Check-In', i: 'clock'},
+                {id: 'dec', t: 'Decisions', i: 'book'}
             ];
 
-            const renderNav = (isMob) => menus.map(p => isMob 
-                ? `<div class="col" onclick="go('${p.id}')"><div class="p-2 nav-icon ${p.id==='overview'?'text-primary':''}" id="mn-${p.id}"><i data-lucide="${p.i}"></i><div style="font-size:10px">${p.t}</div></div></div>`
-                : `<div onclick="go('${p.id}')" class="d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary" style="cursor:pointer" id="dn-${p.id}"><i data-lucide="${p.i}" size="18"></i><span class="fw-medium">${p.t}</span></div>`
-            ).join('');
+            const navItem = (p, isMob) => isMob 
+                ? `<div class="col py-2" onclick="nav('${p.id}')"><i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary':''}"></i><div style="font-size:10px">${p.t}</div></div>`
+                : `<div onclick="nav('${p.id}')" class="d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none" style="cursor:pointer" id="lnk-${p.id}"><i data-lucide="${p.i}" size="18"></i><span class="small fw-bold">${p.t}</span></div>`;
 
-            document.getElementById('sidebar-menu').innerHTML = renderNav(false);
-            document.getElementById('mobile-menu').innerHTML = renderNav(true);
-            
-            go('overview');
-        }
-
-        function go(pg) {
-            STATE.page = pg;
-            document.getElementById('page-title').innerText = pg.charAt(0).toUpperCase() + pg.slice(1);
-            
-            // Highlight
-            document.querySelectorAll('[id^="dn-"]').forEach(el => { el.classList.remove('bg-primary','text-white'); el.classList.add('text-secondary'); });
-            document.querySelectorAll('[id^="mn-"]').forEach(el => { el.classList.remove('text-primary'); });
-            
-            const dn = document.getElementById(`dn-${pg}`); if(dn) { dn.classList.add('bg-primary','text-white'); dn.classList.remove('text-secondary'); }
-            const mn = document.getElementById(`mn-${pg}`); if(mn) mn.classList.add('text-primary');
-
-            loadContent(pg);
-        }
-
-        async function loadContent(pg) {
-            const box = document.getElementById('app-content');
-            box.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-            
-            try {
-                if(pg === 'overview') await pgOverview(box);
-                if(pg === 'tasks') await pgTasks(box);
-                if(pg === 'att') await pgAtt(box);
-                if(pg === 'dec') await pgDec(box);
+            const renderNav = () => {
+                document.getElementById('nav-links').innerHTML = pages.map(p => navItem(p, false)).join('');
+                document.getElementById('mob-links').innerHTML = pages.map(p => navItem(p, true)).join('');
+                if(document.getElementById(`lnk-${STATE.page}`)) {
+                    document.getElementById(`lnk-${STATE.page}`).classList.add('bg-primary', 'bg-opacity-10', 'text-primary');
+                    document.getElementById(`lnk-${STATE.page}`).classList.remove('text-secondary');
+                }
                 lucide.createIcons();
-            } catch(e) { console.error(e); box.innerHTML = '<div class="text-danger">Error loading data.</div>'; }
+            };
+            
+            window.renderNav = renderNav;
+            nav('home');
+
+            // AUTO SYNC ENGINE (Every 60s)
+            if(STATE.timer) clearInterval(STATE.timer);
+            STATE.timer = setInterval(() => {
+                loadPage(STATE.page, true); // Silent refresh
+                document.getElementById('sync-time').innerText = new Date().toLocaleTimeString();
+                notify('Data Synced', '🔄');
+            }, 60000); // 1 minute interval
         }
 
-        // --- PAGE: OVERVIEW (MOMENTUM) ---
-        async function pgOverview(c) {
-            // Fetch Data
-            const {data: history} = await sb.from('momentum_history').select('*').order('date', {ascending:true});
-            const {data: tasks} = await sb.from('tasks').select('*');
+        function nav(pg) {
+            STATE.page = pg;
+            window.renderNav();
+            document.getElementById('page-header').innerText = pg === 'home' ? 'Team Velocity' : (pg.charAt(0).toUpperCase() + pg.slice(1));
+            loadPage(pg, false);
+        }
 
-            // Calculate Metrics
-            const today = new Date().toISOString().split('T')[0];
-            const todayDone = tasks.filter(t => t.status === 'Done' && t.created_at.includes(today)).length;
-            const lastScore = history.length ? history[history.length-1].score : 100;
-            const currentScore = lastScore + (todayDone * 5); // Algo: +5 points per done task
+        async function loadPage(pg, silent) {
+            const box = document.getElementById('content-area');
+            if(!silent) box.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+
+            try {
+                if(pg === 'home') await renderHome(box);
+                if(pg === 'task') await renderTasks(box);
+                if(pg === 'att') await renderAtt(box);
+                if(pg === 'dec') await renderDec(box);
+                lucide.createIcons();
+            } catch (err) {
+                console.error(err);
+                if(!silent) box.innerHTML = `<div class="alert alert-danger">Connection Error: ${err.message}</div>`;
+            }
+        }
+
+        // --- 5. PAGE RENDERERS ---
+        
+        // HOME / MOMENTUM
+        async function renderHome(c) {
+            // Safe Fetch Pattern
+            let { data: hist } = await supabase.from('momentum_history').select('*').order('date', {ascending:true});
+            let { data: tasks } = await supabase.from('tasks').select('*');
+            if(!hist) hist = []; if(!tasks) tasks = [];
+
+            // Metrics
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayDone = tasks.filter(t => t.status === 'Done' && t.created_at.includes(todayStr)).length;
             
-            // Trend
-            const prevScore = history.length > 1 ? history[history.length-2].score : 100;
-            const isUp = currentScore >= prevScore;
+            const lastScore = hist.length ? hist[hist.length-1].score : 100;
+            const liveScore = lastScore + (todayDone * 5); // Algo
+            const prevScore = hist.length > 1 ? hist[hist.length-2].score : 100;
+            const diff = liveScore - prevScore;
+            
+            const myActive = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id));
+            const review = tasks.filter(t => t.status === 'Review');
 
-            // HTML Structure
             c.innerHTML = `
-                <div class="glass-panel p-4 mb-4 position-relative overflow-hidden">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="small text-muted fw-bold ls-1 mb-1">TEAM VELOCITY INDEX</div>
-                            <h1 class="display-3 fw-bold m-0 text-white tracking-tight">${currentScore}</h1>
-                            <div class="d-flex align-items-center gap-2 mt-2">
-                                <span class="badge bg-${isUp?'success':'danger'} bg-opacity-25 text-${isUp?'success':'danger'} border border-${isUp?'success':'danger'}">
-                                    ${isUp ? '▲' : '▼'} ${(currentScore - prevScore)} pts
-                                </span>
-                                <span class="small text-muted">vs Yesterday</span>
+                <div class="glass-box p-4 mb-4 position-relative overflow-hidden">
+                    <div class="row align-items-center">
+                        <div class="col-7">
+                            <div class="small text-muted fw-bold ls-1 mb-1">MOMENTUM INDEX</div>
+                            <h1 class="display-3 fw-bold text-white m-0 tracking-tight">${liveScore}</h1>
+                            <div class="badge ${diff>=0?'bg-success':'bg-danger'} bg-opacity-25 ${diff>=0?'text-success':'text-danger'} mt-2">
+                                ${diff>=0?'+':''}${diff} pts today
                             </div>
                         </div>
-                        <div class="text-end">
-                            <div class="live-pulse me-2"></div><span class="small text-success fw-bold">MARKET OPEN</span>
+                        <div class="col-5">
+                            <div style="height:120px;"><canvas id="chartHome"></canvas></div>
                         </div>
-                    </div>
-                    <div style="height: 220px; width:100%; margin-top:20px;">
-                        <canvas id="mainChart"></canvas>
                     </div>
                 </div>
 
-                <div class="row g-4">
-                    <div class="col-lg-7">
-                        ${STATE.user.role === 'LEADER' ? renderLeaderInbox(tasks) : renderActiveTasks(tasks)}
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        ${STATE.user.role === 'LEADER' ? renderLeaderBox(review) : renderMyTasks(myActive)}
                     </div>
-                    <div class="col-lg-5">
-                        <div class="glass-panel p-3 h-100">
-                            <h6 class="fw-bold mb-3 text-white">Recent Activity</h6>
-                            ${tasks.slice(0,6).map(t => `
-                                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-10">
-                                    <div class="bg-secondary bg-opacity-25 p-2 rounded text-white"><i data-lucide="${t.status==='Done'?'check':'clock'}" size="14"></i></div>
-                                    <div class="lh-1">
-                                        <div class="small fw-bold text-white">${t.task_title}</div>
-                                        <div class="small text-muted" style="font-size:11px">${t.status} • ${new Date(t.created_at).toLocaleDateString()}</div>
+                    <div class="col-lg-6">
+                        <div class="glass-box h-100">
+                            <div class="glass-box-header">Recent Activity</div>
+                            <div class="p-3">
+                                ${tasks.slice(0, 5).map(t => `
+                                    <div class="d-flex gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-10">
+                                        <div class="text-${t.status==='Done'?'success':'warning'}"><i data-lucide="${t.status==='Done'?'check-circle':'clock'}" size="16"></i></div>
+                                        <div class="lh-1">
+                                            <div class="small fw-bold text-white">${t.task_title}</div>
+                                            <div class="small text-muted mt-1" style="font-size:10px">${t.status} • ${new Date(t.created_at).toLocaleDateString()}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            `).join('')}
+                                `).join('') || '<div class="text-muted small">No recent activity.</div>'}
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
-
-            initChart(history, currentScore);
+            
+            // Draw Chart
+            const ctx = document.getElementById('chartHome');
+            if(ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: hist.map(x=>x.date).concat(['Today']),
+                        datasets: [{
+                            data: hist.map(x=>x.score).concat([liveScore]),
+                            borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.2)',
+                            borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0
+                        }]
+                    },
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{display:false}} }
+                });
+            }
         }
 
-        function renderLeaderInbox(tasks) {
-            const reviews = tasks.filter(t => t.status === 'Review');
+        function renderLeaderBox(reviews) {
             return `
-                <div class="glass-panel p-3 border-start border-4 border-info h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="text-info fw-bold m-0">🔍 Pending Review (${reviews.length})</h6>
-                        <span class="badge bg-info text-dark">Action Required</span>
+                <div class="glass-box h-100 border-start border-4 border-info">
+                    <div class="glass-box-header text-info d-flex justify-content-between">
+                        <span>Waiting Review</span>
+                        <span class="badge bg-info text-dark">${reviews.length}</span>
                     </div>
-                    ${reviews.length === 0 ? '<p class="text-muted small">No items waiting for review.</p>' : ''}
-                    <div class="d-flex flex-column gap-2">
+                    <div class="p-3">
+                        ${reviews.length === 0 ? '<span class="small text-muted">All clear.</span>' : ''}
                         ${reviews.map(t => `
-                            <div class="p-3 bg-black bg-opacity-25 rounded d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="fw-bold text-white">${t.task_title}</div>
-                                    <div class="small text-muted">Members: ${getMemberNames(t.tagged_members)}</div>
-                                </div>
-                                <button onclick="approveTask('${t.id}')" class="btn btn-sm btn-success fw-bold">✔ Approve</button>
+                            <div class="p-2 mb-2 bg-dark rounded d-flex justify-content-between align-items-center">
+                                <span class="small text-white fw-bold">${t.task_title}</span>
+                                <button onclick="apiApprove(${t.id})" class="btn btn-sm btn-success py-0" style="font-size:11px">Approve</button>
                             </div>
                         `).join('')}
                     </div>
@@ -369,22 +405,45 @@
             `;
         }
 
-        function renderActiveTasks(tasks) {
-            const active = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id));
+        function renderMyTasks(tasks) {
             return `
-                <div class="glass-panel p-3 h-100">
-                    <h6 class="fw-bold mb-3 text-white">My Active Tasks</h6>
-                    ${active.length === 0 ? '<p class="text-muted small">You have no active tasks.</p>' : ''}
-                    ${active.map(t => `
-                        <div class="mb-3 p-3 bg-black bg-opacity-25 rounded border border-secondary border-opacity-10">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-bold text-white">${t.task_title}</span>
-                                <span class="badge bg-primary bg-opacity-25 text-primary">Ongoing</span>
+                <div class="glass-box h-100">
+                    <div class="glass-box-header">My Active Tasks</div>
+                    <div class="p-3">
+                        ${tasks.length === 0 ? '<span class="small text-muted">No active tasks.</span>' : ''}
+                        ${tasks.map(t => `
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="fw-bold text-white">${t.task_title}</span>
+                                    <span class="text-primary cursor-pointer" onclick="openProof(${t.id})">Submit</span>
+                                </div>
+                                <input type="text" class="form-control form-control-sm text-muted" value="${t.progress_note||''}" placeholder="Update status..." 
+                                    onchange="apiUpdateProg(${t.id}, this.value)">
                             </div>
-                            <input type="text" id="prog-${t.id}" class="form-control form-control-sm mb-2" placeholder="Type status update..." value="${t.progress_note||''}">
-                            <div class="d-flex gap-2">
-                                <button onclick="updateProg('${t.id}')" class="btn btn-sm btn-outline-secondary flex-grow-1">Save Update</button>
-                                <button onclick="openProof('${t.id}')" class="btn btn-sm btn-primary fw-bold flex-grow-1">Submit</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // TASKS PAGE
+        async function renderTasks(c) {
+            let { data: tasks } = await supabase.from('tasks').select('*').order('created_at', {ascending:false});
+            if(!tasks) tasks = [];
+            
+            c.innerHTML = `
+                <div class="d-flex flex-column gap-3">
+                    ${tasks.map(t => `
+                        <div class="glass-box p-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="status-badge ${t.status==='Done'?'text-success border-success':(t.status==='Review'?'text-info border-info':'text-warning border-warning')}">${t.status}</span>
+                                <span class="small text-muted">Due: ${t.due_date}</span>
+                            </div>
+                            <h5 class="fw-bold text-white m-0">${t.task_title}</h5>
+                            <p class="small text-muted mt-1 mb-2">${t.description}</p>
+                            <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-2">
+                                <span class="small text-secondary">Assigned: ${getMembers(t.tagged_members)}</span>
+                                ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? `<button onclick="openProof(${t.id})" class="btn btn-sm btn-primary">Submit</button>` : ''}
                             </div>
                         </div>
                     `).join('')}
@@ -392,249 +451,151 @@
             `;
         }
 
-        // --- PAGE: TASKS ---
-        async function pgTasks(c) {
-            const {data: tasks} = await sb.from('tasks').select('*').order('created_at', {ascending:false});
-            const myTasks = tasks; // Show all for visibility, can filter if needed
+        // CHECK IN PAGE
+        async function renderAtt(c) {
+            let { data: logs } = await supabase.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(20);
+            if(!logs) logs = [];
             
-            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-            const recent = tasks.filter(t => new Date(t.created_at) > yesterday || t.status !== 'Done');
-            const history = tasks.filter(t => !recent.includes(t));
-
-            const renderCard = (t) => `
-                <div class="glass-panel p-3 mb-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="badge bg-${t.status==='Done'?'success':(t.status==='Review'?'info':'warning')}">${t.status}</span>
-                        <small class="text-muted">${t.due_date}</small>
-                    </div>
-                    <h5 class="fw-bold text-white">${t.task_title}</h5>
-                    <p class="text-muted small mb-2">${t.description}</p>
-                    <div class="d-flex align-items-center justify-content-between border-top border-secondary border-opacity-10 pt-2">
-                        <small class="text-info">Assigned: ${getMemberNames(t.tagged_members)}</small>
-                        ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? `<button onclick="openProof('${t.id}')" class="btn btn-sm btn-primary">Submit</button>` : ''}
-                    </div>
-                </div>`;
-
-            c.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold m-0">Task List</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">Filter</button>
-                        <ul class="dropdown-menu dropdown-menu-dark">
-                            <li><a class="dropdown-item" href="#">All Tasks</a></li>
-                            <li><a class="dropdown-item" href="#">My Tasks</a></li>
-                        </ul>
-                    </div>
-                </div>
-                ${recent.length ? recent.map(renderCard).join('') : '<div class="text-center text-muted py-4">No recent tasks.</div>'}
-                
-                ${history.length ? `
-                <details class="mt-4">
-                    <summary>📂 View Task History (${history.length})</summary>
-                    <div class="mt-3">${history.map(renderCard).join('')}</div>
-                </details>` : ''}
-            `;
-        }
-
-        // --- PAGE: CHECK-IN ---
-        async function pgAtt(c) {
-            const {data: logs} = await sb.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(20);
             const today = new Date().toISOString().split('T')[0];
-            const amIChecked = logs.find(l => l.user_id === STATE.user.id && l.date === today);
+            const hasChecked = logs.find(l => l.user_id === STATE.user.id && l.date === today);
 
             c.innerHTML = `
-                <div class="text-center glass-panel p-5 mb-4">
-                    <h1 class="display-4 fw-bold text-white mb-0">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
-                    <p class="text-muted mb-4">${new Date().toDateString()}</p>
-                    ${amIChecked 
-                        ? `<button class="btn btn-success px-5 fw-bold" disabled>✅ Checked In Today</button>` 
-                        : `<button onclick="doCheckIn()" class="btn btn-primary px-5 fw-bold shadow-lg">Check In Now</button>`}
+                <div class="text-center glass-box p-4 mb-4">
+                    <h2 class="text-white mb-0">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h2>
+                    <p class="text-muted small mb-3">${new Date().toDateString()}</p>
+                    ${hasChecked 
+                        ? `<button class="btn btn-success btn-sm px-4 fw-bold" disabled>✅ Checked In</button>`
+                        : `<button onclick="apiCheckIn()" class="btn btn-primary px-4 fw-bold shadow">Check In Now</button>`}
                 </div>
-                
-                <h6 class="fw-bold mb-3 ps-2">Recent Logs</h6>
-                <div class="glass-panel px-3">
-                    ${logs.map(l => `
-                        <div class="d-flex justify-content-between align-items-center py-3 border-bottom border-secondary border-opacity-10">
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="fs-4">${l.users.avatar}</span>
-                                <span class="fw-bold text-white">${l.users.name}</span>
+                <div class="glass-box">
+                    <div class="glass-box-header">Today's Log</div>
+                    <div class="d-flex flex-column">
+                        ${logs.map(l => `
+                            <div class="d-flex justify-content-between px-3 py-2 border-bottom border-secondary border-opacity-10">
+                                <div class="small"><span class="me-2">${l.users.avatar}</span>${l.users.name}</div>
+                                <div class="small text-muted font-monospace">${new Date(l.created_at).toLocaleTimeString()}</div>
                             </div>
-                            <span class="small text-muted font-monospace">${new Date(l.created_at).toLocaleTimeString()}</span>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
             `;
         }
 
-        // --- PAGE: DECISIONS ---
-        async function pgDec(c) {
-            const {data: decs} = await sb.from('decisions').select('*').order('created_at', {ascending:false});
-            c.innerHTML = decs.length ? decs.map(d => `
-                <div class="glass-panel p-3 mb-3">
-                    <div class="d-flex gap-3">
-                        <div class="bg-primary bg-opacity-25 p-2 rounded text-primary h-100"><i data-lucide="book-open"></i></div>
-                        <div>
-                            <h6 class="fw-bold text-white m-0">${d.subject}</h6>
-                            <p class="small text-muted mt-1 mb-0">${d.details}</p>
-                            <small class="text-secondary mt-2 d-block">${new Date(d.created_at).toLocaleDateString()}</small>
-                        </div>
-                    </div>
+        // DECISIONS PAGE
+        async function renderDec(c) {
+            let { data: decs } = await supabase.from('decisions').select('*').order('created_at', {ascending:false});
+            if(!decs) decs = [];
+            c.innerHTML = decs.map(d => `
+                <div class="glass-box p-3 mb-2 border-start border-4 border-secondary">
+                    <h6 class="fw-bold text-white m-0">${d.subject}</h6>
+                    <p class="small text-muted mt-1 mb-0">${d.details}</p>
                 </div>
-            `).join('') : '<div class="text-center text-muted py-5">No decisions recorded yet.</div>';
+            `).join('') || '<div class="text-center text-muted py-5">No records found.</div>';
         }
 
-        // --- CHART JS LOGIC ---
-        function initChart(history, current) {
-            const ctx = document.getElementById('mainChart');
-            if(!ctx) return;
-            
-            const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(46, 160, 67, 0.4)');
-            gradient.addColorStop(1, 'rgba(46, 160, 67, 0)');
-
-            const labels = history.map(h => h.date).concat(['Today']);
-            const dataPts = history.map(h => h.score).concat([current]);
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Velocity',
-                        data: dataPts,
-                        borderColor: '#2ea043',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#fff',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    },
-                    layout: { padding: 10 }
-                }
-            });
+        // --- 6. API ACTIONS (With Notifications) ---
+        
+        // Helper
+        function getMembers(ids) {
+            if(!ids || !ids.length) return 'None';
+            return ids.map(id => TEAM.find(u=>u.id==id)?.name.split(' ')[0]).join(', ');
         }
 
-        // --- ACTIONS ---
-        function setCreateType(t) {
-            STATE.createType = t;
-            document.getElementById('btn-type-task').className = t==='task' ? 'btn btn-sm btn-primary flex-grow-1 fw-bold' : 'btn btn-sm text-secondary flex-grow-1';
-            document.getElementById('btn-type-decision').className = t==='decision' ? 'btn btn-sm btn-primary flex-grow-1 fw-bold' : 'btn btn-sm text-secondary flex-grow-1';
-            document.getElementById('task-fields').classList.toggle('d-none', t!=='task');
+        // CREATE
+        function setMode(m) {
+            STATE.mode = m;
+            document.getElementById('btn-m-task').className = m==='task'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
+            document.getElementById('btn-m-dec').className = m==='decision'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
+            document.getElementById('div-task-opts').classList.toggle('d-none', m!=='task');
             
-            // Populate Checklist
-            if(t==='task') {
-                document.getElementById('assign-list').innerHTML = TEAM.map(u => `
-                    <label class="custom-check-box">
-                        <input type="checkbox" class="tag-chk" value="${u.id}">
+            if(m==='task') {
+                document.getElementById('n-members').innerHTML = TEAM.map(u => `
+                    <label class="member-check">
+                        <input type="checkbox" class="chk-mem" value="${u.id}">
                         <span class="small text-white">${u.avatar} ${u.name}</span>
                     </label>
                 `).join('');
             }
         }
+        function openCreate() { setMode('task'); MODALS.create.show(); }
 
-        function openCreateModal() {
-            setCreateType('task');
-            document.getElementById('new-title').value = '';
-            document.getElementById('new-desc').value = '';
-            bsModalCreate.show();
+        async function apiCreate() {
+            const title = document.getElementById('n-title').value;
+            const desc = document.getElementById('n-desc').value;
+            if(!title) return notify('Title required', '⚠️');
+
+            notify('Publishing...', '⏳');
+            try {
+                if(STATE.mode === 'task') {
+                    const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
+                    await supabase.from('tasks').insert({
+                        task_title: title, description: desc, priority: document.getElementById('n-prio').value,
+                        due_date: document.getElementById('n-date').value, creator_id: STATE.user.id,
+                        tagged_members: tags, status: 'Ongoing'
+                    });
+                } else {
+                    await supabase.from('decisions').insert({ subject: title, details: desc });
+                }
+                MODALS.create.hide();
+                notify('Created Successfully', '✅');
+                loadPage(STATE.page, true);
+            } catch(e) { notify('Error Creating', '❌'); }
         }
 
-        async function submitItem() {
-            const title = document.getElementById('new-title').value;
-            const desc = document.getElementById('new-desc').value;
-            
-            if(!title) return toast('⚠️ Title is required');
-
-            if(STATE.createType === 'task') {
-                const tags = Array.from(document.querySelectorAll('.tag-chk:checked')).map(c => parseInt(c.value));
-                if(tags.length === 0) return toast('⚠️ Please check at least one member');
-                
-                await sb.from('tasks').insert({
-                    task_title: title, 
-                    description: desc, 
-                    priority: document.getElementById('new-prio').value, 
-                    due_date: document.getElementById('new-date').value,
-                    creator_id: STATE.user.id,
-                    tagged_members: tags,
-                    status: 'Ongoing' 
-                });
-            } else {
-                await sb.from('decisions').insert({ subject: title, details: desc });
-            }
-            
-            bsModalCreate.hide();
-            loadContent(STATE.page);
-            toast('✅ Created Successfully');
+        // UPDATE PROGRESS
+        async function apiUpdateProg(id, val) {
+            notify('Saving...', '💾');
+            await supabase.from('tasks').update({progress_note:val}).eq('id',id);
+            notify('Saved', '✅');
         }
 
-        async function updateProg(id) {
-            const val = document.getElementById(`prog-${id}`).value;
-            await sb.from('tasks').update({progress_note: val}).eq('id',id);
-            toast('💾 Progress Saved');
-        }
-
+        // SUBMIT PROOF
         function openProof(id) {
-            document.getElementById('proof-task-id').value = id;
-            document.getElementById('chk-1').checked = false;
-            document.getElementById('chk-2').checked = false;
-            checkProofState();
-            bsModalProof.show();
+            document.getElementById('p-tid').value = id;
+            document.getElementById('chk1').checked = false;
+            document.getElementById('chk2').checked = false;
+            validateProof();
+            MODALS.proof.show();
         }
-
-        function checkProofState() {
-            const c1 = document.getElementById('chk-1').checked;
-            const c2 = document.getElementById('chk-2').checked;
-            const btn = document.getElementById('btn-final-done');
-            if(c1 && c2) {
-                btn.disabled = false;
-                btn.className = 'btn btn-success w-100 fw-bold';
-            } else {
-                btn.disabled = true;
-                btn.className = 'btn btn-secondary w-100 fw-bold';
-            }
+        function validateProof() {
+            const ok = document.getElementById('chk1').checked && document.getElementById('chk2').checked;
+            document.getElementById('btn-submit-proof').disabled = !ok;
         }
-
-        async function submitForReview() {
-            const id = document.getElementById('proof-task-id').value;
-            await sb.from('tasks').update({status:'Review'}).eq('id',id);
-            bsModalProof.hide();
-            loadContent(STATE.page);
-            toast('📤 Submitted to Leader');
-        }
-
-        async function approveTask(id) {
-            await sb.from('tasks').update({status:'Done'}).eq('id',id);
-            // Add Momentum
-            const today = new Date().toISOString().split('T')[0];
-            await sb.from('momentum_history').insert({date:today, score: 5}); // Simplified score add
-            loadContent(STATE.page);
-            toast('✅ Approved & Momentum Added');
-        }
-
-        async function doCheckIn() {
-            await sb.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
-            loadContent('att');
-            toast('✅ You are checked in');
-        }
-
-        function getMemberNames(ids) {
-            if(!ids || !ids.length) return 'None';
-            return ids.map(id => TEAM.find(u=>u.id==id)?.name.split(' ')[0]).join(', ');
-        }
+        function closeProof() { if(document.activeElement) document.activeElement.blur(); MODALS.proof.hide(); }
         
-        function toast(msg) {
+        async function apiSubmit() {
+            const id = document.getElementById('p-tid').value;
+            notify('Submitting...', '🚀');
+            await supabase.from('tasks').update({status:'Review'}).eq('id',id);
+            closeProof();
+            loadPage(STATE.page, true);
+            notify('Submitted to Leader', '✅');
+        }
+
+        // APPROVE
+        async function apiApprove(id) {
+            notify('Approving...', '⚙️');
+            await supabase.from('tasks').update({status:'Done'}).eq('id',id);
+            // Add Momentum
+            await supabase.from('momentum_history').insert({ date: new Date().toISOString().split('T')[0], score: 5 });
+            loadPage(STATE.page, true);
+            notify('Approved & Momentum Up', '📈');
+        }
+
+        // CHECK IN
+        async function apiCheckIn() {
+            notify('Logging attendance...', '📍');
+            await supabase.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
+            loadPage('att', true);
+            notify('Checked In', '✅');
+        }
+
+        // NOTIFICATION UI
+        function notify(msg, icon) {
             document.getElementById('toast-msg').innerText = msg;
-            new bootstrap.Toast(document.getElementById('appToast')).show();
+            document.getElementById('toast-icon').innerText = icon || 'ℹ️';
+            const t = bootstrap.Toast.getOrCreateInstance(document.getElementById('liveToast'));
+            t.show();
         }
     </script>
 </body>
