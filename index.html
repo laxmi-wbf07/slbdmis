@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Mobile</title>
+    <title>SLBDMIS | Team Portal</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
@@ -12,15 +12,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === MOBILE OPTIMIZED THEME === */
+        /* === PROFESSIONAL DARK THEME === */
         :root { 
             --bg: #0d1117; 
-            --glass: rgba(22, 27, 34, 0.85); 
+            --glass: rgba(22, 27, 34, 0.95); 
             --glass-border: rgba(48, 54, 61, 0.7);
             --primary: #2f81f7; 
+            --success: #238636;
             --text-main: #f0f6fc;
             --text-sub: #8b949e;
-            --nav-height: 70px; /* Taller for mobile thumbs */
         }
 
         body { 
@@ -28,79 +28,83 @@
             color: var(--text-main); 
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            padding-bottom: 90px; /* Space for Bottom Nav */
+            /* Padding for Mobile Bottom Nav */
+            padding-bottom: 90px; 
         }
 
-        /* GLASS COMPONENTS */
+        /* RESET SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #010409; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+
+        /* GLASS CARD STYLING */
         .glass-panel {
             background: var(--glass);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px; /* softer corners for mobile */
-            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-            margin-bottom: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin-bottom: 12px;
+            overflow: hidden;
         }
 
-        /* RESPONSIVE LAYOUT ENGINE */
+        /* --- DESKTOP SIDEBAR --- */
         .sidebar {
             width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
             background: #010409; border-right: 1px solid #30363d;
             display: none; flex-direction: column; padding: 24px; z-index: 100;
         }
         
-        .main-content { 
-            margin: 0; 
-            padding: 20px; 
-            max-width: 100%; 
+        .nav-item-d {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            border-radius: 8px; color: var(--text-sub); cursor: pointer; margin-bottom: 4px; font-weight: 500; transition: 0.2s;
         }
+        .nav-item-d:hover, .nav-item-d.active { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item-d.active { border-left: 3px solid var(--primary); }
 
-        /* Desktop Overrides */
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(13, 17, 23, 0.98);
+            border-top: 1px solid #30363d;
+            z-index: 1000;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            display: flex; justify-content: space-around;
+        }
+        .mob-link {
+            padding: 12px 0; color: var(--text-sub); text-align: center; width: 100%;
+            transition: 0.2s; position: relative;
+        }
+        .mob-link.active { color: var(--primary); }
+        .mob-link i { display: block; margin: 0 auto 4px; }
+        .mob-link span { font-size: 10px; font-weight: 600; display: block; }
+
+        /* --- MAIN CONTENT LAYOUT --- */
+        .main-content { margin: 0; padding: 16px; max-width: 100%; }
+        
         @media (min-width: 992px) { 
             .sidebar { display: flex; } 
-            .main-content { margin-left: 260px; padding: 40px; max-width: 1200px; } 
+            .main-content { margin-left: 260px; padding: 40px; max-width: 1000px; margin-right: auto; } 
             body { padding-bottom: 0; } 
             .mobile-nav { display: none !important; } 
         }
 
-        /* Mobile Bottom Nav */
-        .mobile-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(13, 17, 23, 0.95);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid var(--glass-border);
-            z-index: 1000;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
-            height: auto;
-        }
-        .mob-link {
-            padding: 12px 0;
-            color: var(--text-sub);
-            transition: 0.2s;
-            position: relative;
-        }
-        .mob-link.active { color: var(--primary); }
-        .mob-link.active::after {
-            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-            width: 20px; height: 3px; background: var(--primary); border-radius: 0 0 4px 4px;
-        }
-
-        /* Drive Links Grid */
-        .drive-link {
+        /* DRIVE LINKS GRID */
+        .drive-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .drive-btn {
             display: flex; align-items: center; gap: 12px;
-            background: #21262d; padding: 12px; border-radius: 8px;
+            background: #21262d; padding: 16px; border-radius: 8px;
             text-decoration: none; color: white; border: 1px solid transparent;
-            margin-bottom: 8px;
         }
-        .drive-link:hover { border-color: var(--primary); background: #262c36; }
+        .drive-btn:hover { border-color: var(--primary); background: #262c36; }
 
-        /* STATUS BADGES */
-        .status-badge { font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 4px 8px; border-radius: 20px; }
-        .st-done { background: rgba(46, 160, 67, 0.15); color: #3fb950; }
-        .st-future { background: rgba(139, 148, 158, 0.15); color: #8b949e; } /* Gray for Not Yet */
-        .st-ongoing { background: rgba(210, 153, 34, 0.15); color: #d29922; }
+        /* BADGES */
+        .badge-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+        .bg-st-done { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
+        .bg-st-review { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
+        .bg-st-ongoing { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+        .bg-st-future { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
 
-        /* UTILS */
+        /* AVATAR */
         .user-avatar {
             width: 50px; height: 50px; border-radius: 50%; background: #21262d;
             display: grid; place-items: center; font-size: 24px; border: 2px solid transparent;
@@ -110,34 +114,24 @@
 </head>
 <body>
 
-    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 11000">
-        <div id="sysToast" class="toast text-bg-dark border-0 shadow-lg align-items-center">
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-center gap-3">
-                    <span id="toast-icon" class="fs-5"></span>
-                    <div><strong id="toast-title" class="d-block text-white"></strong><small id="toast-msg" class="text-secondary"></small></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3">
+    <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3" style="z-index: 2000; position: relative; background: var(--bg);">
         <div class="glass-panel p-4 w-100" style="max-width: 400px;">
             <div class="text-center mb-4">
-                <h3 class="fw-bold text-white">SLBD Portal</h3>
-                <p class="text-secondary small">Secure Team Access</p>
+                <div class="bg-primary bg-opacity-10 text-primary rounded p-3 d-inline-block mb-3"><i data-lucide="shield-check" size="32"></i></div>
+                <h4 class="fw-bold text-white">SLBDMIS Portal</h4>
+                <p class="text-secondary small">Identify yourself to proceed</p>
             </div>
-            <div id="auth-step-1">
-                <div class="d-grid grid-cols-2 gap-3 d-flex flex-wrap justify-content-center mb-4" id="auth-list"></div>
-            </div>
+            
+            <div id="auth-step-1" class="row g-2"></div>
+            
             <div id="auth-step-2" class="d-none">
                 <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded bg-dark border border-secondary border-opacity-25">
-                    <div id="sel-avatar" class="fs-4"></div>
-                    <div><div id="sel-name" class="fw-bold text-white"></div><div class="text-muted small">Enter PIN</div></div>
+                    <div id="sel-avatar" class="fs-2"></div>
+                    <div><div id="sel-name" class="fw-bold text-white"></div><div class="text-muted small">Enter Citizen ID (PIN)</div></div>
                 </div>
-                <input type="password" id="inp-cid" class="form-control bg-black text-white border-secondary mb-3 text-center fs-2 py-3" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="doLogin()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Login</button>
-                <button onclick="resetAuth()" class="btn btn-link w-100 mt-2 text-secondary">Back</button>
+                <input type="password" id="inp-cid" class="form-control bg-black text-white border-secondary mb-3 text-center fs-2 py-2" placeholder="••••" maxlength="11" inputmode="numeric">
+                <button onclick="doLogin()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Login Access</button>
+                <button onclick="resetAuth()" class="btn btn-link w-100 mt-2 text-secondary text-decoration-none">Cancel</button>
             </div>
         </div>
     </div>
@@ -149,8 +143,12 @@
                 <div class="bg-primary rounded p-1"><i data-lucide="layout" size="20"></i></div>
                 <span class="fw-bold">SLBDMIS</span>
             </div>
-            <div id="nav-links-desktop" class="d-flex flex-column gap-2 flex-grow-1"></div>
-            <div class="mt-auto">
+            <div id="nav-links-desktop" class="d-flex flex-column flex-grow-1"></div>
+            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
+                <div class="d-flex align-items-center gap-2 mb-3 px-2">
+                    <div id="u-av-side" class="fs-5"></div>
+                    <div><div id="u-name-side" class="small fw-bold text-white"></div><div class="text-secondary" style="font-size:10px">Online</div></div>
+                </div>
                 <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Sign Out</button>
             </div>
         </nav>
@@ -159,11 +157,11 @@
             <header class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 id="page-title" class="fw-bold text-white m-0">Dashboard</h4>
-                    <small class="text-secondary" id="u-greeting"></small>
+                    <small id="date-display" class="text-secondary"></small>
                 </div>
                 <div class="d-flex gap-2">
                     <button onclick="MODALS.noti.show(); markRead()" class="btn btn-dark border border-secondary border-opacity-25 position-relative">
-                        <i data-lucide="bell" size="18"></i>
+                        <i data-lucide="bell" size="20"></i>
                         <span id="bell-dot" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
                     </button>
                     <button onclick="openCreate()" class="btn btn-primary shadow-sm"><i data-lucide="plus" size="20"></i></button>
@@ -171,44 +169,41 @@
             </header>
             
             <div id="content-area"></div>
-            <div style="height: 60px;"></div> </main>
+        </main>
 
-        <nav class="mobile-nav">
-            <div class="row text-center m-0" id="nav-links-mobile"></div>
-        </nav>
+        <nav class="mobile-nav" id="nav-links-mobile"></nav>
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content glass-panel border-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="fw-bold text-white m-0">New Item</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body p-4">
-                    <div class="d-flex justify-content-between mb-4">
-                        <h5 class="fw-bold text-white m-0">New Item</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    
                     <div class="btn-group w-100 mb-3" role="group">
-                        <input type="radio" class="btn-check" name="ctype" id="ct-task" autocomplete="off" checked onclick="setMode('task')">
+                        <input type="radio" class="btn-check" name="ctype" id="ct-task" checked onclick="setMode('task')">
                         <label class="btn btn-outline-primary" for="ct-task">Task</label>
 
-                        <input type="radio" class="btn-check" name="ctype" id="ct-future" autocomplete="off" onclick="setMode('future')">
+                        <input type="radio" class="btn-check" name="ctype" id="ct-future" onclick="setMode('future')">
                         <label class="btn btn-outline-secondary" for="ct-future">Not Yet</label>
                         
-                        <input type="radio" class="btn-check" name="ctype" id="ct-dec" autocomplete="off" onclick="setMode('decision')">
+                        <input type="radio" class="btn-check" name="ctype" id="ct-dec" onclick="setMode('decision')">
                         <label class="btn btn-outline-warning" for="ct-dec">Decision</label>
                     </div>
 
-                    <input type="text" id="n-title" class="form-control bg-black text-white mb-3 py-3" placeholder="Title / Subject">
-                    <textarea id="n-desc" class="form-control bg-black text-white mb-3" rows="3" placeholder="Details..."></textarea>
+                    <input type="text" id="n-title" class="form-control bg-black text-white mb-3 py-3" placeholder="Task Title">
+                    <textarea id="n-desc" class="form-control bg-black text-white mb-3" rows="3" placeholder="Description..."></textarea>
                     
                     <div id="div-task-opts">
                         <label class="text-secondary small mb-1">Due Date</label>
                         <input type="date" id="n-date" class="form-control bg-black text-white mb-3">
-                        <label class="text-secondary small mb-1">Assign Members</label>
+                        <label class="text-secondary small mb-1">Assign To</label>
                         <div id="n-members" class="d-flex flex-column gap-2 mb-3"></div>
                     </div>
                     
-                    <button onclick="apiCreate()" class="btn btn-primary w-100 fw-bold py-3 rounded-pill">Save</button>
+                    <button onclick="apiCreate()" class="btn btn-primary w-100 fw-bold py-3 rounded-pill">Save Record</button>
                 </div>
             </div>
         </div>
@@ -218,31 +213,33 @@
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content glass-panel border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold text-white">Upload Proof</h5>
+                    <h5 class="modal-title fw-bold text-white">Proof of Work</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-secondary mb-3">Before marking this as done, please upload your files to the correct folder:</p>
+                    <div class="alert alert-warning bg-opacity-10 border-0 text-warning small mb-3">
+                        <i data-lucide="alert-triangle" size="14" class="me-1"></i> Files must be uploaded to Drive before completing.
+                    </div>
                     
-                    <div class="d-flex flex-column gap-2 mb-4">
-                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-link">
+                    <div class="drive-grid mb-4">
+                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-btn">
                             <i data-lucide="folder" class="text-warning"></i> <span>Admin & Finance</span>
                         </a>
-                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-link">
+                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-btn">
                             <i data-lucide="cpu" class="text-info"></i> <span>Machine Unit</span>
                         </a>
-                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-link">
+                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-btn">
                             <i data-lucide="image" class="text-danger"></i> <span>Pictures</span>
                         </a>
-                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-link">
+                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-btn">
                             <i data-lucide="presentation" class="text-primary"></i> <span>Proposals & PPT</span>
                         </a>
                     </div>
 
                     <div class="form-check bg-dark p-3 rounded border border-secondary border-opacity-25 mb-3">
                         <input class="form-check-input" type="checkbox" id="chk-upload" onchange="toggleDoneBtn()">
-                        <label class="form-check-label text-white" for="chk-upload">
-                            I have uploaded the necessary files.
+                        <label class="form-check-label text-white small" for="chk-upload">
+                            I certify that I have uploaded the necessary files to the links above.
                         </label>
                     </div>
 
@@ -254,16 +251,16 @@
 
     <div class="modal fade" id="modArchiveView" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content glass-panel border-0 rounded-0">
+            <div class="modal-content glass-panel border-0 rounded-0" style="background: var(--bg);">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
                     <h5 class="modal-title text-white" id="arc-title">Archive</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-3">
-                    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
-                        <button onclick="renderArchiveTab('tasks')" class="btn btn-sm btn-outline-light active" id="at-tasks">Tasks</button>
-                        <button onclick="renderArchiveTab('decisions')" class="btn btn-sm btn-outline-light" id="at-decisions">Decisions</button>
-                        <button onclick="renderArchiveTab('attendance')" class="btn btn-sm btn-outline-light" id="at-attendance">Attendance</button>
+                    <div class="d-flex gap-2 mb-4">
+                        <button onclick="renderArchiveTab('tasks')" class="btn btn-sm btn-outline-light active flex-fill" id="at-tasks">Tasks</button>
+                        <button onclick="renderArchiveTab('decisions')" class="btn btn-sm btn-outline-light flex-fill" id="at-decisions">Decisions</button>
+                        <button onclick="renderArchiveTab('attendance')" class="btn btn-sm btn-outline-light flex-fill" id="at-attendance">Attendance</button>
                     </div>
                     <div id="archive-content"></div>
                 </div>
@@ -285,12 +282,24 @@
         </div>
     </div>
 
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 11000">
+        <div id="sysToast" class="toast text-bg-dark border-0 shadow-lg align-items-center">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-3">
+                    <span id="toast-icon" class="fs-5"></span>
+                    <div><strong id="toast-title" class="d-block text-white"></strong><small id="toast-msg" class="text-secondary"></small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- CONFIGURATION ---
+        // --- SUPABASE CONFIG ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const db = window.supabase.createClient(SB_URL, SB_KEY);
         
+        // --- TEAM DATA ---
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel",    avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
@@ -304,11 +313,13 @@
         // --- INIT ---
         window.onload = () => {
             lucide.createIcons();
+            // Initialize Bootstrap Modals
             MODALS.create = new bootstrap.Modal('#modCreate');
             MODALS.upload = new bootstrap.Modal('#modUpload');
             MODALS.archive = new bootstrap.Modal('#modArchiveView');
             MODALS.noti = new bootstrap.Modal('#modNoti');
 
+            // Check Session
             const uid = localStorage.getItem('slbd_v2_uid');
             if(uid) { 
                 STATE.user = TEAM.find(u => u.id == uid); 
@@ -320,12 +331,16 @@
         // --- AUTH ---
         function renderAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
-            document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="d-flex flex-column align-items-center gap-2 cursor-pointer p-3 rounded hover-bg-dark" onclick="pickUser(${u.id})">
-                    <div class="user-avatar shadow" id="av-${u.id}">${u.avatar}</div>
-                    <span class="small fw-bold text-secondary">${u.name.split(' ')[0]}</span>
+            const list = document.getElementById('auth-step-1');
+            list.innerHTML = TEAM.map(u => `
+                <div class="col-6">
+                    <div class="glass-panel p-3 text-center cursor-pointer" onclick="pickUser(${u.id})">
+                        <div class="fs-1 mb-2">${u.avatar}</div>
+                        <div class="fw-bold text-white small">${u.name.split(' ')[0]}</div>
+                    </div>
                 </div>`).join('');
         }
+
         function pickUser(id) {
             STATE.selUser = TEAM.find(u => u.id === id);
             document.getElementById('auth-step-1').classList.add('d-none');
@@ -349,48 +364,50 @@
         }
         function logout() { localStorage.removeItem('slbd_v2_uid'); location.reload(); }
 
-        // --- NAVIGATION & LAYOUT ---
+        // --- NAVIGATION ---
         function startApp() {
             document.getElementById('view-app').classList.remove('d-none');
-            document.getElementById('u-greeting').innerText = `Hello, ${STATE.user.name.split(' ')[0]}`;
+            document.getElementById('u-av-side').innerHTML = STATE.user.avatar;
+            document.getElementById('u-name-side').innerText = STATE.user.name;
+            document.getElementById('date-display').innerText = new Date().toDateString();
 
             const pages = [
                 {id:'home', t:'Home', i:'layout-dashboard'},
                 {id:'task', t:'Tasks', i:'layers'},
-                {id:'future', t:'Not Yet', i:'hourglass'}, // NEW TAB
+                {id:'future', t:'Not Yet', i:'hourglass'},
                 {id:'dec', t:'Decisions', i:'scroll-text'},
-                {id:'att', t:'Attend', i:'clock'},
+                {id:'att', t:'Attendance', i:'clock'},
                 {id:'arc', t:'Records', i:'archive'}
             ];
 
-            // Render Desktop Sidebar
+            // Render Desktop Nav
             document.getElementById('nav-links-desktop').innerHTML = pages.map(p => `
-                <div onclick="nav('${p.id}')" class="d-flex align-items-center gap-3 p-3 rounded cursor-pointer text-secondary hover-white">
-                    <i data-lucide="${p.i}"></i> <span class="fw-bold">${p.t}</span>
-                </div>
-            `).join('');
+                <div onclick="nav('${p.id}')" class="nav-item-d ${STATE.page===p.id?'active':''}" id="nav-d-${p.id}">
+                    <i data-lucide="${p.i}" size="18"></i> <span>${p.t}</span>
+                </div>`).join('');
 
-            // Render Mobile Bottom Nav
+            // Render Mobile Nav
             document.getElementById('nav-links-mobile').innerHTML = pages.map(p => `
-                <div class="col mob-link ${STATE.page===p.id?'active':''}" onclick="nav('${p.id}')">
+                <div class="mob-link ${STATE.page===p.id?'active':''}" onclick="nav('${p.id}')" id="nav-m-${p.id}">
                     <i data-lucide="${p.i}" size="20"></i>
-                    <div style="font-size:10px; margin-top:2px;">${p.t}</div>
-                </div>
-            `).join('');
+                    <span>${p.t}</span>
+                </div>`).join('');
 
             nav('home');
-            setInterval(() => { if(STATE.page!=='arc') refreshData(true); }, 3000);
+            // Poll for notifications
+            setInterval(() => { checkNotis(); if(STATE.page!=='arc') refreshData(true); }, 3000);
         }
 
         function nav(pg) {
             STATE.page = pg;
             
-            // Update Mobile Nav Active State
-            document.querySelectorAll('.mob-link').forEach(el => el.classList.remove('active'));
-            const activeIdx = ['home','task','future','dec','att','arc'].indexOf(pg);
-            if(activeIdx > -1) document.querySelectorAll('.mob-link')[activeIdx].classList.add('active');
+            // Highlight Active
+            document.querySelectorAll('.nav-item-d').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.mob-link').forEach(e=>e.classList.remove('active'));
+            document.getElementById(`nav-d-${pg}`).classList.add('active');
+            document.getElementById(`nav-m-${pg}`).classList.add('active');
 
-            const titles = {home:'My Workspace', task:'Active Tasks', future:'Future Opportunities', dec:'Decision Log', att:'Attendance', arc:'Digital Records'};
+            const titles = {home:'My Workspace', task:'Active Tasks', future:'Future Opportunities', dec:'Decision Log', att:'Attendance Register', arc:'Digital Archives'};
             document.getElementById('page-title').innerText = titles[pg];
             
             refreshData(false);
@@ -400,44 +417,50 @@
             const box = document.getElementById('content-area');
             if(!silent && STATE.page !== 'arc') box.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
             
-            // Date Filter: Current Month 1st
+            // Get Month Start Date (for Active view)
             const now = new Date();
             const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 
             if(STATE.page === 'home') renderHome(box, startMonth);
             if(STATE.page === 'task') renderTasks(box); 
-            if(STATE.page === 'future') renderFuture(box); // NEW
+            if(STATE.page === 'future') renderFuture(box);
             if(STATE.page === 'att') renderAtt(box, startMonth);
             if(STATE.page === 'dec') renderDec(box, startMonth);
             if(STATE.page === 'arc') renderArchives(box);
             lucide.createIcons();
         }
 
-        // --- VIEW RENDERERS ---
+        // --- RENDERERS ---
 
         async function renderHome(c, dateFilter) {
-            const { data: tasks } = await db.from('tasks').select('*').neq('status','Done').neq('status','Future').order('created_at',{ascending:false});
-            
+            // Fetch relevant tasks
+            const { data: tasks } = await db.from('tasks').select('*').neq('status','Done').neq('status','Future');
             const myPending = tasks.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
             const review = tasks.filter(t => t.status === 'Review');
 
             c.innerHTML = `
                 ${STATE.user.role === 'LEADER' && review.length ? `
-                    <div class="alert alert-warning border-0 shadow-sm d-flex justify-content-between align-items-center mb-3">
-                        <span class="small fw-bold">⚠️ ${review.length} items need review</span>
-                        <button class="btn btn-sm btn-dark" onclick="nav('task')">Go</button>
+                    <div class="glass-panel p-3 border-start border-4 border-info d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold text-white"><i data-lucide="alert-circle" class="me-2 inline"></i> ${review.length} items need review</span>
+                        <button class="btn btn-sm btn-info fw-bold" onclick="nav('task')">Go</button>
                     </div>` : ''}
 
-                <div class="glass-panel p-3">
-                    <h6 class="text-white mb-3 fw-bold border-bottom border-secondary border-opacity-25 pb-2">My Priority</h6>
-                    ${myPending.length === 0 ? '<div class="text-center text-muted py-3 small">Nothing assigned to you.</div>' : 
-                    myPending.map(t => `
-                        <div class="bg-dark p-3 rounded mb-2 border border-secondary border-opacity-10">
-                            <div class="fw-bold text-white mb-1">${t.task_title}</div>
-                            <div class="small text-secondary mb-2">${t.description}</div>
-                            <button class="btn btn-sm btn-outline-primary w-100" onclick="nav('task')">View Task</button>
-                        </div>
-                    `).join('')}
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-secondary small fw-bold mb-3 text-uppercase">My Active Tasks</h6>
+                        ${myPending.length === 0 ? '<div class="glass-panel p-4 text-center text-muted">No active tasks assigned.</div>' : 
+                        myPending.map(t => `
+                            <div class="glass-panel p-3 mb-2">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <div class="fw-bold text-white mb-1">${t.task_title}</div>
+                                        <div class="small text-secondary">${t.description}</div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="nav('task')"><i data-lucide="arrow-right" size="16"></i></button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
             `;
         }
@@ -446,49 +469,63 @@
             const now = new Date();
             const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
             
-            // Fetch everything except Future
+            // Get Tasks (Exclude Future)
             const { data: all } = await db.from('tasks').select('*').neq('status','Future').order('created_at', {ascending:false});
             
-            // Filter: Show all Active. Show Done ONLY if updated this month.
+            // Clean view: Show Active OR (Done but only from this month)
             const display = all.filter(t => t.status !== 'Done' || t.updated_at >= startMonth);
 
             c.innerHTML = display.length ? display.map(t => `
                 <div class="glass-panel p-3 border-start border-4 ${t.status==='Done'?'border-success':(t.status==='Review'?'border-info':'border-warning')}">
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="status-badge ${t.status==='Done'?'st-done':(t.status==='Review'?'st-review':'st-ongoing')}">${t.status}</span>
+                        <span class="badge-status ${t.status==='Done'?'bg-st-done':(t.status==='Review'?'bg-st-review':'bg-st-ongoing')}">${t.status}</span>
                         <span class="small text-secondary">${new Date(t.created_at).toLocaleDateString().slice(0,5)}</span>
                     </div>
                     <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
-                    <p class="small text-secondary mb-2">${t.description}</p>
-                    ${t.due_date ? `<div class="small text-danger mb-2"><i data-lucide="calendar" size="12"></i> Due: ${t.due_date}</div>` : ''}
+                    <p class="small text-secondary mb-3">${t.description}</p>
                     
                     ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? 
-                        `<button onclick="startDoneWorkflow(${t.id})" class="btn btn-primary w-100 mt-2 btn-sm fw-bold">Mark Complete</button>` : ''}
+                        `<button onclick="startDoneWorkflow(${t.id})" class="btn btn-primary w-100 btn-sm fw-bold">Mark Complete</button>` : ''}
                     
                     ${STATE.user.role === 'LEADER' && t.status === 'Review' ? 
-                        `<button onclick="apiApprove(${t.id})" class="btn btn-success w-100 mt-2 btn-sm fw-bold">Approve</button>` : ''}
+                        `<button onclick="apiApprove(${t.id})" class="btn btn-success w-100 btn-sm fw-bold">Approve</button>` : ''}
                 </div>
-            `).join('') : '<div class="text-center text-muted py-5">No active tasks.</div>';
+            `).join('') : '<div class="text-center text-muted py-5">No active tasks found.</div>';
         }
 
         async function renderFuture(c) {
             const { data } = await db.from('tasks').select('*').eq('status','Future').order('created_at', {ascending:false});
-            
             c.innerHTML = `
                 <div class="alert alert-secondary bg-opacity-10 border-0 small text-secondary mb-3">
-                    Ideas and tasks for later. Not active yet.
+                    <i data-lucide="info" size="14" class="me-1"></i> These items are on hold for future execution.
                 </div>
                 ${data.length ? data.map(t => `
                     <div class="glass-panel p-3">
                         <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
                         <p class="small text-secondary mb-2">${t.description}</p>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <span class="status-badge st-future">Not Yet</span>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge-status bg-st-future">Not Yet</span>
                             ${STATE.user.role === 'LEADER' ? `<button onclick="apiActivate(${t.id})" class="btn btn-sm btn-outline-success">Activate</button>` : ''}
                         </div>
                     </div>
                 `).join('') : '<div class="text-center text-muted py-5">No future ideas logged.</div>'}
             `;
+        }
+
+        async function renderDec(c, dateFilter) {
+            const { data } = await db.from('decisions').select('*').gte('created_at', dateFilter).order('created_at', {ascending:false});
+            c.innerHTML = data.length ? data.map(d => `
+                <div class="glass-panel p-3 mb-3">
+                    <div class="d-flex gap-3">
+                        <i data-lucide="quote" class="text-warning flex-shrink-0" size="20"></i>
+                        <div>
+                            <h6 class="fw-bold text-white mb-1">${d.subject}</h6>
+                            <p class="text-secondary mb-2 small">${d.details}</p>
+                            <div class="small text-muted font-monospace" style="font-size:10px">${new Date(d.created_at).toDateString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="text-center text-muted py-5">No decisions recorded this month.</div>';
         }
 
         async function renderAtt(c, dateFilter) {
@@ -498,13 +535,13 @@
 
             c.innerHTML = `
                 <div class="glass-panel p-4 text-center mb-4">
-                    <h1 class="fw-bold text-white mb-0">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
-                    <p class="text-secondary mb-3 small">${new Date().toDateString()}</p>
+                    <h1 class="fw-bold text-white mb-0 display-4">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
+                    <p class="text-secondary mb-4 small">${new Date().toDateString()}</p>
                     ${checked ? '<button class="btn btn-success w-100 py-3 fw-bold rounded-pill" disabled>Checked In</button>' 
                               : '<button onclick="apiCheckIn()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-lg">Tap to Check In</button>'}
                 </div>
                 <div class="glass-panel">
-                    <div class="p-3 border-bottom border-secondary border-opacity-25 fw-bold small text-secondary">Recent Logs</div>
+                    <div class="p-3 border-bottom border-secondary border-opacity-25 fw-bold small text-secondary">Recent Logs (This Month)</div>
                     ${logs.slice(0,10).map(l => {
                         const u = TEAM.find(x=>x.id==l.user_id);
                         return `<div class="d-flex justify-content-between p-3 border-bottom border-secondary border-opacity-10">
@@ -516,37 +553,85 @@
             `;
         }
 
-        async function renderDec(c, dateFilter) {
-            const { data } = await db.from('decisions').select('*').gte('created_at', dateFilter).order('created_at', {ascending:false});
-            c.innerHTML = data.length ? data.map(d => `
-                <div class="glass-panel p-3 mb-3">
-                    <div class="d-flex gap-3">
-                        <i data-lucide="quote" class="text-warning flex-shrink-0"></i>
-                        <div>
-                            <h6 class="fw-bold text-white mb-1">${d.subject}</h6>
-                            <p class="text-secondary mb-2 small">${d.details}</p>
-                            <div class="small text-muted font-monospace" style="font-size:10px">${new Date(d.created_at).toDateString()}</div>
+        // --- ARCHIVE LOGIC ---
+        async function renderArchives(c) {
+            // Find existing data ranges
+            const { data: tasks } = await db.from('tasks').select('updated_at').eq('status','Done');
+            
+            // Build Month List
+            const months = new Set();
+            (tasks||[]).forEach(x => months.add(x.updated_at.slice(0, 7))); // "YYYY-MM"
+            const sorted = Array.from(months).sort().reverse();
+
+            if(sorted.length === 0) {
+                 // Fallback if no data
+                 c.innerHTML = '<div class="text-center py-5 text-muted">No historical records found yet. Complete tasks to see them here.</div>';
+                 return;
+            }
+
+            c.innerHTML = `<div class="row g-3">
+                ${sorted.map(ym => `
+                    <div class="col-6 col-md-4">
+                        <div class="glass-panel p-3 text-center cursor-pointer hover-zoom" onclick="openArchiveFolder('${ym}')">
+                            <i data-lucide="folder-closed" class="text-warning mb-2" size="32"></i>
+                            <div class="fw-bold text-white">${new Date(ym+'-01').toLocaleString('default',{month:'short', year:'numeric'})}</div>
+                            <div class="small text-secondary">Open Folder</div>
                         </div>
-                    </div>
-                </div>
-            `).join('') : '<div class="text-center text-muted py-5">No decisions this month.</div>';
+                    </div>`).join('')}
+            </div>`;
+            lucide.createIcons();
+        }
+
+        async function openArchiveFolder(ym) {
+            const start = `${ym}-01`; const end = `${ym}-31`;
+            const [t, d, a] = await Promise.all([
+                db.from('tasks').select('*').eq('status','Done').gte('updated_at', start).lte('updated_at', end),
+                db.from('decisions').select('*').gte('created_at', start).lte('created_at', end),
+                db.from('attendance').select('*').gte('date', start).lte('date', end)
+            ]);
+            STATE.archiveData = { tasks: t.data, decisions: d.data, attendance: a.data };
+            
+            document.getElementById('arc-title').innerText = `Archive: ${ym}`;
+            MODALS.archive.show();
+            renderArchiveTab('tasks');
+        }
+
+        function renderArchiveTab(tab) {
+            document.querySelectorAll('#modArchiveView .btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`at-${tab}`).classList.add('active');
+            const box = document.getElementById('archive-content');
+            const d = STATE.archiveData;
+
+            if(tab === 'tasks') {
+                box.innerHTML = d.tasks.length ? d.tasks.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small d-flex justify-content-between"><span>${x.task_title}</span><span>${new Date(x.updated_at).getDate()}th</span></div>`).join('') : '<div class="text-muted p-3">No tasks.</div>';
+            } else if(tab === 'decisions') {
+                box.innerHTML = d.decisions.length ? d.decisions.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small fw-bold">${x.subject}</div>`).join('') : '<div class="text-muted p-3">No decisions.</div>';
+            } else {
+                box.innerHTML = d.attendance.length ? d.attendance.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${TEAM.find(u=>u.id==x.user_id)?.name.split(' ')[0]} - ${x.date}</div>`).join('') : '<div class="text-muted p-3">No logs.</div>';
+            }
         }
 
         // --- ACTIONS ---
-
         function setMode(m) {
             STATE.mode = m;
-            document.getElementById('div-task-opts').classList.toggle('d-none', m==='decision');
-            document.getElementById('n-title').placeholder = m==='decision' ? 'Decision Subject' : 'Task Title';
+            const isTask = m === 'task' || m === 'future';
+            document.getElementById('div-task-opts').classList.toggle('d-none', !isTask);
+            document.getElementById('n-title').placeholder = m === 'decision' ? 'Subject' : 'Title';
             
-            if(m !== 'decision') {
+            if(isTask) {
                 document.getElementById('n-members').innerHTML = TEAM.map(u => `
                 <label class="d-flex align-items-center p-2 rounded bg-dark border border-secondary border-opacity-10">
                     <input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}" style="transform:scale(1.2)"> ${u.avatar} ${u.name}
                 </label>`).join('');
             }
         }
-        function openCreate() { setMode('task'); document.getElementById('ct-task').click(); MODALS.create.show(); }
+        function openCreate() { 
+            setMode('task'); 
+            document.getElementById('ct-task').click(); 
+            document.getElementById('n-title').value=''; 
+            document.getElementById('n-desc').value=''; 
+            MODALS.create.show(); 
+        }
         
         async function apiCreate() {
             const t = document.getElementById('n-title').value;
@@ -556,19 +641,14 @@
             if(STATE.mode === 'decision') {
                 await db.from('decisions').insert({subject:t, details:desc});
             } else {
-                // Task or Future
                 const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
-                let status = 'Pending';
-                if(STATE.mode === 'future') status = 'Future';
-                else if(STATE.user.role === 'LEADER') status = 'Ongoing';
+                // If 'future' mode -> Status Future. If Leader -> Ongoing. Else -> Pending.
+                let status = STATE.mode === 'future' ? 'Future' : (STATE.user.role === 'LEADER' ? 'Ongoing' : 'Pending');
 
                 await db.from('tasks').insert({
-                    task_title: t, 
-                    description: desc, 
+                    task_title: t, description: desc, 
                     due_date: document.getElementById('n-date').value || null, 
-                    creator_id: STATE.user.id, 
-                    tagged_members: tags, 
-                    status: status
+                    creator_id: STATE.user.id, tagged_members: tags, status: status
                 });
             }
             toast('Success','Saved','✅');
@@ -599,65 +679,25 @@
         async function apiActivate(id) { await db.from('tasks').update({status:'Pending'}).eq('id',id); refreshData(false); toast('Activated','Moved to active tasks','⚡'); }
         async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); refreshData(false); toast('Checked In','Success','✅'); }
         
+        async function checkNotis() {
+            if(!STATE.user) return;
+            const { data } = await db.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
+            const dot = document.getElementById('bell-dot');
+            if(data?.length) { 
+                dot.classList.remove('d-none'); 
+                document.getElementById('noti-list').innerHTML = data.map(n=>`<div class="list-group-item bg-dark text-white p-3"><small>${n.message}</small></div>`).join(''); 
+            } else { 
+                dot.classList.add('d-none'); 
+                document.getElementById('noti-list').innerHTML = '<div class="p-4 text-center small text-muted">No new alerts</div>'; 
+            }
+        }
         async function markRead() { 
             await db.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id); 
             document.getElementById('bell-dot').classList.add('d-none');
         }
 
-        // --- ARCHIVE LOGIC (Simplified for Mobile) ---
-        async function renderArchives(c) {
-            // Group by Month
-            const { data } = await db.from('tasks').select('updated_at').eq('status','Done');
-            // Simplified: Just show month folders
-            c.innerHTML = `
-                <div class="row g-2">
-                    <div class="col-6">
-                        <div class="glass-panel p-3 text-center" onclick="openArchiveFolder('2026-02')">
-                            <i data-lucide="folder" class="text-warning mb-2"></i>
-                            <div class="fw-bold text-white">Feb 2026</div>
-                        </div>
-                    </div>
-                     <div class="col-6">
-                        <div class="glass-panel p-3 text-center" onclick="openArchiveFolder('2026-01')">
-                            <i data-lucide="folder" class="text-warning mb-2"></i>
-                            <div class="fw-bold text-white">Jan 2026</div>
-                        </div>
-                    </div>
-                </div>`;
-            lucide.createIcons();
-        }
-
-        async function openArchiveFolder(ym) {
-            const start = `${ym}-01`; const end = `${ym}-31`;
-            const [t, d, a] = await Promise.all([
-                db.from('tasks').select('*').eq('status','Done').gte('updated_at', start).lte('updated_at', end),
-                db.from('decisions').select('*').gte('created_at', start).lte('created_at', end),
-                db.from('attendance').select('*').gte('date', start).lte('date', end)
-            ]);
-            STATE.archiveData = { tasks: t.data, decisions: d.data, attendance: a.data };
-            MODALS.archive.show();
-            renderArchiveTab('tasks');
-        }
-
-        function renderArchiveTab(tab) {
-            document.querySelectorAll('#modArchiveView .btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`at-${tab}`).classList.add('active');
-            const box = document.getElementById('archive-content');
-            const d = STATE.archiveData;
-
-            if(tab === 'tasks') {
-                box.innerHTML = d.tasks.length ? d.tasks.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${x.task_title}</div>`).join('') : 'No records';
-            } else if(tab === 'decisions') {
-                box.innerHTML = d.decisions.length ? d.decisions.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${x.subject}</div>`).join('') : 'No records';
-            } else {
-                box.innerHTML = d.attendance.length ? d.attendance.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${TEAM.find(u=>u.id==x.user_id)?.name} - ${x.date}</div>`).join('') : 'No records';
-            }
-        }
-
         function toast(t,m,i) { 
-            document.getElementById('toast-title').innerText=t; 
-            document.getElementById('toast-msg').innerText=m; 
-            document.getElementById('toast-icon').innerText=i||'🔔'; 
+            document.getElementById('toast-title').innerText=t; document.getElementById('toast-msg').innerText=m; document.getElementById('toast-icon').innerText=i||'🔔'; 
             bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); 
         }
     </script>
