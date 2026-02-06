@@ -12,7 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === THEME VARIABLES === */
         :root { 
             --bg-body: #0d1117; 
             --bg-card: #161b22; 
@@ -21,6 +20,7 @@
             --primary: #2f81f7; 
             --success: #238636;
             --warning: #d29922;
+            --danger: #da3633;
             --text-main: #f0f6fc;
             --text-sub: #8b949e;
             --sidebar-w: 260px;
@@ -39,32 +39,35 @@
             padding-bottom: 90px;
         }
 
-        /* === UTILITIES === */
-        .glass { background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        .glass { 
+            background: rgba(22, 27, 34, 0.95); 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px); 
+        }
+        
         .card-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
+        
         .card-box:active { transform: scale(0.99); }
         .text-xs { font-size: 0.75rem; }
         .fw-bold { font-weight: 600 !important; }
         .cursor-pointer { cursor: pointer; }
         .hover-bg:hover { background-color: var(--bg-subtle) !important; }
         
-        /* === LAYOUT SYSTEM === */
-        
-        /* 1. LOGIN SCREEN */
+        /* AUTH SCREEN */
         #view-auth {
-            position: fixed;
+            position: fixed !important;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
             background: var(--bg-body);
             z-index: 10000;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -77,7 +80,7 @@
             pointer-events: none !important;
         }
         
-        /* 2. APP VIEW */
+        /* APP VIEW */
         #view-app {
             display: none;
             min-height: 100vh;
@@ -87,7 +90,7 @@
             display: block !important;
         }
         
-        /* 3. SIDEBAR (Desktop Only) */
+        /* SIDEBAR */
         .sidebar {
             position: fixed;
             top: 0;
@@ -102,7 +105,7 @@
             z-index: 1000;
         }
 
-        /* 4. BOTTOM NAV (Mobile Only) */
+        /* BOTTOM NAV */
         .mobile-nav {
             position: fixed;
             bottom: 0;
@@ -118,14 +121,14 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* 5. MAIN CONTENT WRAPPER */
+        /* MAIN CONTENT */
         .main-wrapper {
             padding: 20px;
             max-width: 100%;
             padding-top: 80px;
         }
 
-        /* 6. MOBILE HEADER */
+        /* MOBILE HEADER */
         .mobile-header {
             position: fixed;
             top: 0;
@@ -135,7 +138,7 @@
             height: 60px;
         }
 
-        /* RESPONSIVE SWITCHER */
+        /* RESPONSIVE */
         @media (min-width: 992px) {
             .sidebar { display: flex; }
             .mobile-nav { display: none !important; }
@@ -149,7 +152,7 @@
             }
         }
 
-        /* COMPONENT STYLES */
+        /* NAV ITEMS */
         .nav-item-d {
             display: flex;
             align-items: center;
@@ -185,6 +188,7 @@
             color: var(--primary); 
         }
         
+        /* AVATAR */
         .avatar {
             width: 42px;
             height: 42px;
@@ -195,28 +199,51 @@
             font-size: 20px;
             border: 2px solid transparent;
         }
-        .avatar.selected { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 12px rgba(47,129,247,0.3); 
-        }
-
+        
+        /* STATUS BADGES */
         .badge-st { 
             padding: 4px 8px; 
             border-radius: 20px; 
             font-size: 10px; 
             font-weight: 700; 
-            text-transform: uppercase; 
+            text-transform: uppercase;
+            display: inline-block;
         }
         .st-done { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
-        .st-wait { background: rgba(210, 153, 34, 0.2); color: #d29922; }
-        .st-rev { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
-        .st-fut { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
-        .st-pending { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
         .st-ongoing { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+        .st-review { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
+        .st-pending { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+        .st-future { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+
+        /* TASK CARDS */
+        .task-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* LOADING SPINNER */
+        .spinner-border {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        /* NOTIFICATION DOT */
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--danger);
+        }
     </style>
 </head>
 <body>
 
+    <!-- ============================================= -->
+    <!-- LOGIN SCREEN -->
+    <!-- ============================================= -->
     <div id="view-auth">
         <div class="card-box p-4 w-100" style="max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
             <div class="text-center mb-4">
@@ -234,18 +261,22 @@
                     <div id="auth-av" class="avatar fs-4"></div>
                     <div>
                         <div id="auth-name" class="fw-bold text-white"></div>
-                        <div class="text-sub text-xs">Enter ID/PIN</div>
+                        <div class="text-sub text-xs">Enter CID/PIN</div>
                     </div>
                 </div>
-                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3" placeholder="••••" maxlength="11" inputmode="numeric">
+                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3" placeholder="••••••••••" maxlength="11" inputmode="numeric">
                 <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Login Access</button>
                 <button onclick="authReset()" class="btn btn-link text-secondary w-100 text-decoration-none mt-2">Go Back</button>
             </div>
         </div>
     </div>
 
+    <!-- ============================================= -->
+    <!-- MAIN APPLICATION -->
+    <!-- ============================================= -->
     <div id="view-app">
         
+        <!-- MOBILE HEADER -->
         <div class="mobile-header glass border-bottom border-secondary border-opacity-25 px-3 py-3 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
                 <div id="mob-u-av" class="avatar" style="width:32px; height:32px; font-size:16px;"></div>
@@ -254,7 +285,7 @@
             <div class="d-flex gap-2">
                 <button onclick="checkNoti(true)" class="btn btn-dark btn-sm border border-secondary border-opacity-25 position-relative">
                     <i data-lucide="bell" style="width: 18px; height: 18px;"></i>
-                    <span id="badge-bell-m" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle" style="display: none; width: 8px; height: 8px;"></span>
+                    <span id="badge-bell-m" class="position-absolute top-0 end-0 notification-dot" style="display: none;"></span>
                 </button>
                 <button onclick="openCreate()" class="btn btn-primary btn-sm shadow-sm">
                     <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
@@ -262,6 +293,7 @@
             </div>
         </div>
 
+        <!-- DESKTOP SIDEBAR -->
         <nav class="sidebar">
             <div class="d-flex align-items-center gap-3 mb-5 px-2 text-white">
                 <div class="bg-primary rounded p-1">
@@ -282,13 +314,14 @@
             </div>
         </nav>
 
+        <!-- MAIN CONTENT -->
         <main class="main-wrapper">
             <div class="d-none d-lg-flex justify-content-between align-items-center mb-4">
                 <h3 id="desk-pg-title" class="fw-bold m-0">Dashboard</h3>
                 <div class="d-flex gap-2">
                     <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 position-relative">
                         <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
-                        <span id="badge-bell-d" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle" style="display: none; width: 8px; height: 8px;"></span>
+                        <span id="badge-bell-d" class="position-absolute top-0 end-0 notification-dot" style="display: none;"></span>
                     </button>
                     <button onclick="openCreate()" class="btn btn-primary px-4 fw-bold shadow">
                         <i data-lucide="plus" style="width: 18px; height: 18px;" class="me-2"></i>New Item
@@ -298,9 +331,15 @@
             <div id="content-box"></div>
         </main>
 
+        <!-- MOBILE BOTTOM NAV -->
         <nav class="mobile-nav" id="nav-m-links"></nav>
     </div>
 
+    <!-- ============================================= -->
+    <!-- MODALS -->
+    <!-- ============================================= -->
+
+    <!-- CREATE MODAL -->
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content card-box border-0">
@@ -331,6 +370,7 @@
         </div>
     </div>
 
+    <!-- PROOF OF WORK MODAL -->
     <div class="modal fade" id="modProof" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content card-box border-0">
@@ -339,6 +379,10 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
+                    <div class="alert alert-info border-0 bg-primary bg-opacity-10 text-primary mb-4">
+                        <i data-lucide="info" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle;" class="me-2"></i>
+                        Upload your completed work to the appropriate folder before marking as complete.
+                    </div>
                     <div class="d-grid gap-2 mb-4">
                         <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
                             <i data-lucide="folder" class="me-2 text-warning" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle;"></i> Admin & Finance
@@ -355,7 +399,7 @@
                     </div>
                     <div class="form-check bg-black p-3 rounded border border-secondary border-opacity-25">
                         <input class="form-check-input" type="checkbox" id="chk-done" onchange="toggleFin()">
-                        <label class="form-check-label text-white small">I have uploaded the files.</label>
+                        <label class="form-check-label text-white small">I have uploaded the files to the appropriate folder.</label>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3">
@@ -365,11 +409,12 @@
         </div>
     </div>
 
+    <!-- NOTIFICATIONS MODAL -->
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold">Alerts</h5>
+                    <h5 class="modal-title fw-bold">Notifications</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -379,6 +424,7 @@
         </div>
     </div>
 
+    <!-- ARCHIVE MODAL -->
     <div class="modal fade" id="modArc" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
             <div class="modal-content bg-dark">
@@ -390,7 +436,7 @@
                     <div class="d-flex border-bottom border-secondary border-opacity-25">
                         <button onclick="loadArcTab('t')" class="btn btn-dark flex-fill rounded-0 py-3 active border-bottom border-primary border-2" id="at-t">Tasks</button>
                         <button onclick="loadArcTab('d')" class="btn btn-dark flex-fill rounded-0 py-3 text-secondary" id="at-d">Decisions</button>
-                        <button onclick="loadArcTab('a')" class="btn btn-dark flex-fill rounded-0 py-3 text-secondary" id="at-a">Logs</button>
+                        <button onclick="loadArcTab('a')" class="btn btn-dark flex-fill rounded-0 py-3 text-secondary" id="at-a">Attendance</button>
                     </div>
                     <div id="arc-b" class="p-3"></div>
                 </div>
@@ -398,6 +444,7 @@
         </div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1100;">
         <div id="sysToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -413,24 +460,38 @@
         </div>
     </div>
 
+    <!-- ============================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ============================================= -->
     <script>
-        // --- CONFIGURATION ---
+        // ============================================
+        // CONFIGURATION
+        // ============================================
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         
         const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
         const TEAM = [
-            { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
-            { id: 2, name: "Jamphel",    av: "👨‍💻", pin: "11302003634", role: "MEMBER" },
-            { id: 3, name: "Laxmi",      av: "👨‍🔬", pin: "11103002151", role: "MEMBER" },
-            { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
+            { id: 1, name: "Pema Ugyen", av: "👨‍💼", cid: "11107008201", role: "LEADER" },
+            { id: 2, name: "Jamphel",    av: "👨‍💻", cid: "11302003634", role: "MEMBER" },
+            { id: 3, name: "Laxmi",      av: "👨‍🔬", cid: "11103002151", role: "MEMBER" },
+            { id: 4, name: "Ngawang",    av: "👨",   cid: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', tempId: null, arcData: null };
+        let STATE = { 
+            user: null, 
+            page: 'home', 
+            mode: 'task', 
+            tempId: null, 
+            arcData: null 
+        };
+        
         const MODALS = {};
 
-        // --- INITIALIZATION ---
+        // ============================================
+        // INITIALIZATION
+        // ============================================
         window.addEventListener('DOMContentLoaded', function() {
             try {
                 lucide.createIcons();
@@ -455,12 +516,14 @@
             }
         });
 
-        // --- AUTHENTICATION ---
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
         function initAuth() {
             const container = document.getElementById('auth-step-1');
             container.innerHTML = TEAM.map(u => `
                 <div class="col-6">
-                    <div onclick="preLogin(${u.id})" class="card-box p-3 text-center cursor-pointer">
+                    <div onclick="preLogin(${u.id})" class="card-box p-3 text-center cursor-pointer hover-bg">
                         <div class="fs-1 mb-2">${u.av}</div>
                         <div class="fw-bold text-white small">${u.name.split(' ')[0]}</div>
                     </div>
@@ -488,11 +551,11 @@
 
         function tryLogin() {
             const pin = document.getElementById('inp-pin').value;
-            if(pin === STATE.sel.pin) {
+            if(pin === STATE.sel.cid) {
                 localStorage.setItem('slbd_uid', STATE.sel.id);
                 login(STATE.sel);
             } else {
-                toast('Access Denied', 'Incorrect PIN code', 'shield-alert', 'text-danger');
+                toast('Access Denied', 'Incorrect CID/PIN', 'shield-alert', 'text-danger');
             }
         }
 
@@ -517,16 +580,21 @@
                     render(true);
                     checkNoti(false);
                 }
-            }, 4000);
+            }, 5000);
+            
             checkNoti(false);
         }
 
         function doLogout() {
-            localStorage.removeItem('slbd_uid');
-            location.reload();
+            if(confirm('Are you sure you want to sign out?')) {
+                localStorage.removeItem('slbd_uid');
+                location.reload();
+            }
         }
 
-        // --- NAVIGATION ---
+        // ============================================
+        // NAVIGATION
+        // ============================================
         function setupNav() {
             const pages = [
                 {id:'home', t:'Dashboard', i:'layout-grid'},
@@ -543,7 +611,8 @@
 
             document.getElementById('nav-m-links').innerHTML = pages.map(p => `
                 <a href="javascript:void(0)" onclick="nav('${p.id}')" id="nm-${p.id}" class="nav-item-m">
-                    <i data-lucide="${p.i}" style="width: 22px; height: 22px;"></i> <span>${p.t}</span>
+                    <i data-lucide="${p.i}" style="width: 22px; height: 22px;"></i> 
+                    <span>${p.t}</span>
                 </a>`).join('');
             
             lucide.createIcons();
@@ -575,6 +644,9 @@
             render(false);
         }
 
+        // ============================================
+        // RENDERING
+        // ============================================
         async function render(silent) {
             const c = document.getElementById('content-box');
             if(!silent) {
@@ -600,22 +672,24 @@
                                     <h1 class="fw-bold text-white mb-0">${now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
                                     <div class="text-secondary small mb-3">${now.toDateString()}</div>
                                     ${a && a.length 
-                                        ? '<button class="btn btn-success w-100 rounded-pill" disabled>Checked In ✅</button>' 
-                                        : '<button onclick="doCheckIn()" class="btn btn-primary w-100 rounded-pill shadow">Check In Now</button>'}
+                                        ? '<button class="btn btn-success w-100 rounded-pill" disabled><i data-lucide="check-circle" style="width:16px;height:16px;" class="me-2"></i>Checked In</button>' 
+                                        : '<button onclick="doCheckIn()" class="btn btn-primary w-100 rounded-pill shadow"><i data-lucide="clock" style="width:16px;height:16px;" class="me-2"></i>Check In Now</button>'}
                                 </div>
                             </div>
                             <div class="col-12 col-md-8">
                                 <div class="card-box h-100 p-3">
-                                    <h6 class="text-secondary small fw-bold mb-3 border-bottom border-secondary border-opacity-25 pb-2">MY ASSIGNED TASKS</h6>
+                                    <h6 class="text-secondary small fw-bold mb-3 border-bottom border-secondary border-opacity-25 pb-2">
+                                        <i data-lucide="target" style="width:14px;height:14px;" class="me-1"></i> MY ASSIGNED TASKS
+                                    </h6>
                                     ${myT.length ? myT.map(x => `
                                         <div class="p-3 border border-secondary border-opacity-25 rounded mb-2 bg-dark hover-bg" onclick="nav('task')" style="cursor:pointer">
                                             <div class="d-flex justify-content-between mb-1">
-                                                <span class="badge-st st-${x.status.toLowerCase().replace(' ', '-')}">${x.status}</span>
+                                                <span class="badge-st st-${x.status.toLowerCase()}">${x.status}</span>
                                                 <small class="text-secondary">${x.due_date || 'No Date'}</small>
                                             </div>
                                             <div class="fw-bold text-white">${x.task_title}</div>
                                         </div>`).join('') 
-                                        : '<div class="text-center text-muted py-5">No active tasks assigned to you.</div>'}
+                                        : '<div class="text-center text-muted py-5"><i data-lucide="inbox" style="width:48px;height:48px;" class="mb-2 opacity-50"></i><div>No active tasks assigned</div></div>'}
                                 </div>
                             </div>
                         </div>`;
@@ -626,30 +700,33 @@
                     const list = (data || []).filter(x => x.status !== 'Done' || x.updated_at >= mStart);
                     
                     if(list.length === 0) {
-                        c.innerHTML = '<div class="text-center text-muted py-5">No tasks found. Create one!</div>';
+                        c.innerHTML = '<div class="text-center text-muted py-5"><i data-lucide="clipboard-list" style="width:64px;height:64px;" class="mb-3 opacity-50"></i><div class="fs-5">No tasks found</div><div class="small">Create a new task to get started</div></div>';
                     } else {
                         c.innerHTML = `<div class="row g-3">${list.map(t => {
-                            const statusClass = t.status === 'Done' ? 'st-done' : 
-                                              t.status === 'Review' ? 'st-rev' : 
-                                              t.status === 'Ongoing' ? 'st-ongoing' : 'st-pending';
+                            const statusClass = `st-${t.status.toLowerCase()}`;
                             const borderClass = t.status === 'Done' ? 'border-success' : 
-                                              t.status === 'Review' ? 'border-info' : 'border-warning';
+                                              t.status === 'Review' ? 'border-info' : 
+                                              t.status === 'Ongoing' ? 'border-warning' : 'border-secondary';
                             
                             return `<div class="col-12 col-lg-6">
-                                <div class="card-box p-3 border-start border-4 ${borderClass}">
+                                <div class="card-box p-3 border-start border-4 ${borderClass} task-card">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span class="badge-st ${statusClass}">${t.status}</span>
                                         <span class="text-xs text-secondary">${new Date(t.created_at).toLocaleDateString()}</span>
                                     </div>
-                                    <h5 class="fw-bold text-white text-truncate">${t.task_title}</h5>
-                                    <p class="small text-secondary mb-3 text-truncate">${t.description || ''}</p>
+                                    <h5 class="fw-bold text-white mb-2">${t.task_title}</h5>
+                                    <p class="small text-secondary mb-3">${t.description || 'No description'}</p>
+                                    ${t.due_date ? `<div class="text-xs text-warning mb-3"><i data-lucide="calendar" style="width:12px;height:12px;"></i> Due: ${t.due_date}</div>` : ''}
                                     
                                     <div class="d-flex gap-2">
                                         ${t.status === 'Ongoing' && (t.tagged_members || []).includes(STATE.user.id) 
-                                            ? `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary flex-fill fw-bold">Mark Done</button>` 
+                                            ? `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary flex-fill fw-bold"><i data-lucide="check" style="width:14px;height:14px;"></i> Mark Done</button>` 
                                             : ''}
                                         ${STATE.user.role === 'LEADER' && t.status === 'Review' 
-                                            ? `<button onclick="doApprove(${t.id})" class="btn btn-sm btn-success flex-fill fw-bold">Approve</button>` 
+                                            ? `<button onclick="doApprove(${t.id})" class="btn btn-sm btn-success flex-fill fw-bold"><i data-lucide="check-circle" style="width:14px;height:14px;"></i> Approve</button>` 
+                                            : ''}
+                                        ${STATE.user.role === 'LEADER' && t.status === 'Pending' 
+                                            ? `<button onclick="doApprove(${t.id})" class="btn btn-sm btn-outline-success flex-fill fw-bold"><i data-lucide="play" style="width:14px;height:14px;"></i> Start</button>` 
                                             : ''}
                                     </div>
                                 </div>
@@ -659,36 +736,44 @@
                 }
 
                 if(STATE.page === 'future') {
-                    const {data} = await sb.from('tasks').select('*').eq('status', 'Future');
-                    c.innerHTML = `<div class="row g-3">${(data || []).map(t => `
-                        <div class="col-12 col-lg-6">
-                            <div class="card-box p-3 opacity-75">
-                                <h5 class="fw-bold text-white">${t.task_title}</h5>
-                                <p class="small text-secondary">${t.description || ''}</p>
-                                <div class="d-flex justify-content-between border-top border-secondary border-opacity-25 pt-2 mt-2">
-                                    <span class="badge-st st-fut">Not Yet</span>
-                                    ${STATE.user.role === 'LEADER' 
-                                        ? `<button onclick="doActivate(${t.id})" class="btn btn-sm btn-outline-success">Activate</button>` 
-                                        : ''}
+                    const {data} = await sb.from('tasks').select('*').eq('status', 'Future').order('created_at', {ascending: false});
+                    c.innerHTML = data && data.length 
+                        ? `<div class="row g-3">${data.map(t => `
+                            <div class="col-12 col-lg-6">
+                                <div class="card-box p-3 opacity-75 hover-bg">
+                                    <div class="d-flex align-items-start gap-2 mb-2">
+                                        <i data-lucide="lightbulb" class="text-warning flex-shrink-0" style="width:20px;height:20px;"></i>
+                                        <div class="flex-grow-1">
+                                            <h5 class="fw-bold text-white mb-1">${t.task_title}</h5>
+                                            <p class="small text-secondary mb-0">${t.description || 'No description'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-2 mt-2">
+                                        <span class="badge-st st-future">Not Yet</span>
+                                        ${STATE.user.role === 'LEADER' 
+                                            ? `<button onclick="doActivate(${t.id})" class="btn btn-sm btn-outline-success"><i data-lucide="zap" style="width:14px;height:14px;"></i> Activate</button>` 
+                                            : ''}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>`).join('')}</div>`;
+                            </div>`).join('')}</div>`
+                        : '<div class="text-center text-muted py-5"><i data-lucide="hourglass" style="width:64px;height:64px;" class="mb-3 opacity-50"></i><div class="fs-5">No future ideas</div><div class="small">Add ideas for later consideration</div></div>';
                 }
 
                 if(STATE.page === 'dec') {
                     const {data} = await sb.from('decisions').select('*').order('created_at', {ascending: false});
-                    c.innerHTML = (data && data.length) 
+                    c.innerHTML = data && data.length 
                         ? data.map(d => `
                             <div class="card-box p-3 mb-2">
                                 <div class="d-flex gap-3">
-                                    <i data-lucide="quote" class="text-warning flex-shrink-0"></i>
-                                    <div>
-                                        <div class="fw-bold text-white">${d.subject}</div>
+                                    <i data-lucide="quote" class="text-warning flex-shrink-0" style="width:24px;height:24px;"></i>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold text-white mb-1">${d.subject}</div>
                                         <div class="small text-secondary">${d.details || ''}</div>
+                                        <div class="text-xs text-muted mt-2">${new Date(d.created_at).toLocaleDateString()}</div>
                                     </div>
                                 </div>
                             </div>`).join('') 
-                        : '<div class="text-center text-muted py-5">No decisions recorded.</div>';
+                        : '<div class="text-center text-muted py-5"><i data-lucide="scroll-text" style="width:64px;height:64px;" class="mb-3 opacity-50"></i><div class="fs-5">No decisions recorded</div><div class="small">Log important team decisions here</div></div>';
                 }
 
                 if(STATE.page === 'arc') {
@@ -700,20 +785,23 @@
                                 <div onclick="openArc('${m}')" class="card-box p-4 text-center cursor-pointer hover-bg">
                                     <i data-lucide="folder-closed" class="text-warning mb-2" style="width: 32px; height: 32px;"></i>
                                     <div class="fw-bold text-white">${m}</div>
+                                    <div class="text-xs text-secondary mt-1">Archive</div>
                                 </div>
                             </div>`).join('')}</div>` 
-                        : '<div class="text-center text-muted py-5">Archive is empty.</div>';
+                        : '<div class="text-center text-muted py-5"><i data-lucide="archive" style="width:64px;height:64px;" class="mb-3 opacity-50"></i><div class="fs-5">Archive is empty</div><div class="small">Completed tasks will appear here</div></div>';
                 }
 
             } catch(e) {
                 console.error('Render error:', e);
-                c.innerHTML = `<div class="alert alert-danger">Error loading data: ${e.message}</div>`;
+                c.innerHTML = `<div class="alert alert-danger"><i data-lucide="alert-circle" style="width:16px;height:16px;" class="me-2"></i>Error loading data: ${e.message}</div>`;
             }
             
             lucide.createIcons();
         }
 
-        // --- ACTIONS ---
+        // ============================================
+        // ACTIONS
+        // ============================================
         function setMode(m) {
             STATE.mode = m;
             ['task', 'future', 'dec'].forEach(x => {
@@ -729,18 +817,15 @@
             
             const isT = m !== 'dec';
             const taskOpt = document.getElementById('sec-task-opt');
-            if(isT) {
-                taskOpt.style.display = 'block';
-            } else {
-                taskOpt.style.display = 'none';
-            }
+            taskOpt.style.display = isT ? 'block' : 'none';
             
             document.getElementById('inp-t').placeholder = m === 'dec' ? 'Subject' : 'Title';
             
             if(isT) {
                 document.getElementById('div-mems').innerHTML = TEAM.map(u => `
-                    <label class="d-flex align-items-center p-2 rounded bg-black border border-secondary border-opacity-25">
-                        <input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}"> ${u.av} ${u.name}
+                    <label class="d-flex align-items-center p-2 rounded bg-black border border-secondary border-opacity-25 cursor-pointer">
+                        <input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}"> 
+                        <span class="me-2">${u.av}</span> ${u.name}
                     </label>`).join('');
             }
         }
@@ -754,11 +839,11 @@
         }
         
         async function saveItem() {
-            const t = document.getElementById('inp-t').value;
-            const d = document.getElementById('inp-d').value;
+            const t = document.getElementById('inp-t').value.trim();
+            const d = document.getElementById('inp-d').value.trim();
             
             if(!t) {
-                toast('Error', 'Title Missing', 'alert-circle', 'text-danger');
+                toast('Error', 'Title required', 'alert-circle', 'text-danger');
                 return;
             }
             
@@ -780,7 +865,7 @@
                 }
                 
                 MODALS.create.hide();
-                toast('Saved', 'Record created successfully', 'check-circle', 'text-success');
+                toast('Success', 'Record created', 'check-circle', 'text-success');
                 render(false);
             } catch(e) {
                 console.error('Save error:', e);
@@ -813,7 +898,7 @@
                 }).eq('id', STATE.tempId);
                 
                 MODALS.proof.hide();
-                toast('Great Work!', 'Task marked complete', 'trophy', 'text-warning');
+                toast('Completed!', 'Task marked as done', 'trophy', 'text-success');
                 render(false);
             } catch(e) {
                 console.error('Finish error:', e);
@@ -828,10 +913,14 @@
                     date: new Date().toISOString().split('T')[0]
                 });
                 render(false);
-                toast('Checked In', 'Attendance Logged', 'clock', 'text-success');
+                toast('Success', 'Attendance recorded', 'check-circle', 'text-success');
             } catch(e) {
                 console.error('Check-in error:', e);
-                toast('Error', 'Failed to check in', 'alert-circle', 'text-danger');
+                if(e.message.includes('duplicate')) {
+                    toast('Info', 'Already checked in today', 'info', 'text-info');
+                } else {
+                    toast('Error', 'Failed to check in', 'alert-circle', 'text-danger');
+                }
             }
         }
 
@@ -839,9 +928,10 @@
             try {
                 await sb.from('tasks').update({status: 'Ongoing'}).eq('id', id);
                 render(false);
-                toast('Approved', 'Task is now active', 'thumbs-up', 'text-success');
+                toast('Approved', 'Task activated', 'thumbs-up', 'text-success');
             } catch(e) {
                 console.error('Approve error:', e);
+                toast('Error', 'Failed to approve', 'alert-circle', 'text-danger');
             }
         }
 
@@ -849,13 +939,16 @@
             try {
                 await sb.from('tasks').update({status: 'Pending'}).eq('id', id);
                 render(false);
-                toast('Activated', 'Idea moved to active', 'zap', 'text-warning');
+                toast('Activated', 'Moved to active tasks', 'zap', 'text-success');
             } catch(e) {
                 console.error('Activate error:', e);
+                toast('Error', 'Failed to activate', 'alert-circle', 'text-danger');
             }
         }
 
-        // --- ARCHIVE ---
+        // ============================================
+        // ARCHIVE
+        // ============================================
         async function openArc(m) {
             document.getElementById('arc-t').innerText = `Archive: ${m}`;
             const s = `${m}-01`;
@@ -873,6 +966,7 @@
                 loadArcTab('t');
             } catch(e) {
                 console.error('Archive error:', e);
+                toast('Error', 'Failed to load archive', 'alert-circle', 'text-danger');
             }
         }
 
@@ -892,35 +986,46 @@
             const c = document.getElementById('arc-b');
             
             if(!d || !d.length) {
-                c.innerHTML = '<div class="text-center text-muted p-4">No records found.</div>';
+                c.innerHTML = '<div class="text-center text-muted p-5"><i data-lucide="inbox" style="width:48px;height:48px;" class="mb-2 opacity-50"></i><div>No records found</div></div>';
+                lucide.createIcons();
                 return;
             }
             
             if(k === 't') {
                 c.innerHTML = d.map(x => `
-                    <div class="py-2 border-bottom border-secondary border-opacity-25">
-                        <div class="fw-bold text-white">${x.task_title}</div>
-                        <small class="text-secondary">Finished: ${x.updated_at.slice(0, 10)}</small>
+                    <div class="py-3 border-bottom border-secondary border-opacity-25">
+                        <div class="fw-bold text-white mb-1">${x.task_title}</div>
+                        <div class="small text-secondary">${x.description || ''}</div>
+                        <div class="text-xs text-muted mt-1">Completed: ${new Date(x.updated_at).toLocaleDateString()}</div>
                     </div>`).join('');
             }
             if(k === 'd') {
                 c.innerHTML = d.map(x => `
-                    <div class="py-2 border-bottom border-secondary border-opacity-25">
-                        <div class="fw-bold text-white">${x.subject}</div>
-                        <small class="text-secondary">${x.details || ''}</small>
+                    <div class="py-3 border-bottom border-secondary border-opacity-25">
+                        <div class="fw-bold text-white mb-1">${x.subject}</div>
+                        <div class="small text-secondary">${x.details || ''}</div>
+                        <div class="text-xs text-muted mt-1">${new Date(x.created_at).toLocaleDateString()}</div>
                     </div>`).join('');
             }
             if(k === 'a') {
                 c.innerHTML = d.map(x => {
                     const user = TEAM.find(u => u.id == x.user_id);
-                    return `<div class="py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between">
-                        <span class="text-white">${user ? user.name : 'Unknown'}</span>
+                    return `<div class="py-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="me-2">${user ? user.av : '👤'}</span>
+                            <span class="text-white">${user ? user.name : 'Unknown'}</span>
+                        </div>
                         <span class="font-monospace text-secondary">${x.date}</span>
                     </div>`;
                 }).join('');
             }
+            
+            lucide.createIcons();
         }
 
+        // ============================================
+        // NOTIFICATIONS
+        // ============================================
         async function checkNoti(showModal) {
             if(!STATE.user) return;
             
@@ -931,30 +1036,28 @@
                 const bellM = document.getElementById('badge-bell-m');
                 const bellD = document.getElementById('badge-bell-d');
                 
-                if(has) {
-                    bellM.style.display = 'block';
-                    bellD.style.display = 'block';
-                } else {
-                    bellM.style.display = 'none';
-                    bellD.style.display = 'none';
-                }
+                bellM.style.display = has ? 'block' : 'none';
+                bellD.style.display = has ? 'block' : 'none';
                 
                 if(showModal) {
                     const box = document.getElementById('noti-list');
-                    const {data: all} = await sb.from('notifications').select('*').eq('user_id', STATE.user.id).order('created_at', {ascending: false}).limit(10);
+                    const {data: all} = await sb.from('notifications').select('*').eq('user_id', STATE.user.id).order('created_at', {ascending: false}).limit(20);
                     
                     if(!all || !all.length) {
-                        box.innerHTML = '<div class="p-4 text-center text-secondary">No notifications.</div>';
+                        box.innerHTML = '<div class="p-5 text-center text-secondary"><i data-lucide="bell-off" style="width:48px;height:48px;" class="mb-2 opacity-50"></i><div>No notifications</div></div>';
                     } else {
                         box.innerHTML = all.map(n => `
-                            <div class="list-group-item bg-dark border-secondary border-opacity-25 p-3">
+                            <div class="list-group-item bg-dark border-secondary border-opacity-25 p-3 ${n.is_read ? '' : 'border-start border-4 border-primary'}">
                                 <div class="${n.is_read ? 'text-secondary' : 'fw-bold text-white'}">${n.message}</div>
+                                <div class="text-xs text-muted mt-1">${new Date(n.created_at).toLocaleString()}</div>
                             </div>`).join('');
                         
                         await sb.from('notifications').update({is_read: true}).eq('user_id', STATE.user.id);
                         bellM.style.display = 'none';
                         bellD.style.display = 'none';
                     }
+                    
+                    lucide.createIcons();
                     MODALS.noti.show();
                 }
             } catch(e) {
@@ -962,6 +1065,9 @@
             }
         }
 
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
         function toast(t, m, i, c) {
             document.getElementById('t-tit').innerText = t;
             document.getElementById('t-msg').innerText = m;
