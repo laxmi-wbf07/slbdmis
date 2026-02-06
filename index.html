@@ -3,129 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Professional</title>
+    <title>SLBDMIS | Mobile</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* === PRO THEME === */
+        /* === MOBILE OPTIMIZED THEME === */
         :root { 
             --bg: #0d1117; 
-            --glass: rgba(22, 27, 34, 0.75); 
+            --glass: rgba(22, 27, 34, 0.85); 
             --glass-border: rgba(48, 54, 61, 0.7);
             --primary: #2f81f7; 
             --text-main: #f0f6fc;
             --text-sub: #8b949e;
+            --nav-height: 70px; /* Taller for mobile thumbs */
         }
 
         body { 
             background-color: var(--bg); 
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(47, 129, 247, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(46, 160, 67, 0.05) 0px, transparent 50%);
             color: var(--text-main); 
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            padding-bottom: 80px; /* Mobile Nav Space */
+            padding-bottom: 90px; /* Space for Bottom Nav */
         }
 
         /* GLASS COMPONENTS */
         .glass-panel {
             background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
+            border-radius: 16px; /* softer corners for mobile */
             box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-        }
-        
-        .glass-header {
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 14px 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-main);
-            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
         }
 
-        /* FOLDER SYSTEM UI */
-        .folder-card {
-            background: rgba(33, 38, 45, 0.5);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .folder-card:hover {
-            background: rgba(47, 129, 247, 0.1);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-        .folder-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: var(--primary); opacity: 0; transition: opacity 0.2s;
-        }
-        .folder-card:hover::before { opacity: 1; }
-
-        .archive-tab {
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-sub);
-            cursor: pointer;
-            transition: all 0.2s;
-            background: transparent;
-            border: 1px solid transparent;
-        }
-        .archive-tab.active {
-            background: rgba(47, 129, 247, 0.15);
-            color: var(--primary);
-            border-color: rgba(47, 129, 247, 0.3);
-        }
-
-        /* LAYOUT & UTILS */
+        /* RESPONSIVE LAYOUT ENGINE */
         .sidebar {
-            width: 260px; height: 100vh; position: fixed;
+            width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
             background: #010409; border-right: 1px solid #30363d;
             display: none; flex-direction: column; padding: 24px; z-index: 100;
         }
-        .main-content { margin: 0; padding: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
         
+        .main-content { 
+            margin: 0; 
+            padding: 20px; 
+            max-width: 100%; 
+        }
+
+        /* Desktop Overrides */
         @media (min-width: 992px) { 
             .sidebar { display: flex; } 
-            .main-content { margin-left: 260px; padding: 40px; } 
+            .main-content { margin-left: 260px; padding: 40px; max-width: 1200px; } 
             body { padding-bottom: 0; } 
             .mobile-nav { display: none !important; } 
         }
 
-        .user-avatar {
-            width: 48px; height: 48px; border-radius: 50%; background: #21262d;
-            display: grid; place-items: center; font-size: 24px; border: 2px solid transparent;
+        /* Mobile Bottom Nav */
+        .mobile-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--glass-border);
+            z-index: 1000;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            height: auto;
         }
-        .user-avatar.selected { border-color: var(--primary); box-shadow: 0 0 20px rgba(47,129,247,0.4); }
+        .mob-link {
+            padding: 12px 0;
+            color: var(--text-sub);
+            transition: 0.2s;
+            position: relative;
+        }
+        .mob-link.active { color: var(--primary); }
+        .mob-link.active::after {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 3px; background: var(--primary); border-radius: 0 0 4px 4px;
+        }
+
+        /* Drive Links Grid */
+        .drive-link {
+            display: flex; align-items: center; gap: 12px;
+            background: #21262d; padding: 12px; border-radius: 8px;
+            text-decoration: none; color: white; border: 1px solid transparent;
+            margin-bottom: 8px;
+        }
+        .drive-link:hover { border-color: var(--primary); background: #262c36; }
+
+        /* STATUS BADGES */
         .status-badge { font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 4px 8px; border-radius: 20px; }
         .st-done { background: rgba(46, 160, 67, 0.15); color: #3fb950; }
-        .st-review { background: rgba(56, 139, 253, 0.15); color: #58a6ff; }
+        .st-future { background: rgba(139, 148, 158, 0.15); color: #8b949e; } /* Gray for Not Yet */
         .st-ongoing { background: rgba(210, 153, 34, 0.15); color: #d29922; }
 
-        /* NAV */
-        .nav-item-custom {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-            border-radius: 8px; color: var(--text-sub); cursor: pointer; margin-bottom: 4px; font-weight: 500;
+        /* UTILS */
+        .user-avatar {
+            width: 50px; height: 50px; border-radius: 50%; background: #21262d;
+            display: grid; place-items: center; font-size: 24px; border: 2px solid transparent;
         }
-        .nav-item-custom:hover, .nav-item-custom.active { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item-custom.active { border-left: 3px solid var(--primary); }
+        .user-avatar.selected { border-color: var(--primary); box-shadow: 0 0 15px rgba(47,129,247,0.5); }
     </style>
 </head>
 <body>
@@ -142,103 +122,148 @@
     </div>
 
     <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3">
-        <div class="text-center mb-5">
-            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3 shadow-lg" style="width: 64px; height: 64px;"><i data-lucide="shield-check" size="32"></i></div>
-            <h3 class="fw-bold text-white">SLBDMIS Portal</h3>
-        </div>
-        <div class="glass-panel p-4 w-100" style="max-width: 440px;">
+        <div class="glass-panel p-4 w-100" style="max-width: 400px;">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-white">SLBD Portal</h3>
+                <p class="text-secondary small">Secure Team Access</p>
+            </div>
             <div id="auth-step-1">
-                <div class="d-flex flex-wrap justify-content-center gap-4 mb-4" id="auth-list"></div>
-                <div class="text-center small text-secondary">Select Identity</div>
+                <div class="d-grid grid-cols-2 gap-3 d-flex flex-wrap justify-content-center mb-4" id="auth-list"></div>
             </div>
             <div id="auth-step-2" class="d-none">
                 <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded bg-dark border border-secondary border-opacity-25">
                     <div id="sel-avatar" class="fs-4"></div>
-                    <div><div id="sel-name" class="fw-bold text-white"></div><div class="text-muted small">Enter CID PIN</div></div>
+                    <div><div id="sel-name" class="fw-bold text-white"></div><div class="text-muted small">Enter PIN</div></div>
                 </div>
-                <input type="password" id="inp-cid" class="form-control bg-black text-white border-secondary mb-3 text-center fs-4" placeholder="•••••••••••" maxlength="11">
-                <button onclick="doLogin()" class="btn btn-primary w-100 py-3 fw-bold">Login</button>
-                <button onclick="resetAuth()" class="btn btn-link w-100 mt-2 text-secondary text-decoration-none small">Back</button>
+                <input type="password" id="inp-cid" class="form-control bg-black text-white border-secondary mb-3 text-center fs-2 py-3" placeholder="••••" maxlength="11" inputmode="numeric">
+                <button onclick="doLogin()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Login</button>
+                <button onclick="resetAuth()" class="btn btn-link w-100 mt-2 text-secondary">Back</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
+        
         <nav class="sidebar">
             <div class="mb-5 px-2 d-flex align-items-center gap-3 text-white">
                 <div class="bg-primary rounded p-1"><i data-lucide="layout" size="20"></i></div>
                 <span class="fw-bold">SLBDMIS</span>
             </div>
-            <div id="nav-links" class="flex-grow-1"></div>
-            <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
-                <div class="d-flex align-items-center gap-3 px-2 mb-3">
-                    <div id="u-avatar" class="fs-4"></div>
-                    <div><div id="u-name" class="fw-bold text-white small"></div><div id="u-role" class="text-secondary" style="font-size:11px"></div></div>
-                </div>
+            <div id="nav-links-desktop" class="d-flex flex-column gap-2 flex-grow-1"></div>
+            <div class="mt-auto">
                 <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Sign Out</button>
             </div>
         </nav>
 
         <main class="main-content">
-            <header class="d-flex justify-content-between align-items-center mb-5">
+            <header class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h3 id="page-title" class="fw-bold text-white m-0">Dashboard</h3>
-                    <div class="text-secondary small d-flex align-items-center gap-2 mt-1" id="date-display"></div>
+                    <h4 id="page-title" class="fw-bold text-white m-0">Dashboard</h4>
+                    <small class="text-secondary" id="u-greeting"></small>
                 </div>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="position-relative p-2 cursor-pointer" onclick="MODALS.noti.show(); markRead()">
-                        <i data-lucide="bell" class="text-white"></i>
+                <div class="d-flex gap-2">
+                    <button onclick="MODALS.noti.show(); markRead()" class="btn btn-dark border border-secondary border-opacity-25 position-relative">
+                        <i data-lucide="bell" size="18"></i>
                         <span id="bell-dot" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
-                    </div>
-                    <button onclick="openCreate()" class="btn btn-primary fw-bold d-flex align-items-center gap-2 px-4 shadow-sm">
-                        <i data-lucide="plus" size="18"></i> <span class="d-none d-sm-inline">New</span>
                     </button>
+                    <button onclick="openCreate()" class="btn btn-primary shadow-sm"><i data-lucide="plus" size="20"></i></button>
                 </div>
             </header>
+            
             <div id="content-area"></div>
-        </main>
+            <div style="height: 60px;"></div> </main>
 
-        <nav class="mobile-nav fixed-bottom bg-dark border-top border-secondary border-opacity-50 pb-3 pt-2 px-3 d-lg-none" style="z-index:1000">
-            <div class="row text-center m-0" id="mob-links"></div>
+        <nav class="mobile-nav">
+            <div class="row text-center m-0" id="nav-links-mobile"></div>
         </nav>
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content glass-panel border-0">
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold text-white mb-4">Create New</h5>
-                    <div class="d-flex gap-2 mb-3 bg-dark p-1 rounded">
-                        <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm flex-fill fw-bold btn-primary">Task</button>
-                        <button onclick="setMode('decision')" id="btn-m-dec" class="btn btn-sm flex-fill fw-bold text-secondary">Decision</button>
+                    <div class="d-flex justify-content-between mb-4">
+                        <h5 class="fw-bold text-white m-0">New Item</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
-                    <input type="text" id="n-title" class="form-control bg-black text-white mb-3" placeholder="Title / Subject">
+                    
+                    <div class="btn-group w-100 mb-3" role="group">
+                        <input type="radio" class="btn-check" name="ctype" id="ct-task" autocomplete="off" checked onclick="setMode('task')">
+                        <label class="btn btn-outline-primary" for="ct-task">Task</label>
+
+                        <input type="radio" class="btn-check" name="ctype" id="ct-future" autocomplete="off" onclick="setMode('future')">
+                        <label class="btn btn-outline-secondary" for="ct-future">Not Yet</label>
+                        
+                        <input type="radio" class="btn-check" name="ctype" id="ct-dec" autocomplete="off" onclick="setMode('decision')">
+                        <label class="btn btn-outline-warning" for="ct-dec">Decision</label>
+                    </div>
+
+                    <input type="text" id="n-title" class="form-control bg-black text-white mb-3 py-3" placeholder="Title / Subject">
                     <textarea id="n-desc" class="form-control bg-black text-white mb-3" rows="3" placeholder="Details..."></textarea>
+                    
                     <div id="div-task-opts">
+                        <label class="text-secondary small mb-1">Due Date</label>
                         <input type="date" id="n-date" class="form-control bg-black text-white mb-3">
+                        <label class="text-secondary small mb-1">Assign Members</label>
                         <div id="n-members" class="d-flex flex-column gap-2 mb-3"></div>
                     </div>
-                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Save</button>
+                    
+                    <button onclick="apiCreate()" class="btn btn-primary w-100 fw-bold py-3 rounded-pill">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modUpload" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content glass-panel border-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white">Upload Proof</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-secondary mb-3">Before marking this as done, please upload your files to the correct folder:</p>
+                    
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-link">
+                            <i data-lucide="folder" class="text-warning"></i> <span>Admin & Finance</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-link">
+                            <i data-lucide="cpu" class="text-info"></i> <span>Machine Unit</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-link">
+                            <i data-lucide="image" class="text-danger"></i> <span>Pictures</span>
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-link">
+                            <i data-lucide="presentation" class="text-primary"></i> <span>Proposals & PPT</span>
+                        </a>
+                    </div>
+
+                    <div class="form-check bg-dark p-3 rounded border border-secondary border-opacity-25 mb-3">
+                        <input class="form-check-input" type="checkbox" id="chk-upload" onchange="toggleDoneBtn()">
+                        <label class="form-check-label text-white" for="chk-upload">
+                            I have uploaded the necessary files.
+                        </label>
+                    </div>
+
+                    <button id="btn-conf-done" onclick="confirmDone()" class="btn btn-success w-100 py-3 fw-bold disabled">Mark Completed</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="modal fade" id="modArchiveView" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content glass-panel border-0" style="min-height:80vh">
-                <div class="modal-header glass-header">
-                    <div class="d-flex align-items-center gap-2">
-                        <i data-lucide="folder-open" class="text-warning"></i>
-                        <span id="arc-title">Archive</span>
-                    </div>
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content glass-panel border-0 rounded-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="modal-title text-white" id="arc-title">Archive</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="d-flex gap-2 mb-4">
-                        <button onclick="renderArchiveTab('tasks')" class="archive-tab active" id="at-tasks">Completed Tasks</button>
-                        <button onclick="renderArchiveTab('decisions')" class="archive-tab" id="at-decisions">Decision Log</button>
-                        <button onclick="renderArchiveTab('attendance')" class="archive-tab" id="at-attendance">Attendance Register</button>
+                <div class="modal-body p-3">
+                    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+                        <button onclick="renderArchiveTab('tasks')" class="btn btn-sm btn-outline-light active" id="at-tasks">Tasks</button>
+                        <button onclick="renderArchiveTab('decisions')" class="btn btn-sm btn-outline-light" id="at-decisions">Decisions</button>
+                        <button onclick="renderArchiveTab('attendance')" class="btn btn-sm btn-outline-light" id="at-attendance">Attendance</button>
                     </div>
                     <div id="archive-content"></div>
                 </div>
@@ -247,16 +272,21 @@
     </div>
 
     <div class="modal fade" id="modNoti" tabindex="-1">
-        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content glass-panel border-0">
-                <div class="modal-header glass-header"><h6 class="m-0">Notifications</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body p-0"><div id="noti-list" class="list-group list-group-flush"></div></div>
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="modal-title fw-bold text-white">Notifications</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="noti-list" class="list-group list-group-flush"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIG
+        // --- CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const db = window.supabase.createClient(SB_URL, SB_KEY);
@@ -268,17 +298,22 @@
             { id: 4, name: "Ngawang",    avatar: "👨",   cid: "10801003243", role: "MEMBER" }
         ];
 
-        const STATE = { user: null, page: 'home', mode: 'task', archiveMonth: null, archiveData: null };
+        let STATE = { user: null, page: 'home', mode: 'task', pendingDoneId: null };
         const MODALS = {};
 
+        // --- INIT ---
         window.onload = () => {
             lucide.createIcons();
             MODALS.create = new bootstrap.Modal('#modCreate');
+            MODALS.upload = new bootstrap.Modal('#modUpload');
             MODALS.archive = new bootstrap.Modal('#modArchiveView');
             MODALS.noti = new bootstrap.Modal('#modNoti');
-            
+
             const uid = localStorage.getItem('slbd_v2_uid');
-            if(uid) { STATE.user = TEAM.find(u => u.id == uid); if(STATE.user) { startApp(); return; } }
+            if(uid) { 
+                STATE.user = TEAM.find(u => u.id == uid); 
+                if(STATE.user) { startApp(); return; } 
+            }
             renderAuth();
         };
 
@@ -286,14 +321,12 @@
         function renderAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="d-flex flex-column align-items-center gap-2 cursor-pointer p-2" onclick="pickUser(${u.id})">
-                    <div class="user-avatar shadow-lg" id="av-${u.id}">${u.avatar}</div>
+                <div class="d-flex flex-column align-items-center gap-2 cursor-pointer p-3 rounded hover-bg-dark" onclick="pickUser(${u.id})">
+                    <div class="user-avatar shadow" id="av-${u.id}">${u.avatar}</div>
                     <span class="small fw-bold text-secondary">${u.name.split(' ')[0]}</span>
                 </div>`).join('');
         }
         function pickUser(id) {
-            document.querySelectorAll('.user-avatar').forEach(x => x.classList.remove('selected'));
-            document.getElementById(`av-${id}`).classList.add('selected');
             STATE.selUser = TEAM.find(u => u.id === id);
             document.getElementById('auth-step-1').classList.add('d-none');
             document.getElementById('auth-step-2').classList.remove('d-none');
@@ -301,161 +334,161 @@
             document.getElementById('sel-name').innerText = STATE.selUser.name;
             document.getElementById('inp-cid').focus();
         }
-        function resetAuth() { document.getElementById('auth-step-1').classList.remove('d-none'); document.getElementById('auth-step-2').classList.add('d-none'); }
+        function resetAuth() { 
+            document.getElementById('auth-step-1').classList.remove('d-none'); 
+            document.getElementById('auth-step-2').classList.add('d-none'); 
+            document.getElementById('inp-cid').value = '';
+        }
         function doLogin() {
             if(document.getElementById('inp-cid').value === STATE.selUser.cid) {
                 STATE.user = STATE.selUser;
                 localStorage.setItem('slbd_v2_uid', STATE.user.id);
                 document.getElementById('view-auth').classList.add('d-none');
                 startApp();
-            } else toast('Error', 'Invalid CID PIN', '🚫');
+            } else toast('Error', 'Wrong PIN', '🚫');
         }
         function logout() { localStorage.removeItem('slbd_v2_uid'); location.reload(); }
 
-        // --- NAV ---
+        // --- NAVIGATION & LAYOUT ---
         function startApp() {
             document.getElementById('view-app').classList.remove('d-none');
-            document.getElementById('u-avatar').innerHTML = STATE.user.avatar;
-            document.getElementById('u-name').innerText = STATE.user.name;
-            document.getElementById('u-role').innerText = STATE.user.role;
-            document.getElementById('date-display').innerText = new Date().toDateString();
+            document.getElementById('u-greeting').innerText = `Hello, ${STATE.user.name.split(' ')[0]}`;
 
             const pages = [
-                {id:'home', t:'Workspace', i:'layout-dashboard'},
-                {id:'task', t:'Active Tasks', i:'layers'},
+                {id:'home', t:'Home', i:'layout-dashboard'},
+                {id:'task', t:'Tasks', i:'layers'},
+                {id:'future', t:'Not Yet', i:'hourglass'}, // NEW TAB
                 {id:'dec', t:'Decisions', i:'scroll-text'},
-                {id:'att', t:'Attendance', i:'clock'},
-                {id:'arc', t:'Archives', i:'archive'}
+                {id:'att', t:'Attend', i:'clock'},
+                {id:'arc', t:'Records', i:'archive'}
             ];
-            if(STATE.user.role === 'LEADER') pages.splice(1, 0, {id:'stats', t:'Team Metrics', i:'bar-chart-2'});
 
-            const renderNav = (isMob) => pages.map(p => isMob 
-                ? `<div class="col py-2" onclick="nav('${p.id}')"><i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary':'text-secondary'} mb-1"></i><div style="font-size:10px" class="${STATE.page===p.id?'text-white fw-bold':'text-secondary'}">${p.t}</div></div>`
-                : `<div class="nav-item-custom ${STATE.page===p.id?'active':''}" onclick="nav('${p.id}')"><i data-lucide="${p.i}" size="18"></i><span>${p.t}</span></div>`
-            ).join('');
+            // Render Desktop Sidebar
+            document.getElementById('nav-links-desktop').innerHTML = pages.map(p => `
+                <div onclick="nav('${p.id}')" class="d-flex align-items-center gap-3 p-3 rounded cursor-pointer text-secondary hover-white">
+                    <i data-lucide="${p.i}"></i> <span class="fw-bold">${p.t}</span>
+                </div>
+            `).join('');
 
-            document.getElementById('nav-links').innerHTML = renderNav(false);
-            document.getElementById('mob-links').innerHTML = renderNav(true);
-            
+            // Render Mobile Bottom Nav
+            document.getElementById('nav-links-mobile').innerHTML = pages.map(p => `
+                <div class="col mob-link ${STATE.page===p.id?'active':''}" onclick="nav('${p.id}')">
+                    <i data-lucide="${p.i}" size="20"></i>
+                    <div style="font-size:10px; margin-top:2px;">${p.t}</div>
+                </div>
+            `).join('');
+
             nav('home');
-            setInterval(() => { checkNotis(); if(STATE.page!=='arc') refreshData(true); }, 3000);
+            setInterval(() => { if(STATE.page!=='arc') refreshData(true); }, 3000);
         }
 
         function nav(pg) {
             STATE.page = pg;
-            document.getElementById('page-title').innerText = pg==='arc' ? 'Digital Records' : (pg==='home'?'My Workspace':document.querySelector(`[onclick="nav('${pg}')"] span`)?.innerText || pg);
-            startApp(); // Re-render nav highlight
+            
+            // Update Mobile Nav Active State
+            document.querySelectorAll('.mob-link').forEach(el => el.classList.remove('active'));
+            const activeIdx = ['home','task','future','dec','att','arc'].indexOf(pg);
+            if(activeIdx > -1) document.querySelectorAll('.mob-link')[activeIdx].classList.add('active');
+
+            const titles = {home:'My Workspace', task:'Active Tasks', future:'Future Opportunities', dec:'Decision Log', att:'Attendance', arc:'Digital Records'};
+            document.getElementById('page-title').innerText = titles[pg];
+            
             refreshData(false);
         }
 
-        // --- DATA ENGINE ---
         async function refreshData(silent) {
             const box = document.getElementById('content-area');
             if(!silent && STATE.page !== 'arc') box.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
             
-            // GLOBAL DATE FILTER: Current Month Only (active view)
+            // Date Filter: Current Month 1st
             const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-            
-            if(STATE.page === 'home') renderHome(box, startOfMonth);
-            if(STATE.page === 'task') renderTasks(box); // Tasks handles its own logic (show all active + recent done)
-            if(STATE.page === 'att') renderAtt(box, startOfMonth);
-            if(STATE.page === 'dec') renderDec(box, startOfMonth);
-            if(STATE.page === 'stats') renderStats(box);
+            const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+            if(STATE.page === 'home') renderHome(box, startMonth);
+            if(STATE.page === 'task') renderTasks(box); 
+            if(STATE.page === 'future') renderFuture(box); // NEW
+            if(STATE.page === 'att') renderAtt(box, startMonth);
+            if(STATE.page === 'dec') renderDec(box, startMonth);
             if(STATE.page === 'arc') renderArchives(box);
             lucide.createIcons();
         }
 
-        // --- PAGES ---
+        // --- VIEW RENDERERS ---
 
         async function renderHome(c, dateFilter) {
-            const { data: tasks } = await db.from('tasks').select('*').neq('status','Done').order('created_at',{ascending:false});
-            const { data: myDone } = await db.from('tasks').select('*').eq('status','Done').contains('tagged_members', [STATE.user.id]).gte('updated_at', dateFilter);
+            const { data: tasks } = await db.from('tasks').select('*').neq('status','Done').neq('status','Future').order('created_at',{ascending:false});
             
-            // Filter
             const myPending = tasks.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
             const review = tasks.filter(t => t.status === 'Review');
-            const approval = tasks.filter(t => t.status === 'Pending');
 
             c.innerHTML = `
-                <div class="row g-4">
-                    <div class="col-lg-8">
-                        <div class="glass-panel mb-4">
-                            <div class="glass-header text-primary"><span class="d-flex align-items-center gap-2"><i data-lucide="zap" size="16"></i> Priority Actions</span></div>
-                            <div class="p-3">
-                                ${STATE.user.role === 'LEADER' && (review.length || approval.length) ? `
-                                    <div class="alert alert-warning border-0 d-flex justify-content-between align-items-center mb-3">
-                                        <span><strong>${review.length + approval.length}</strong> items need your attention.</span>
-                                        <button class="btn btn-sm btn-dark" onclick="nav('task')">Review Now</button>
-                                    </div>` : ''}
-                                ${myPending.length === 0 ? '<div class="text-center text-muted py-4">You are all caught up!</div>' : myPending.map(t => `
-                                    <div class="bg-dark p-3 rounded mb-2 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div class="fw-bold text-white">${t.task_title}</div>
-                                            <div class="small text-secondary">Due: ${t.due_date || 'No Date'}</div>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="nav('task')">Open</button>
-                                    </div>
-                                `).join('')}
-                            </div>
+                ${STATE.user.role === 'LEADER' && review.length ? `
+                    <div class="alert alert-warning border-0 shadow-sm d-flex justify-content-between align-items-center mb-3">
+                        <span class="small fw-bold">⚠️ ${review.length} items need review</span>
+                        <button class="btn btn-sm btn-dark" onclick="nav('task')">Go</button>
+                    </div>` : ''}
+
+                <div class="glass-panel p-3">
+                    <h6 class="text-white mb-3 fw-bold border-bottom border-secondary border-opacity-25 pb-2">My Priority</h6>
+                    ${myPending.length === 0 ? '<div class="text-center text-muted py-3 small">Nothing assigned to you.</div>' : 
+                    myPending.map(t => `
+                        <div class="bg-dark p-3 rounded mb-2 border border-secondary border-opacity-10">
+                            <div class="fw-bold text-white mb-1">${t.task_title}</div>
+                            <div class="small text-secondary mb-2">${t.description}</div>
+                            <button class="btn btn-sm btn-outline-primary w-100" onclick="nav('task')">View Task</button>
                         </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="glass-panel text-center p-4">
-                            <div class="h1 fw-bold text-success m-0">${myDone.length}</div>
-                            <div class="small text-secondary uppercase fw-bold mb-3">Tasks Completed (This Month)</div>
-                            <div class="progress" style="height:6px"><div class="progress-bar bg-success" style="width: 100%"></div></div>
-                        </div>
-                    </div>
+                    `).join('')}
                 </div>
             `;
         }
 
         async function renderTasks(c) {
-            // Logic: Show ALL Pending/Ongoing/Review. Show 'Done' ONLY if updated in current month.
             const now = new Date();
             const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
             
-            const { data: all } = await db.from('tasks').select('*').order('created_at', {ascending:false});
+            // Fetch everything except Future
+            const { data: all } = await db.from('tasks').select('*').neq('status','Future').order('created_at', {ascending:false});
+            
+            // Filter: Show all Active. Show Done ONLY if updated this month.
             const display = all.filter(t => t.status !== 'Done' || t.updated_at >= startMonth);
 
-            c.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="m-0">Active Pipeline</h5>
-                    <span class="badge bg-secondary">Current Month View</span>
-                </div>
-                <div class="d-flex flex-column gap-3">
-                ${display.map(t => `
-                    <div class="glass-panel p-3 border-start border-4 ${t.status==='Done'?'border-success':(t.status==='Review'?'border-info':'border-warning')}">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="status-badge ${t.status==='Done'?'st-done':(t.status==='Review'?'st-review':'st-ongoing')}">${t.status}</span>
-                            <span class="small text-muted">${new Date(t.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
-                        <p class="small text-secondary mb-2">${t.description}</p>
-                        ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? 
-                            `<button onclick="apiDone(${t.id})" class="btn btn-sm btn-primary w-100 mt-2">Mark Complete</button>` : ''}
-                        ${STATE.user.role === 'LEADER' && t.status === 'Review' ? 
-                            `<button onclick="apiApprove(${t.id})" class="btn btn-sm btn-success w-100 mt-2">Approve Work</button>` : ''}
+            c.innerHTML = display.length ? display.map(t => `
+                <div class="glass-panel p-3 border-start border-4 ${t.status==='Done'?'border-success':(t.status==='Review'?'border-info':'border-warning')}">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="status-badge ${t.status==='Done'?'st-done':(t.status==='Review'?'st-review':'st-ongoing')}">${t.status}</span>
+                        <span class="small text-secondary">${new Date(t.created_at).toLocaleDateString().slice(0,5)}</span>
                     </div>
-                `).join('')}
-                </div>`;
+                    <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
+                    <p class="small text-secondary mb-2">${t.description}</p>
+                    ${t.due_date ? `<div class="small text-danger mb-2"><i data-lucide="calendar" size="12"></i> Due: ${t.due_date}</div>` : ''}
+                    
+                    ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? 
+                        `<button onclick="startDoneWorkflow(${t.id})" class="btn btn-primary w-100 mt-2 btn-sm fw-bold">Mark Complete</button>` : ''}
+                    
+                    ${STATE.user.role === 'LEADER' && t.status === 'Review' ? 
+                        `<button onclick="apiApprove(${t.id})" class="btn btn-success w-100 mt-2 btn-sm fw-bold">Approve</button>` : ''}
+                </div>
+            `).join('') : '<div class="text-center text-muted py-5">No active tasks.</div>';
         }
 
-        async function renderDec(c, dateFilter) {
-            const { data } = await db.from('decisions').select('*').gte('created_at', dateFilter).order('created_at', {ascending:false});
-            c.innerHTML = data.length ? data.map(d => `
-                <div class="glass-panel p-3 mb-3">
-                    <div class="d-flex gap-3">
-                        <i data-lucide="quote" class="text-secondary flex-shrink-0"></i>
-                        <div>
-                            <h5 class="fw-bold text-white mb-1">${d.subject}</h5>
-                            <p class="text-secondary mb-2">${d.details}</p>
-                            <div class="small text-muted font-monospace">${new Date(d.created_at).toDateString()}</div>
+        async function renderFuture(c) {
+            const { data } = await db.from('tasks').select('*').eq('status','Future').order('created_at', {ascending:false});
+            
+            c.innerHTML = `
+                <div class="alert alert-secondary bg-opacity-10 border-0 small text-secondary mb-3">
+                    Ideas and tasks for later. Not active yet.
+                </div>
+                ${data.length ? data.map(t => `
+                    <div class="glass-panel p-3">
+                        <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
+                        <p class="small text-secondary mb-2">${t.description}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="status-badge st-future">Not Yet</span>
+                            ${STATE.user.role === 'LEADER' ? `<button onclick="apiActivate(${t.id})" class="btn btn-sm btn-outline-success">Activate</button>` : ''}
                         </div>
                     </div>
-                </div>
-            `).join('') : '<div class="text-center text-muted py-5">No decisions recorded this month.</div>';
+                `).join('') : '<div class="text-center text-muted py-5">No future ideas logged.</div>'}
+            `;
         }
 
         async function renderAtt(c, dateFilter) {
@@ -465,154 +498,168 @@
 
             c.innerHTML = `
                 <div class="glass-panel p-4 text-center mb-4">
-                    <h1 class="fw-bold text-white mb-0 display-3">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
-                    <p class="text-muted mb-3">${new Date().toDateString()}</p>
-                    ${checked ? '<button class="btn btn-success px-5 py-2 fw-bold" disabled>Checked In</button>' 
-                              : '<button onclick="apiCheckIn()" class="btn btn-primary px-5 py-2 fw-bold shadow-lg">Check In</button>'}
+                    <h1 class="fw-bold text-white mb-0">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
+                    <p class="text-secondary mb-3 small">${new Date().toDateString()}</p>
+                    ${checked ? '<button class="btn btn-success w-100 py-3 fw-bold rounded-pill" disabled>Checked In</button>' 
+                              : '<button onclick="apiCheckIn()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-lg">Tap to Check In</button>'}
                 </div>
                 <div class="glass-panel">
-                    <div class="glass-header">Current Month Log</div>
-                    <div>${logs.map(l => {
+                    <div class="p-3 border-bottom border-secondary border-opacity-25 fw-bold small text-secondary">Recent Logs</div>
+                    ${logs.slice(0,10).map(l => {
                         const u = TEAM.find(x=>x.id==l.user_id);
                         return `<div class="d-flex justify-content-between p-3 border-bottom border-secondary border-opacity-10">
-                            <span class="text-white small fw-bold"><span class="me-2">${u?.avatar}</span> ${u?.name}</span>
-                            <span class="text-secondary small font-monospace">${l.date}</span>
-                        </div>`;
-                    }).join('')}</div>
-                </div>
-            `;
-        }
-
-        // --- ARCHIVE SYSTEM (THE NEW FEATURE) ---
-        async function renderArchives(c) {
-            // 1. Fetch ALL data dates to calculate folders
-            const { data: dDates } = await db.from('decisions').select('created_at');
-            const { data: tDates } = await db.from('tasks').select('updated_at').eq('status','Done');
-            
-            const months = new Set();
-            [...(dDates||[]), ...(tDates||[])].forEach(x => {
-                const d = new Date(x.created_at || x.updated_at);
-                months.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
-            });
-
-            const sorted = Array.from(months).sort().reverse();
-
-            c.innerHTML = `
-                <div class="alert alert-info border-0 bg-opacity-10 text-info small mb-4">
-                    <i data-lucide="archive" size="14" class="me-2"></i> Only <strong>completed</strong> items and past records appear here.
-                </div>
-                <div class="row g-3">
-                    ${sorted.map(m => {
-                        const [y, mo] = m.split('-');
-                        const label = new Date(y, mo-1).toLocaleString('default', { month: 'long', year: 'numeric' });
-                        return `
-                        <div class="col-6 col-md-4 col-lg-3">
-                            <div class="folder-card" onclick="openArchiveFolder('${m}', '${label}')">
-                                <i data-lucide="folder" class="text-warning mb-3" size="32"></i>
-                                <h6 class="text-white fw-bold mb-0">${label}</h6>
-                                <div class="small text-secondary mt-1">Click to open</div>
-                            </div>
+                            <span class="text-white small fw-bold">${u?.avatar} ${u?.name.split(' ')[0]}</span>
+                            <span class="text-secondary small font-monospace">${l.date.slice(5)}</span>
                         </div>`;
                     }).join('')}
                 </div>
             `;
+        }
+
+        async function renderDec(c, dateFilter) {
+            const { data } = await db.from('decisions').select('*').gte('created_at', dateFilter).order('created_at', {ascending:false});
+            c.innerHTML = data.length ? data.map(d => `
+                <div class="glass-panel p-3 mb-3">
+                    <div class="d-flex gap-3">
+                        <i data-lucide="quote" class="text-warning flex-shrink-0"></i>
+                        <div>
+                            <h6 class="fw-bold text-white mb-1">${d.subject}</h6>
+                            <p class="text-secondary mb-2 small">${d.details}</p>
+                            <div class="small text-muted font-monospace" style="font-size:10px">${new Date(d.created_at).toDateString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="text-center text-muted py-5">No decisions this month.</div>';
+        }
+
+        // --- ACTIONS ---
+
+        function setMode(m) {
+            STATE.mode = m;
+            document.getElementById('div-task-opts').classList.toggle('d-none', m==='decision');
+            document.getElementById('n-title').placeholder = m==='decision' ? 'Decision Subject' : 'Task Title';
+            
+            if(m !== 'decision') {
+                document.getElementById('n-members').innerHTML = TEAM.map(u => `
+                <label class="d-flex align-items-center p-2 rounded bg-dark border border-secondary border-opacity-10">
+                    <input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}" style="transform:scale(1.2)"> ${u.avatar} ${u.name}
+                </label>`).join('');
+            }
+        }
+        function openCreate() { setMode('task'); document.getElementById('ct-task').click(); MODALS.create.show(); }
+        
+        async function apiCreate() {
+            const t = document.getElementById('n-title').value;
+            const desc = document.getElementById('n-desc').value;
+            if(!t) return toast('Error','Title required');
+            
+            if(STATE.mode === 'decision') {
+                await db.from('decisions').insert({subject:t, details:desc});
+            } else {
+                // Task or Future
+                const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
+                let status = 'Pending';
+                if(STATE.mode === 'future') status = 'Future';
+                else if(STATE.user.role === 'LEADER') status = 'Ongoing';
+
+                await db.from('tasks').insert({
+                    task_title: t, 
+                    description: desc, 
+                    due_date: document.getElementById('n-date').value || null, 
+                    creator_id: STATE.user.id, 
+                    tagged_members: tags, 
+                    status: status
+                });
+            }
+            toast('Success','Saved','✅');
+            MODALS.create.hide(); refreshData(false);
+        }
+
+        // UPLOAD & DONE LOGIC
+        function startDoneWorkflow(id) {
+            STATE.pendingDoneId = id;
+            document.getElementById('chk-upload').checked = false;
+            toggleDoneBtn();
+            MODALS.upload.show();
+        }
+        function toggleDoneBtn() {
+            const chk = document.getElementById('chk-upload').checked;
+            const btn = document.getElementById('btn-conf-done');
+            if(chk) btn.classList.remove('disabled'); else btn.classList.add('disabled');
+        }
+        async function confirmDone() {
+            if(!STATE.pendingDoneId) return;
+            await db.from('tasks').update({status:'Done', updated_at: new Date()}).eq('id', STATE.pendingDoneId);
+            MODALS.upload.hide();
+            toast('Great Job!','Task completed','🎉');
+            refreshData(false);
+        }
+
+        async function apiApprove(id) { await db.from('tasks').update({status:'Ongoing'}).eq('id',id); refreshData(false); toast('Approved','Work started','🚀'); }
+        async function apiActivate(id) { await db.from('tasks').update({status:'Pending'}).eq('id',id); refreshData(false); toast('Activated','Moved to active tasks','⚡'); }
+        async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); refreshData(false); toast('Checked In','Success','✅'); }
+        
+        async function markRead() { 
+            await db.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id); 
+            document.getElementById('bell-dot').classList.add('d-none');
+        }
+
+        // --- ARCHIVE LOGIC (Simplified for Mobile) ---
+        async function renderArchives(c) {
+            // Group by Month
+            const { data } = await db.from('tasks').select('updated_at').eq('status','Done');
+            // Simplified: Just show month folders
+            c.innerHTML = `
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="glass-panel p-3 text-center" onclick="openArchiveFolder('2026-02')">
+                            <i data-lucide="folder" class="text-warning mb-2"></i>
+                            <div class="fw-bold text-white">Feb 2026</div>
+                        </div>
+                    </div>
+                     <div class="col-6">
+                        <div class="glass-panel p-3 text-center" onclick="openArchiveFolder('2026-01')">
+                            <i data-lucide="folder" class="text-warning mb-2"></i>
+                            <div class="fw-bold text-white">Jan 2026</div>
+                        </div>
+                    </div>
+                </div>`;
             lucide.createIcons();
         }
 
-        async function openArchiveFolder(ym, label) {
-            STATE.archiveMonth = ym; // format "2025-12"
-            document.getElementById('arc-title').innerText = label;
-            
-            // Pre-fetch all data for this month
-            const start = `${ym}-01`;
-            const end = `${ym}-31`; // Loose end date works for filtering
-            
+        async function openArchiveFolder(ym) {
+            const start = `${ym}-01`; const end = `${ym}-31`;
             const [t, d, a] = await Promise.all([
                 db.from('tasks').select('*').eq('status','Done').gte('updated_at', start).lte('updated_at', end),
                 db.from('decisions').select('*').gte('created_at', start).lte('created_at', end),
                 db.from('attendance').select('*').gte('date', start).lte('date', end)
             ]);
-            
             STATE.archiveData = { tasks: t.data, decisions: d.data, attendance: a.data };
             MODALS.archive.show();
             renderArchiveTab('tasks');
         }
 
         function renderArchiveTab(tab) {
-            document.querySelectorAll('.archive-tab').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('#modArchiveView .btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`at-${tab}`).classList.add('active');
-            
-            const div = document.getElementById('archive-content');
+            const box = document.getElementById('archive-content');
             const d = STATE.archiveData;
-            
+
             if(tab === 'tasks') {
-                div.innerHTML = d.tasks.length ? `<div class="table-responsive"><table class="table table-dark table-hover table-sm small">
-                    <thead><tr><th>Task</th><th>Owner</th><th>Date</th></tr></thead>
-                    <tbody>${d.tasks.map(x => `<tr><td>${x.task_title}</td><td>${getTeamName(x.creator_id)}</td><td>${new Date(x.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody>
-                </table></div>` : '<div class="p-4 text-center text-muted">No completed tasks this month</div>';
-            }
-            if(tab === 'decisions') {
-                div.innerHTML = d.decisions.length ? d.decisions.map(x => `
-                    <div class="border-bottom border-secondary border-opacity-25 py-3">
-                        <div class="fw-bold text-white">${x.subject}</div>
-                        <div class="text-secondary small">${x.details}</div>
-                    </div>`).join('') : '<div class="p-4 text-center text-muted">No decisions recorded</div>';
-            }
-            if(tab === 'attendance') {
-                div.innerHTML = d.attendance.length ? `<div class="table-responsive"><table class="table table-dark table-sm small">
-                    <thead><tr><th>Name</th><th>Date</th></tr></thead>
-                    <tbody>${d.attendance.map(x => `<tr><td>${getTeamName(x.user_id)}</td><td>${x.date}</td></tr>`).join('')}</tbody>
-                </table></div>` : '<div class="p-4 text-center text-muted">No logs found</div>';
-            }
-        }
-
-        // --- ACTIONS ---
-        function setMode(m) {
-            STATE.mode = m;
-            document.getElementById('btn-m-task').className = `btn btn-sm flex-fill fw-bold ${m==='task'?'btn-primary':'text-secondary'}`;
-            document.getElementById('btn-m-dec').className = `btn btn-sm flex-fill fw-bold ${m==='decision'?'btn-primary':'text-secondary'}`;
-            document.getElementById('div-task-opts').classList.toggle('d-none', m!=='task');
-            document.getElementById('n-title').placeholder = m==='task' ? 'What needs doing?' : 'Subject of decision';
-            
-            if(m==='task') document.getElementById('n-members').innerHTML = TEAM.map(u => `
-                <label class="d-flex align-items-center p-2 rounded bg-dark border border-secondary border-opacity-10">
-                    <input type="checkbox" class="chk-mem form-check-input me-2" value="${u.id}"> ${u.avatar} ${u.name}
-                </label>`).join('');
-        }
-        function openCreate() { setMode('task'); MODALS.create.show(); }
-        
-        async function apiCreate() {
-            const t = document.getElementById('n-title').value;
-            const d = document.getElementById('n-desc').value;
-            if(!t) return toast('Error','Title required');
-            
-            if(STATE.mode === 'task') {
-                const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
-                const status = STATE.user.role === 'LEADER' ? 'Ongoing' : 'Pending';
-                await db.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('n-date').value, creator_id:STATE.user.id, tagged_members:tags, status:status});
-                toast('Success','Task Created','✅');
+                box.innerHTML = d.tasks.length ? d.tasks.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${x.task_title}</div>`).join('') : 'No records';
+            } else if(tab === 'decisions') {
+                box.innerHTML = d.decisions.length ? d.decisions.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${x.subject}</div>`).join('') : 'No records';
             } else {
-                await db.from('decisions').insert({subject:t, details:d});
-                toast('Success','Decision Logged','✅');
+                box.innerHTML = d.attendance.length ? d.attendance.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${TEAM.find(u=>u.id==x.user_id)?.name} - ${x.date}</div>`).join('') : 'No records';
             }
-            MODALS.create.hide(); refreshData(false);
         }
 
-        async function apiDone(id) { await db.from('tasks').update({status:'Done', updated_at: new Date()}).eq('id',id); refreshData(false); toast('Done','Task completed!','⭐'); }
-        async function apiApprove(id) { await db.from('tasks').update({status:'Ongoing'}).eq('id',id); refreshData(false); toast('Approved','Work started','🚀'); }
-        async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); refreshData(false); toast('Checked In','Success','✅'); }
-        
-        async function checkNotis() {
-            if(!STATE.user) return;
-            const { data } = await db.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false).order('created_at',{ascending:false});
-            const dot = document.getElementById('bell-dot');
-            if(data?.length) { dot.classList.remove('d-none'); document.getElementById('noti-list').innerHTML = data.map(n=>`<div class="list-group-item bg-dark text-white p-3"><small>${n.message}</small></div>`).join(''); }
-            else { dot.classList.add('d-none'); document.getElementById('noti-list').innerHTML = '<div class="p-3 text-center small text-muted">No new alerts</div>'; }
+        function toast(t,m,i) { 
+            document.getElementById('toast-title').innerText=t; 
+            document.getElementById('toast-msg').innerText=m; 
+            document.getElementById('toast-icon').innerText=i||'🔔'; 
+            bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); 
         }
-        async function markRead() { await db.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id); }
-
-        function toast(t,m,i) { document.getElementById('toast-title').innerText=t; document.getElementById('toast-msg').innerText=m; document.getElementById('toast-icon').innerText=i||'🔔'; bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); }
-        function getTeamName(id) { return TEAM.find(u=>u.id==id)?.name || 'Unknown'; }
     </script>
 </body>
 </html>
