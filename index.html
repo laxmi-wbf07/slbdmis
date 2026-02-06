@@ -6,222 +6,279 @@
     <title>SLBDMIS | Team Portal</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === PROFESSIONAL DARK THEME === */
+        /* === CORE THEME === */
         :root { 
-            --bg: #0d1117; 
-            --glass: rgba(22, 27, 34, 0.95); 
-            --glass-border: rgba(48, 54, 61, 0.7);
+            --bg-body: #0d1117; 
+            --bg-card: #161b22; 
+            --bg-hover: #21262d;
+            --border: #30363d;
             --primary: #2f81f7; 
-            --success: #238636;
+            --accent: #a371f7;
             --text-main: #f0f6fc;
             --text-sub: #8b949e;
+            --nav-height-mobile: 80px;
+            --sidebar-width: 260px;
         }
 
         body { 
-            background-color: var(--bg); 
+            background-color: var(--bg-body); 
             color: var(--text-main); 
             font-family: 'Inter', sans-serif; 
-            overflow-x: hidden;
-            /* Padding for Mobile Bottom Nav */
-            padding-bottom: 90px; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* RESET SCROLLBAR */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #010409; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-
-        /* GLASS CARD STYLING */
-        .glass-panel {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
+        /* === UTILITIES === */
+        .glass {
+            background: rgba(22, 27, 34, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+        }
+        .card-custom {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            margin-bottom: 12px;
             overflow: hidden;
+            transition: transform 0.2s;
         }
+        .card-custom:active { transform: scale(0.99); }
+        .text-xs { font-size: 0.75rem; }
+        .cursor-pointer { cursor: pointer; }
 
-        /* --- DESKTOP SIDEBAR --- */
+        /* === LAYOUT ENGINE === */
+        
+        /* DESKTOP SIDEBAR */
         .sidebar {
-            width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
-            background: #010409; border-right: 1px solid #30363d;
-            display: none; flex-direction: column; padding: 24px; z-index: 100;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: #010409;
+            border-right: 1px solid var(--border);
+            z-index: 1040;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
         }
+
+        /* MOBILE BOTTOM NAV */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: var(--nav-height-mobile);
+            background: rgba(1, 4, 9, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            z-index: 1040;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 Tabs */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* MAIN WRAPPER */
+        .app-wrapper {
+            min-height: 100vh;
+            padding-top: 70px; /* Space for Mobile Header */
+            padding-bottom: 100px; /* Space for Mobile Nav */
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* RESPONSIVE BREAKPOINTS */
+        @media (min-width: 992px) {
+            .sidebar { display: flex; }
+            .bottom-nav { display: none; }
+            .mobile-header { display: none !important; }
+            .app-wrapper {
+                padding-top: 40px;
+                padding-bottom: 40px;
+                padding-left: calc(var(--sidebar-width) + 40px);
+                padding-right: 40px;
+                max-width: 1400px;
+            }
+        }
+
+        /* === COMPONENTS === */
         
-        .nav-item-d {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-            border-radius: 8px; color: var(--text-sub); cursor: pointer; margin-bottom: 4px; font-weight: 500; transition: 0.2s;
+        /* Navigation Links */
+        .nav-link-custom {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border-radius: 8px;
+            color: var(--text-sub); text-decoration: none;
+            transition: 0.2s;
         }
-        .nav-item-d:hover, .nav-item-d.active { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item-d.active { border-left: 3px solid var(--primary); }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            background: var(--bg-hover); color: white;
+        }
+        .nav-link-custom.active { border-left: 3px solid var(--primary); }
 
-        /* --- MOBILE BOTTOM NAV --- */
-        .mobile-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(13, 17, 23, 0.98);
-            border-top: 1px solid #30363d;
-            z-index: 1000;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
-            display: flex; justify-content: space-around;
+        .mob-nav-item {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            color: var(--text-sub); font-size: 10px;
+            text-decoration: none;
+            transition: 0.2s;
         }
-        .mob-link {
-            padding: 12px 0; color: var(--text-sub); text-align: center; width: 100%;
-            transition: 0.2s; position: relative;
-        }
-        .mob-link.active { color: var(--primary); }
-        .mob-link i { display: block; margin: 0 auto 4px; }
-        .mob-link span { font-size: 10px; font-weight: 600; display: block; }
+        .mob-nav-item.active { color: var(--primary); }
+        .mob-nav-item.active i { transform: translateY(-2px); }
 
-        /* --- MAIN CONTENT LAYOUT --- */
-        .main-content { margin: 0; padding: 16px; max-width: 100%; }
+        /* Avatars */
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--bg-hover); color: white;
+            display: grid; place-items: center; font-size: 20px;
+            border: 2px solid transparent;
+        }
+        .avatar.selected { border-color: var(--primary); box-shadow: 0 0 10px rgba(47,129,247,0.4); }
+
+        /* Badges */
+        .badge-status { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 20px; text-transform: uppercase; }
+        .st-done { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
+        .st-pending { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+        .st-future { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
         
-        @media (min-width: 992px) { 
-            .sidebar { display: flex; } 
-            .main-content { margin-left: 260px; padding: 40px; max-width: 1000px; margin-right: auto; } 
-            body { padding-bottom: 0; } 
-            .mobile-nav { display: none !important; } 
-        }
-
-        /* DRIVE LINKS GRID */
-        .drive-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        /* Drive Links */
         .drive-btn {
             display: flex; align-items: center; gap: 12px;
-            background: #21262d; padding: 16px; border-radius: 8px;
-            text-decoration: none; color: white; border: 1px solid transparent;
+            background: var(--bg-hover); padding: 15px;
+            border-radius: 10px; border: 1px solid var(--border);
+            color: var(--text-main); text-decoration: none;
         }
-        .drive-btn:hover { border-color: var(--primary); background: #262c36; }
+        .drive-btn:hover { border-color: var(--primary); background: #2a313c; }
 
-        /* BADGES */
-        .badge-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
-        .bg-st-done { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
-        .bg-st-review { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
-        .bg-st-ongoing { background: rgba(210, 153, 34, 0.2); color: #d29922; }
-        .bg-st-future { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
-
-        /* AVATAR */
-        .user-avatar {
-            width: 50px; height: 50px; border-radius: 50%; background: #21262d;
-            display: grid; place-items: center; font-size: 24px; border: 2px solid transparent;
-        }
-        .user-avatar.selected { border-color: var(--primary); box-shadow: 0 0 15px rgba(47,129,247,0.5); }
     </style>
 </head>
 <body>
 
-    <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3" style="z-index: 2000; position: relative; background: var(--bg);">
-        <div class="glass-panel p-4 w-100" style="max-width: 400px;">
+    <div id="view-auth" class="d-flex flex-column align-items-center justify-content-center min-vh-100 p-3" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-body); z-index:2000;">
+        <div class="card-custom p-4 w-100" style="max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
             <div class="text-center mb-4">
-                <div class="bg-primary bg-opacity-10 text-primary rounded p-3 d-inline-block mb-3"><i data-lucide="shield-check" size="32"></i></div>
-                <h4 class="fw-bold text-white">SLBDMIS Portal</h4>
-                <p class="text-secondary small">Identify yourself to proceed</p>
-            </div>
-            
-            <div id="auth-step-1" class="row g-2"></div>
-            
-            <div id="auth-step-2" class="d-none">
-                <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded bg-dark border border-secondary border-opacity-25">
-                    <div id="sel-avatar" class="fs-2"></div>
-                    <div><div id="sel-name" class="fw-bold text-white"></div><div class="text-muted small">Enter Citizen ID (PIN)</div></div>
+                <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-3">
+                    <i data-lucide="shield-check" size="32"></i>
                 </div>
-                <input type="password" id="inp-cid" class="form-control bg-black text-white border-secondary mb-3 text-center fs-2 py-2" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="doLogin()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Login Access</button>
-                <button onclick="resetAuth()" class="btn btn-link w-100 mt-2 text-secondary text-decoration-none">Cancel</button>
+                <h4 class="fw-bold">SLBDMIS Portal</h4>
+                <p class="text-sub small">Secure Team Access</p>
+            </div>
+
+            <div id="auth-step-1" class="row g-2"></div>
+
+            <div id="auth-step-2" class="d-none animate-fade">
+                <div class="d-flex align-items-center gap-3 p-3 rounded bg-dark border border-secondary border-opacity-25 mb-4">
+                    <div id="auth-sel-av" class="avatar fs-4"></div>
+                    <div>
+                        <div id="auth-sel-name" class="fw-bold text-white"></div>
+                        <div class="text-sub text-xs">Enter PIN</div>
+                    </div>
+                </div>
+                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3" placeholder="••••" maxlength="11" inputmode="numeric">
+                <button onclick="attemptLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg">Unlock</button>
+                <button onclick="resetAuth()" class="btn btn-link text-sub w-100 text-decoration-none mt-2">Back to users</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
         
-        <nav class="sidebar">
-            <div class="mb-5 px-2 d-flex align-items-center gap-3 text-white">
-                <div class="bg-primary rounded p-1"><i data-lucide="layout" size="20"></i></div>
-                <span class="fw-bold">SLBDMIS</span>
+        <div class="mobile-header fixed-top glass p-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <div id="u-av-mob" class="avatar" style="width:32px; height:32px; font-size:16px;"></div>
+                <span id="page-title-mob" class="fw-bold">Dashboard</span>
             </div>
-            <div id="nav-links-desktop" class="d-flex flex-column flex-grow-1"></div>
-            <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
-                <div class="d-flex align-items-center gap-2 mb-3 px-2">
-                    <div id="u-av-side" class="fs-5"></div>
-                    <div><div id="u-name-side" class="small fw-bold text-white"></div><div class="text-secondary" style="font-size:10px">Online</div></div>
+            <div class="d-flex gap-2">
+                <button onclick="openNotis()" class="btn btn-dark btn-sm border border-secondary border-opacity-25 position-relative">
+                    <i data-lucide="bell" size="18"></i>
+                    <span id="badge-noti" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
+                </button>
+                <button onclick="openCreate()" class="btn btn-primary btn-sm shadow-sm"><i data-lucide="plus" size="18"></i></button>
+            </div>
+        </div>
+
+        <nav class="sidebar">
+            <div class="d-flex align-items-center gap-3 mb-5 px-2 text-white">
+                <div class="bg-primary rounded p-1"><i data-lucide="layout-grid" size="24"></i></div>
+                <span class="fw-bold fs-5">SLBDMIS</span>
+            </div>
+            <div id="nav-desktop" class="d-flex flex-column gap-1 flex-grow-1">
+                </div>
+            <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
+                <div class="d-flex align-items-center gap-3 px-2 mb-3">
+                    <div id="u-av-desk" class="avatar"></div>
+                    <div>
+                        <div id="u-name-desk" class="fw-bold text-white small"></div>
+                        <div class="text-success text-xs">● Online</div>
+                    </div>
                 </div>
                 <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Sign Out</button>
             </div>
         </nav>
 
-        <main class="main-content">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 id="page-title" class="fw-bold text-white m-0">Dashboard</h4>
-                    <small id="date-display" class="text-secondary"></small>
-                </div>
+        <main class="app-wrapper">
+            <div class="d-none d-lg-flex justify-content-between align-items-center mb-4">
+                <h3 id="page-title-desk" class="fw-bold m-0">Dashboard</h3>
                 <div class="d-flex gap-2">
-                    <button onclick="MODALS.noti.show(); markRead()" class="btn btn-dark border border-secondary border-opacity-25 position-relative">
+                    <button onclick="openNotis()" class="btn btn-dark border border-secondary border-opacity-25 position-relative">
                         <i data-lucide="bell" size="20"></i>
-                        <span id="bell-dot" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
+                        <span id="badge-noti-d" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
                     </button>
-                    <button onclick="openCreate()" class="btn btn-primary shadow-sm"><i data-lucide="plus" size="20"></i></button>
+                    <button onclick="openCreate()" class="btn btn-primary shadow-sm px-4 fw-bold"><i data-lucide="plus" size="18" class="me-2"></i> New</button>
                 </div>
-            </header>
-            
-            <div id="content-area"></div>
+            </div>
+
+            <div id="main-container" class="fade-in">
+                </div>
         </main>
 
-        <nav class="mobile-nav" id="nav-links-mobile"></nav>
+        <nav class="bottom-nav" id="nav-mobile">
+            </nav>
+
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
-            <div class="modal-content glass-panel border-0">
+            <div class="modal-content card-custom border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold text-white m-0">New Item</h5>
+                    <h5 class="modal-title fw-bold">Create New</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="btn-group w-100 mb-3" role="group">
-                        <input type="radio" class="btn-check" name="ctype" id="ct-task" checked onclick="setMode('task')">
-                        <label class="btn btn-outline-primary" for="ct-task">Task</label>
+                    <div class="bg-dark p-1 rounded-3 d-flex mb-4 border border-secondary border-opacity-25">
+                        <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm text-white flex-fill bg-secondary bg-opacity-25 rounded shadow-sm">Task</button>
+                        <button onclick="setMode('future')" id="btn-m-future" class="btn btn-sm text-secondary flex-fill">Not Yet</button>
+                        <button onclick="setMode('decision')" id="btn-m-decision" class="btn btn-sm text-secondary flex-fill">Decision</button>
+                    </div>
 
-                        <input type="radio" class="btn-check" name="ctype" id="ct-future" onclick="setMode('future')">
-                        <label class="btn btn-outline-secondary" for="ct-future">Not Yet</label>
+                    <input type="text" id="n-title" class="form-control form-control-lg bg-black text-white border-secondary mb-3" placeholder="Title">
+                    <textarea id="n-desc" class="form-control bg-black text-white border-secondary mb-3" rows="4" placeholder="Description details..."></textarea>
+                    
+                    <div id="form-task-extras">
+                        <label class="text-sub text-xs fw-bold mb-2 text-uppercase">Due Date</label>
+                        <input type="date" id="n-date" class="form-control bg-black text-white border-secondary mb-3">
                         
-                        <input type="radio" class="btn-check" name="ctype" id="ct-dec" onclick="setMode('decision')">
-                        <label class="btn btn-outline-warning" for="ct-dec">Decision</label>
-                    </div>
-
-                    <input type="text" id="n-title" class="form-control bg-black text-white mb-3 py-3" placeholder="Task Title">
-                    <textarea id="n-desc" class="form-control bg-black text-white mb-3" rows="3" placeholder="Description..."></textarea>
-                    
-                    <div id="div-task-opts">
-                        <label class="text-secondary small mb-1">Due Date</label>
-                        <input type="date" id="n-date" class="form-control bg-black text-white mb-3">
-                        <label class="text-secondary small mb-1">Assign To</label>
-                        <div id="n-members" class="d-flex flex-column gap-2 mb-3"></div>
+                        <label class="text-sub text-xs fw-bold mb-2 text-uppercase">Assign Members</label>
+                        <div id="n-members" class="d-flex flex-column gap-2 mb-4"></div>
                     </div>
                     
-                    <button onclick="apiCreate()" class="btn btn-primary w-100 fw-bold py-3 rounded-pill">Save Record</button>
+                    <button onclick="submitCreate()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">Save Record</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="modal fade" id="modUpload" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
-            <div class="modal-content glass-panel border-0">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+            <div class="modal-content card-custom border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold text-white">Proof of Work</h5>
+                    <h5 class="modal-title fw-bold">Upload Proof</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="alert alert-warning bg-opacity-10 border-0 text-warning small mb-3">
-                        <i data-lucide="alert-triangle" size="14" class="me-1"></i> Files must be uploaded to Drive before completing.
-                    </div>
+                    <p class="text-sub small mb-3">Select the correct folder to upload your work before closing this task.</p>
                     
-                    <div class="drive-grid mb-4">
+                    <div class="d-grid gap-2 mb-4">
                         <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-btn">
                             <i data-lucide="folder" class="text-warning"></i> <span>Admin & Finance</span>
                         </a>
@@ -236,33 +293,34 @@
                         </a>
                     </div>
 
-                    <div class="form-check bg-dark p-3 rounded border border-secondary border-opacity-25 mb-3">
-                        <input class="form-check-input" type="checkbox" id="chk-upload" onchange="toggleDoneBtn()">
-                        <label class="form-check-label text-white small" for="chk-upload">
-                            I certify that I have uploaded the necessary files to the links above.
+                    <div class="form-check bg-dark p-3 rounded border border-secondary border-opacity-25">
+                        <input class="form-check-input" type="checkbox" id="chk-proof" onchange="toggleDoneBtn()">
+                        <label class="form-check-label text-white small" for="chk-proof">
+                            I have uploaded the files.
                         </label>
                     </div>
-
-                    <button id="btn-conf-done" onclick="confirmDone()" class="btn btn-success w-100 py-3 fw-bold disabled">Mark Completed</button>
+                </div>
+                <div class="modal-footer border-top border-secondary border-opacity-25">
+                    <button id="btn-conf-done" onclick="finishTask()" class="btn btn-success w-100 py-3 rounded-pill fw-bold disabled">Mark Complete</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modArchiveView" tabindex="-1">
+    <div class="modal fade" id="modArchive" tabindex="-1">
         <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content glass-panel border-0 rounded-0" style="background: var(--bg);">
+            <div class="modal-content bg-dark">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title text-white" id="arc-title">Archive</h5>
+                    <h5 class="modal-title fw-bold text-white" id="arc-head">Archive</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-3">
-                    <div class="d-flex gap-2 mb-4">
-                        <button onclick="renderArchiveTab('tasks')" class="btn btn-sm btn-outline-light active flex-fill" id="at-tasks">Tasks</button>
-                        <button onclick="renderArchiveTab('decisions')" class="btn btn-sm btn-outline-light flex-fill" id="at-decisions">Decisions</button>
-                        <button onclick="renderArchiveTab('attendance')" class="btn btn-sm btn-outline-light flex-fill" id="at-attendance">Attendance</button>
+                <div class="modal-body p-0">
+                    <div class="d-flex border-bottom border-secondary border-opacity-25">
+                        <button onclick="tabArc('tasks')" id="tab-a-tasks" class="btn btn-dark flex-fill rounded-0 border-0 border-bottom border-2 border-primary py-3 active">Tasks</button>
+                        <button onclick="tabArc('decs')" id="tab-a-decs" class="btn btn-dark flex-fill rounded-0 border-0 py-3 text-secondary">Decisions</button>
+                        <button onclick="tabArc('logs')" id="tab-a-logs" class="btn btn-dark flex-fill rounded-0 border-0 py-3 text-secondary">Logs</button>
                     </div>
-                    <div id="archive-content"></div>
+                    <div id="arc-body" class="p-3"></div>
                 </div>
             </div>
         </div>
@@ -270,36 +328,39 @@
 
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content glass-panel border-0">
+            <div class="modal-content card-custom border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold text-white">Notifications</h5>
+                    <h5 class="modal-title fw-bold">Notifications</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
-                    <div id="noti-list" class="list-group list-group-flush"></div>
+                    <div id="noti-list" class="list-group list-group-flush bg-transparent"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 11000">
-        <div id="sysToast" class="toast text-bg-dark border-0 shadow-lg align-items-center">
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1070;">
+        <div id="liveToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-3">
-                    <span id="toast-icon" class="fs-5"></span>
-                    <div><strong id="toast-title" class="d-block text-white"></strong><small id="toast-msg" class="text-secondary"></small></div>
+                    <i id="toast-icon" data-lucide="check-circle" class="text-success"></i>
+                    <div>
+                        <strong id="toast-title" class="d-block">Notification</strong>
+                        <small id="toast-msg" class="text-secondary">Action completed.</small>
+                    </div>
                 </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- SUPABASE CONFIG ---
+        // CONFIG
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const db = window.supabase.createClient(SB_URL, SB_KEY);
         
-        // --- TEAM DATA ---
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel",    avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
@@ -307,399 +368,433 @@
             { id: 4, name: "Ngawang",    avatar: "👨",   cid: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', pendingDoneId: null };
+        const ROUTES = [
+            {id:'home', t:'Home', i:'layout-dashboard'},
+            {id:'task', t:'Tasks', i:'layers'},
+            {id:'future', t:'Not Yet', i:'hourglass'},
+            {id:'dec', t:'Decisions', i:'scroll-text'},
+            {id:'arc', t:'Records', i:'archive'}
+        ];
+
+        let STATE = { user: null, page: 'home', formMode: 'task', pendingTask: null, archiveData: null };
         const MODALS = {};
 
         // --- INIT ---
-        window.onload = () => {
+        document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            // Initialize Bootstrap Modals
             MODALS.create = new bootstrap.Modal('#modCreate');
             MODALS.upload = new bootstrap.Modal('#modUpload');
-            MODALS.archive = new bootstrap.Modal('#modArchiveView');
+            MODALS.archive = new bootstrap.Modal('#modArchive');
             MODALS.noti = new bootstrap.Modal('#modNoti');
-
-            // Check Session
-            const uid = localStorage.getItem('slbd_v2_uid');
-            if(uid) { 
-                STATE.user = TEAM.find(u => u.id == uid); 
-                if(STATE.user) { startApp(); return; } 
+            
+            // Auto Login Check
+            const savedId = localStorage.getItem('slbd_uid');
+            if(savedId) {
+                const u = TEAM.find(x => x.id == savedId);
+                if(u) { loginUser(u); return; }
             }
-            renderAuth();
-        };
+            initAuth();
+        });
 
         // --- AUTH ---
-        function renderAuth() {
-            document.getElementById('view-auth').classList.remove('d-none');
-            const list = document.getElementById('auth-step-1');
-            list.innerHTML = TEAM.map(u => `
+        function initAuth() {
+            const c = document.getElementById('auth-step-1');
+            c.innerHTML = TEAM.map(u => `
                 <div class="col-6">
-                    <div class="glass-panel p-3 text-center cursor-pointer" onclick="pickUser(${u.id})">
+                    <div onclick="selectAuthUser(${u.id})" class="card-custom p-3 text-center cursor-pointer hover-bg">
                         <div class="fs-1 mb-2">${u.avatar}</div>
-                        <div class="fw-bold text-white small">${u.name.split(' ')[0]}</div>
+                        <div class="fw-bold text-white text-xs">${u.name.split(' ')[0]}</div>
                     </div>
-                </div>`).join('');
+                </div>
+            `).join('');
         }
-
-        function pickUser(id) {
-            STATE.selUser = TEAM.find(u => u.id === id);
+        function selectAuthUser(id) {
+            STATE.tempUser = TEAM.find(u => u.id === id);
             document.getElementById('auth-step-1').classList.add('d-none');
             document.getElementById('auth-step-2').classList.remove('d-none');
-            document.getElementById('sel-avatar').innerHTML = STATE.selUser.avatar;
-            document.getElementById('sel-name').innerText = STATE.selUser.name;
-            document.getElementById('inp-cid').focus();
+            document.getElementById('auth-sel-av').innerHTML = STATE.tempUser.avatar;
+            document.getElementById('auth-sel-name').innerText = STATE.tempUser.name;
+            document.getElementById('inp-pin').value = ''; 
+            document.getElementById('inp-pin').focus();
         }
-        function resetAuth() { 
-            document.getElementById('auth-step-1').classList.remove('d-none'); 
-            document.getElementById('auth-step-2').classList.add('d-none'); 
-            document.getElementById('inp-cid').value = '';
+        function resetAuth() {
+            document.getElementById('auth-step-2').classList.add('d-none');
+            document.getElementById('auth-step-1').classList.remove('d-none');
         }
-        function doLogin() {
-            if(document.getElementById('inp-cid').value === STATE.selUser.cid) {
-                STATE.user = STATE.selUser;
-                localStorage.setItem('slbd_v2_uid', STATE.user.id);
-                document.getElementById('view-auth').classList.add('d-none');
-                startApp();
-            } else toast('Error', 'Wrong PIN', '🚫');
+        function attemptLogin() {
+            if(document.getElementById('inp-pin').value === STATE.tempUser.cid) {
+                localStorage.setItem('slbd_uid', STATE.tempUser.id);
+                loginUser(STATE.tempUser);
+            } else {
+                showToast('Access Denied', 'Incorrect PIN', 'shield-alert', 'text-danger');
+            }
         }
-        function logout() { localStorage.removeItem('slbd_v2_uid'); location.reload(); }
+        function loginUser(u) {
+            STATE.user = u;
+            document.getElementById('view-auth').classList.add('d-none');
+            document.getElementById('view-app').classList.remove('d-none');
+            
+            // Set User Info
+            document.getElementById('u-av-mob').innerHTML = u.avatar;
+            document.getElementById('u-av-desk').innerHTML = u.avatar;
+            document.getElementById('u-name-desk').innerText = u.name;
+
+            renderNav();
+            navTo('home');
+            
+            // Polling
+            setInterval(() => { if(STATE.page !== 'arc') loadData(true); checkNotis(); }, 5000);
+            checkNotis();
+        }
+        function logout() {
+            localStorage.removeItem('slbd_uid');
+            location.reload();
+        }
 
         // --- NAVIGATION ---
-        function startApp() {
-            document.getElementById('view-app').classList.remove('d-none');
-            document.getElementById('u-av-side').innerHTML = STATE.user.avatar;
-            document.getElementById('u-name-side').innerText = STATE.user.name;
-            document.getElementById('date-display').innerText = new Date().toDateString();
+        function renderNav() {
+            const dNav = document.getElementById('nav-desktop');
+            const mNav = document.getElementById('nav-mobile');
+            
+            dNav.innerHTML = ROUTES.map(r => `
+                <a href="#" onclick="navTo('${r.id}')" id="dn-${r.id}" class="nav-link-custom">
+                    <i data-lucide="${r.i}" size="20"></i> ${r.t}
+                </a>`).join('');
 
-            const pages = [
-                {id:'home', t:'Home', i:'layout-dashboard'},
-                {id:'task', t:'Tasks', i:'layers'},
-                {id:'future', t:'Not Yet', i:'hourglass'},
-                {id:'dec', t:'Decisions', i:'scroll-text'},
-                {id:'att', t:'Attendance', i:'clock'},
-                {id:'arc', t:'Records', i:'archive'}
-            ];
-
-            // Render Desktop Nav
-            document.getElementById('nav-links-desktop').innerHTML = pages.map(p => `
-                <div onclick="nav('${p.id}')" class="nav-item-d ${STATE.page===p.id?'active':''}" id="nav-d-${p.id}">
-                    <i data-lucide="${p.i}" size="18"></i> <span>${p.t}</span>
-                </div>`).join('');
-
-            // Render Mobile Nav
-            document.getElementById('nav-links-mobile').innerHTML = pages.map(p => `
-                <div class="mob-link ${STATE.page===p.id?'active':''}" onclick="nav('${p.id}')" id="nav-m-${p.id}">
-                    <i data-lucide="${p.i}" size="20"></i>
-                    <span>${p.t}</span>
-                </div>`).join('');
-
-            nav('home');
-            // Poll for notifications
-            setInterval(() => { checkNotis(); if(STATE.page!=='arc') refreshData(true); }, 3000);
+            mNav.innerHTML = ROUTES.map(r => `
+                <a href="#" onclick="navTo('${r.id}')" id="mn-${r.id}" class="mob-nav-item">
+                    <i data-lucide="${r.i}" size="24"></i>
+                    <span>${r.t}</span>
+                </a>`).join('');
         }
 
-        function nav(pg) {
+        function navTo(pg) {
             STATE.page = pg;
             
-            // Highlight Active
-            document.querySelectorAll('.nav-item-d').forEach(e=>e.classList.remove('active'));
-            document.querySelectorAll('.mob-link').forEach(e=>e.classList.remove('active'));
-            document.getElementById(`nav-d-${pg}`).classList.add('active');
-            document.getElementById(`nav-m-${pg}`).classList.add('active');
+            // Active States
+            document.querySelectorAll('.nav-link-custom').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.mob-nav-item').forEach(e => e.classList.remove('active'));
+            document.getElementById(`dn-${pg}`).classList.add('active');
+            document.getElementById(`mn-${pg}`).classList.add('active');
 
-            const titles = {home:'My Workspace', task:'Active Tasks', future:'Future Opportunities', dec:'Decision Log', att:'Attendance Register', arc:'Digital Archives'};
-            document.getElementById('page-title').innerText = titles[pg];
-            
-            refreshData(false);
+            // Titles
+            const t = ROUTES.find(r => r.id === pg).t;
+            document.getElementById('page-title-mob').innerText = t;
+            document.getElementById('page-title-desk').innerText = t;
+
+            loadData(false);
         }
 
-        async function refreshData(silent) {
-            const box = document.getElementById('content-area');
-            if(!silent && STATE.page !== 'arc') box.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-            
-            // Get Month Start Date (for Active view)
-            const now = new Date();
-            const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        async function loadData(silent) {
+            const box = document.getElementById('main-container');
+            if(!silent) box.innerHTML = `<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>`;
 
-            if(STATE.page === 'home') renderHome(box, startMonth);
-            if(STATE.page === 'task') renderTasks(box); 
-            if(STATE.page === 'future') renderFuture(box);
-            if(STATE.page === 'att') renderAtt(box, startMonth);
-            if(STATE.page === 'dec') renderDec(box, startMonth);
-            if(STATE.page === 'arc') renderArchives(box);
+            try {
+                const now = new Date();
+                const mStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                
+                if(STATE.page === 'home') await viewHome(box);
+                if(STATE.page === 'task') await viewTasks(box, mStart);
+                if(STATE.page === 'future') await viewFuture(box);
+                if(STATE.page === 'dec') await viewDecisions(box, mStart);
+                if(STATE.page === 'arc') await viewArchives(box);
+
+            } catch (e) {
+                console.error(e);
+                if(!silent) box.innerHTML = `<div class="p-4 text-center text-danger">Failed to load data. Connection issue?</div>`;
+            }
             lucide.createIcons();
         }
 
-        // --- RENDERERS ---
+        // --- VIEWS ---
+        
+        async function viewHome(c) {
+            // Priority: Assigned Tasks + Attendance
+            const [ {data:tasks}, {data:att} ] = await Promise.all([
+                db.from('tasks').select('*').neq('status','Done').neq('status','Future'),
+                db.from('attendance').select('*').eq('user_id', STATE.user.id).eq('date', new Date().toISOString().split('T')[0])
+            ]);
 
-        async function renderHome(c, dateFilter) {
-            // Fetch relevant tasks
-            const { data: tasks } = await db.from('tasks').select('*').neq('status','Done').neq('status','Future');
-            const myPending = tasks.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-            const review = tasks.filter(t => t.status === 'Review');
+            const myTasks = tasks.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
+            const isCheckedIn = att && att.length > 0;
 
             c.innerHTML = `
-                ${STATE.user.role === 'LEADER' && review.length ? `
-                    <div class="glass-panel p-3 border-start border-4 border-info d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold text-white"><i data-lucide="alert-circle" class="me-2 inline"></i> ${review.length} items need review</span>
-                        <button class="btn btn-sm btn-info fw-bold" onclick="nav('task')">Go</button>
-                    </div>` : ''}
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <div class="card-custom p-4 text-center h-100 d-flex flex-column justify-content-center">
+                            <h2 class="fw-bold mb-0 text-white">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h2>
+                            <p class="text-secondary small mb-3">${new Date().toDateString()}</p>
+                            ${isCheckedIn 
+                                ? `<button class="btn btn-success w-100 rounded-pill fw-bold" disabled>Checked In ✅</button>`
+                                : `<button onclick="doCheckIn()" class="btn btn-primary w-100 rounded-pill fw-bold shadow">Check In Now</button>`
+                            }
+                        </div>
+                    </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <h6 class="text-secondary small fw-bold mb-3 text-uppercase">My Active Tasks</h6>
-                        ${myPending.length === 0 ? '<div class="glass-panel p-4 text-center text-muted">No active tasks assigned.</div>' : 
-                        myPending.map(t => `
-                            <div class="glass-panel p-3 mb-2">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <div class="fw-bold text-white mb-1">${t.task_title}</div>
-                                        <div class="small text-secondary">${t.description}</div>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="nav('task')"><i data-lucide="arrow-right" size="16"></i></button>
-                                </div>
+                    <div class="col-12 col-md-8">
+                        <div class="card-custom h-100">
+                            <div class="p-3 border-bottom border-secondary border-opacity-25 bg-dark">
+                                <span class="fw-bold text-white">My Active Tasks</span>
                             </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        async function renderTasks(c) {
-            const now = new Date();
-            const startMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-            
-            // Get Tasks (Exclude Future)
-            const { data: all } = await db.from('tasks').select('*').neq('status','Future').order('created_at', {ascending:false});
-            
-            // Clean view: Show Active OR (Done but only from this month)
-            const display = all.filter(t => t.status !== 'Done' || t.updated_at >= startMonth);
-
-            c.innerHTML = display.length ? display.map(t => `
-                <div class="glass-panel p-3 border-start border-4 ${t.status==='Done'?'border-success':(t.status==='Review'?'border-info':'border-warning')}">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="badge-status ${t.status==='Done'?'bg-st-done':(t.status==='Review'?'bg-st-review':'bg-st-ongoing')}">${t.status}</span>
-                        <span class="small text-secondary">${new Date(t.created_at).toLocaleDateString().slice(0,5)}</span>
-                    </div>
-                    <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
-                    <p class="small text-secondary mb-3">${t.description}</p>
-                    
-                    ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? 
-                        `<button onclick="startDoneWorkflow(${t.id})" class="btn btn-primary w-100 btn-sm fw-bold">Mark Complete</button>` : ''}
-                    
-                    ${STATE.user.role === 'LEADER' && t.status === 'Review' ? 
-                        `<button onclick="apiApprove(${t.id})" class="btn btn-success w-100 btn-sm fw-bold">Approve</button>` : ''}
-                </div>
-            `).join('') : '<div class="text-center text-muted py-5">No active tasks found.</div>';
-        }
-
-        async function renderFuture(c) {
-            const { data } = await db.from('tasks').select('*').eq('status','Future').order('created_at', {ascending:false});
-            c.innerHTML = `
-                <div class="alert alert-secondary bg-opacity-10 border-0 small text-secondary mb-3">
-                    <i data-lucide="info" size="14" class="me-1"></i> These items are on hold for future execution.
-                </div>
-                ${data.length ? data.map(t => `
-                    <div class="glass-panel p-3">
-                        <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
-                        <p class="small text-secondary mb-2">${t.description}</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge-status bg-st-future">Not Yet</span>
-                            ${STATE.user.role === 'LEADER' ? `<button onclick="apiActivate(${t.id})" class="btn btn-sm btn-outline-success">Activate</button>` : ''}
-                        </div>
-                    </div>
-                `).join('') : '<div class="text-center text-muted py-5">No future ideas logged.</div>'}
-            `;
-        }
-
-        async function renderDec(c, dateFilter) {
-            const { data } = await db.from('decisions').select('*').gte('created_at', dateFilter).order('created_at', {ascending:false});
-            c.innerHTML = data.length ? data.map(d => `
-                <div class="glass-panel p-3 mb-3">
-                    <div class="d-flex gap-3">
-                        <i data-lucide="quote" class="text-warning flex-shrink-0" size="20"></i>
-                        <div>
-                            <h6 class="fw-bold text-white mb-1">${d.subject}</h6>
-                            <p class="text-secondary mb-2 small">${d.details}</p>
-                            <div class="small text-muted font-monospace" style="font-size:10px">${new Date(d.created_at).toDateString()}</div>
+                            <div class="p-2">
+                                ${myTasks.length ? myTasks.map(t => `
+                                    <div class="p-3 mb-2 rounded border border-secondary border-opacity-25 bg-body hover-bg cursor-pointer" onclick="navTo('task')">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="badge-status ${t.status==='Review'?'bg-info text-dark':'st-pending'}">${t.status}</span>
+                                            <small class="text-secondary">${t.due_date || 'No Date'}</small>
+                                        </div>
+                                        <div class="fw-bold text-white">${t.task_title}</div>
+                                    </div>
+                                `).join('') : `<div class="p-4 text-center text-secondary">All caught up! 🎉</div>`}
+                            </div>
                         </div>
                     </div>
                 </div>
-            `).join('') : '<div class="text-center text-muted py-5">No decisions recorded this month.</div>';
-        }
-
-        async function renderAtt(c, dateFilter) {
-            const { data: logs } = await db.from('attendance').select('*').gte('date', dateFilter.split('T')[0]).order('date', {ascending:false});
-            const today = new Date().toISOString().split('T')[0];
-            const checked = logs.find(l => l.user_id === STATE.user.id && l.date === today);
-
-            c.innerHTML = `
-                <div class="glass-panel p-4 text-center mb-4">
-                    <h1 class="fw-bold text-white mb-0 display-4">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h1>
-                    <p class="text-secondary mb-4 small">${new Date().toDateString()}</p>
-                    ${checked ? '<button class="btn btn-success w-100 py-3 fw-bold rounded-pill" disabled>Checked In</button>' 
-                              : '<button onclick="apiCheckIn()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-lg">Tap to Check In</button>'}
-                </div>
-                <div class="glass-panel">
-                    <div class="p-3 border-bottom border-secondary border-opacity-25 fw-bold small text-secondary">Recent Logs (This Month)</div>
-                    ${logs.slice(0,10).map(l => {
-                        const u = TEAM.find(x=>x.id==l.user_id);
-                        return `<div class="d-flex justify-content-between p-3 border-bottom border-secondary border-opacity-10">
-                            <span class="text-white small fw-bold">${u?.avatar} ${u?.name.split(' ')[0]}</span>
-                            <span class="text-secondary small font-monospace">${l.date.slice(5)}</span>
-                        </div>`;
-                    }).join('')}
-                </div>
             `;
         }
 
-        // --- ARCHIVE LOGIC ---
-        async function renderArchives(c) {
-            // Find existing data ranges
-            const { data: tasks } = await db.from('tasks').select('updated_at').eq('status','Done');
-            
-            // Build Month List
-            const months = new Set();
-            (tasks||[]).forEach(x => months.add(x.updated_at.slice(0, 7))); // "YYYY-MM"
-            const sorted = Array.from(months).sort().reverse();
-
-            if(sorted.length === 0) {
-                 // Fallback if no data
-                 c.innerHTML = '<div class="text-center py-5 text-muted">No historical records found yet. Complete tasks to see them here.</div>';
-                 return;
-            }
+        async function viewTasks(c, mStart) {
+            const { data } = await db.from('tasks').select('*').neq('status','Future').order('created_at', {ascending:false});
+            const display = data.filter(t => t.status !== 'Done' || t.updated_at >= mStart);
 
             c.innerHTML = `<div class="row g-3">
-                ${sorted.map(ym => `
-                    <div class="col-6 col-md-4">
-                        <div class="glass-panel p-3 text-center cursor-pointer hover-zoom" onclick="openArchiveFolder('${ym}')">
-                            <i data-lucide="folder-closed" class="text-warning mb-2" size="32"></i>
-                            <div class="fw-bold text-white">${new Date(ym+'-01').toLocaleString('default',{month:'short', year:'numeric'})}</div>
-                            <div class="small text-secondary">Open Folder</div>
+                ${display.map(t => `
+                    <div class="col-12 col-lg-6">
+                        <div class="card-custom p-3 border-start border-4 ${t.status==='Done'?'border-success':(t.status==='Review'?'border-info':'border-warning')}">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="badge-status ${t.status==='Done'?'st-done':(t.status==='Review'?'bg-info text-dark':'st-pending')}">${t.status}</span>
+                                <span class="text-xs text-secondary">Created: ${new Date(t.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <h5 class="fw-bold text-white mb-1">${t.task_title}</h5>
+                            <p class="text-sub small mb-3 text-truncate">${t.description}</p>
+                            
+                            <div class="d-flex gap-2">
+                                ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) 
+                                    ? `<button onclick="initComplete(${t.id})" class="btn btn-sm btn-primary flex-fill fw-bold">Mark Done</button>` : ''}
+                                
+                                ${STATE.user.role === 'LEADER' && t.status === 'Review'
+                                    ? `<button onclick="approveTask(${t.id})" class="btn btn-sm btn-success flex-fill fw-bold">Approve</button>` : ''}
+                            </div>
                         </div>
-                    </div>`).join('')}
+                    </div>
+                `).join('')}
             </div>`;
-            lucide.createIcons();
         }
 
-        async function openArchiveFolder(ym) {
-            const start = `${ym}-01`; const end = `${ym}-31`;
-            const [t, d, a] = await Promise.all([
-                db.from('tasks').select('*').eq('status','Done').gte('updated_at', start).lte('updated_at', end),
-                db.from('decisions').select('*').gte('created_at', start).lte('created_at', end),
-                db.from('attendance').select('*').gte('date', start).lte('date', end)
-            ]);
-            STATE.archiveData = { tasks: t.data, decisions: d.data, attendance: a.data };
-            
-            document.getElementById('arc-title').innerText = `Archive: ${ym}`;
-            MODALS.archive.show();
-            renderArchiveTab('tasks');
+        async function viewFuture(c) {
+            const { data } = await db.from('tasks').select('*').eq('status','Future').order('created_at', {ascending:false});
+            c.innerHTML = `
+                <div class="alert alert-dark border border-secondary border-opacity-25 d-flex gap-2 align-items-center">
+                    <i data-lucide="info" class="text-info"></i> <small>Ideas parked here are not active.</small>
+                </div>
+                <div class="row g-3">
+                    ${data.map(t => `
+                        <div class="col-12 col-lg-6">
+                            <div class="card-custom p-3 opacity-75">
+                                <h6 class="fw-bold text-white">${t.task_title}</h6>
+                                <p class="small text-secondary mb-2">${t.description}</p>
+                                <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-2">
+                                    <span class="badge-status st-future">Not Yet</span>
+                                    ${STATE.user.role === 'LEADER' ? `<button onclick="activateTask(${t.id})" class="btn btn-sm btn-outline-success">Activate</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
-        function renderArchiveTab(tab) {
-            document.querySelectorAll('#modArchiveView .btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`at-${tab}`).classList.add('active');
-            const box = document.getElementById('archive-content');
-            const d = STATE.archiveData;
+        async function viewDecisions(c, mStart) {
+            const { data } = await db.from('decisions').select('*').gte('created_at', mStart).order('created_at',{ascending:false});
+            c.innerHTML = data.length ? data.map(d => `
+                <div class="card-custom p-3 mb-3">
+                    <div class="d-flex gap-3">
+                        <i data-lucide="quote" class="text-warning flex-shrink-0"></i>
+                        <div>
+                            <div class="fw-bold text-white">${d.subject}</div>
+                            <div class="text-sub small mb-2">${d.details}</div>
+                            <div class="text-xs text-secondary font-monospace">${new Date(d.created_at).toDateString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : `<div class="text-center text-muted py-5">No decisions recorded this month.</div>`;
+        }
 
-            if(tab === 'tasks') {
-                box.innerHTML = d.tasks.length ? d.tasks.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small d-flex justify-content-between"><span>${x.task_title}</span><span>${new Date(x.updated_at).getDate()}th</span></div>`).join('') : '<div class="text-muted p-3">No tasks.</div>';
-            } else if(tab === 'decisions') {
-                box.innerHTML = d.decisions.length ? d.decisions.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small fw-bold">${x.subject}</div>`).join('') : '<div class="text-muted p-3">No decisions.</div>';
-            } else {
-                box.innerHTML = d.attendance.length ? d.attendance.map(x=>`<div class="border-bottom border-secondary border-opacity-25 py-2 text-secondary small">${TEAM.find(u=>u.id==x.user_id)?.name.split(' ')[0]} - ${x.date}</div>`).join('') : '<div class="text-muted p-3">No logs.</div>';
-            }
+        async function viewArchives(c) {
+            const { data } = await db.from('tasks').select('updated_at').eq('status','Done');
+            const months = new Set();
+            (data||[]).forEach(x => months.add(x.updated_at.slice(0,7))); // YYYY-MM
+            const list = Array.from(months).sort().reverse();
+
+            if(!list.length) { c.innerHTML = `<div class="text-center text-secondary py-5">No archives found.</div>`; return; }
+
+            c.innerHTML = `<div class="row g-3">
+                ${list.map(ym => `
+                    <div class="col-6 col-md-3">
+                        <div onclick="openArchive('${ym}')" class="card-custom p-4 text-center cursor-pointer hover-bg">
+                            <i data-lucide="folder-closed" class="text-warning mb-2" size="32"></i>
+                            <div class="fw-bold text-white">${ym}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
         }
 
         // --- ACTIONS ---
         function setMode(m) {
-            STATE.mode = m;
-            const isTask = m === 'task' || m === 'future';
-            document.getElementById('div-task-opts').classList.toggle('d-none', !isTask);
-            document.getElementById('n-title').placeholder = m === 'decision' ? 'Subject' : 'Title';
+            STATE.formMode = m;
+            // UI Toggle
+            ['task','future','decision'].forEach(x => {
+                const btn = document.getElementById(`btn-m-${x}`);
+                if(x===m) { btn.classList.remove('text-secondary','bg-transparent'); btn.classList.add('text-white','bg-secondary','bg-opacity-25','shadow-sm'); }
+                else { btn.classList.add('text-secondary'); btn.classList.remove('text-white','bg-secondary','bg-opacity-25','shadow-sm'); }
+            });
             
-            if(isTask) {
+            // Field Visibility
+            const isT = (m === 'task' || m === 'future');
+            document.getElementById('form-task-extras').classList.toggle('d-none', !isT);
+            document.getElementById('n-title').placeholder = m==='decision' ? 'Subject' : 'Title';
+            
+            if(isT) {
                 document.getElementById('n-members').innerHTML = TEAM.map(u => `
-                <label class="d-flex align-items-center p-2 rounded bg-dark border border-secondary border-opacity-10">
-                    <input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}" style="transform:scale(1.2)"> ${u.avatar} ${u.name}
-                </label>`).join('');
+                    <label class="d-flex align-items-center p-2 rounded bg-black border border-secondary border-opacity-25">
+                        <input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}"> ${u.avatar} ${u.name}
+                    </label>
+                `).join('');
             }
         }
-        function openCreate() { 
-            setMode('task'); 
-            document.getElementById('ct-task').click(); 
-            document.getElementById('n-title').value=''; 
-            document.getElementById('n-desc').value=''; 
-            MODALS.create.show(); 
+
+        function openCreate() {
+            setMode('task'); // Default
+            document.getElementById('n-title').value = '';
+            document.getElementById('n-desc').value = '';
+            MODALS.create.show();
         }
-        
-        async function apiCreate() {
+
+        async function submitCreate() {
             const t = document.getElementById('n-title').value;
-            const desc = document.getElementById('n-desc').value;
-            if(!t) return toast('Error','Title required');
-            
-            if(STATE.mode === 'decision') {
-                await db.from('decisions').insert({subject:t, details:desc});
+            const d = document.getElementById('n-desc').value;
+            if(!t) return showToast('Error','Title is required','alert-circle','text-danger');
+
+            if(STATE.formMode === 'decision') {
+                await db.from('decisions').insert({subject:t, details:d});
             } else {
                 const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
-                // If 'future' mode -> Status Future. If Leader -> Ongoing. Else -> Pending.
-                let status = STATE.mode === 'future' ? 'Future' : (STATE.user.role === 'LEADER' ? 'Ongoing' : 'Pending');
-
+                let stat = STATE.formMode === 'future' ? 'Future' : (STATE.user.role==='LEADER'?'Ongoing':'Pending');
                 await db.from('tasks').insert({
-                    task_title: t, description: desc, 
-                    due_date: document.getElementById('n-date').value || null, 
-                    creator_id: STATE.user.id, tagged_members: tags, status: status
+                    task_title:t, description:d, 
+                    due_date:document.getElementById('n-date').value || null,
+                    creator_id: STATE.user.id, tagged_members: tags, status: stat
                 });
             }
-            toast('Success','Saved','✅');
-            MODALS.create.hide(); refreshData(false);
+            MODALS.create.hide();
+            showToast('Saved','Record created successfully','check-circle','text-success');
+            loadData(false);
         }
 
-        // UPLOAD & DONE LOGIC
-        function startDoneWorkflow(id) {
-            STATE.pendingDoneId = id;
-            document.getElementById('chk-upload').checked = false;
+        // WORKFLOW
+        function initComplete(id) {
+            STATE.pendingTask = id;
+            document.getElementById('chk-proof').checked = false;
             toggleDoneBtn();
             MODALS.upload.show();
         }
         function toggleDoneBtn() {
-            const chk = document.getElementById('chk-upload').checked;
-            const btn = document.getElementById('btn-conf-done');
-            if(chk) btn.classList.remove('disabled'); else btn.classList.add('disabled');
+            const ok = document.getElementById('chk-proof').checked;
+            document.getElementById('btn-conf-done').classList.toggle('disabled', !ok);
         }
-        async function confirmDone() {
-            if(!STATE.pendingDoneId) return;
-            await db.from('tasks').update({status:'Done', updated_at: new Date()}).eq('id', STATE.pendingDoneId);
+        async function finishTask() {
+            await db.from('tasks').update({status:'Done', updated_at: new Date()}).eq('id', STATE.pendingTask);
             MODALS.upload.hide();
-            toast('Great Job!','Task completed','🎉');
-            refreshData(false);
+            showToast('Nice Work!','Task marked complete','trophy','text-warning');
+            loadData(false);
         }
 
-        async function apiApprove(id) { await db.from('tasks').update({status:'Ongoing'}).eq('id',id); refreshData(false); toast('Approved','Work started','🚀'); }
-        async function apiActivate(id) { await db.from('tasks').update({status:'Pending'}).eq('id',id); refreshData(false); toast('Activated','Moved to active tasks','⚡'); }
-        async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); refreshData(false); toast('Checked In','Success','✅'); }
-        
+        async function approveTask(id) {
+            await db.from('tasks').update({status:'Ongoing'}).eq('id',id);
+            loadData(false);
+            showToast('Approved','Task is now active','thumbs-up','text-success');
+        }
+        async function activateTask(id) {
+            await db.from('tasks').update({status:'Pending'}).eq('id',id);
+            loadData(false);
+            showToast('Activated','Moved from Future to Active','zap','text-warning');
+        }
+        async function doCheckIn() {
+            await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
+            loadData(false);
+            showToast('Welcome','Attendance Logged','clock','text-success');
+        }
+
+        // ARCHIVE MODAL LOGIC
+        async function openArchive(ym) {
+            document.getElementById('arc-head').innerText = `Archive: ${ym}`;
+            const s = `${ym}-01`; const e = `${ym}-31`;
+            const [t, d, l] = await Promise.all([
+                db.from('tasks').select('*').eq('status','Done').gte('updated_at',s).lte('updated_at',e),
+                db.from('decisions').select('*').gte('created_at',s).lte('created_at',e),
+                db.from('attendance').select('*').gte('date',s).lte('date',e)
+            ]);
+            STATE.archiveData = { tasks: t.data, decs: d.data, logs: l.data };
+            MODALS.archive.show();
+            tabArc('tasks');
+        }
+        function tabArc(type) {
+            // Tab UI
+            ['tasks','decs','logs'].forEach(x => {
+                const b = document.getElementById(`tab-a-${x}`);
+                if(x===type) { b.classList.add('active','border-bottom','border-2','border-primary','text-white'); b.classList.remove('text-secondary'); }
+                else { b.classList.remove('active','border-bottom','border-2','border-primary','text-white'); b.classList.add('text-secondary'); }
+            });
+            // Content
+            const box = document.getElementById('arc-body');
+            const d = STATE.archiveData[type];
+            if(!d || !d.length) { box.innerHTML = '<div class="text-secondary text-center p-3">No records.</div>'; return; }
+            
+            if(type === 'tasks') box.innerHTML = d.map(x => `<div class="p-2 border-bottom border-secondary border-opacity-25"><div class="fw-bold text-white">${x.task_title}</div><small class="text-secondary">Closed: ${x.updated_at.slice(0,10)}</small></div>`).join('');
+            if(type === 'decs') box.innerHTML = d.map(x => `<div class="p-2 border-bottom border-secondary border-opacity-25"><div class="fw-bold text-white">${x.subject}</div><small class="text-secondary">${x.details}</small></div>`).join('');
+            if(type === 'logs') box.innerHTML = d.map(x => `<div class="p-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between"><span class="text-white">${TEAM.find(u=>u.id==x.user_id)?.name}</span><span class="text-secondary font-monospace">${x.date}</span></div>`).join('');
+        }
+
+        // NOTIFICATIONS
         async function checkNotis() {
             if(!STATE.user) return;
             const { data } = await db.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
-            const dot = document.getElementById('bell-dot');
-            if(data?.length) { 
-                dot.classList.remove('d-none'); 
-                document.getElementById('noti-list').innerHTML = data.map(n=>`<div class="list-group-item bg-dark text-white p-3"><small>${n.message}</small></div>`).join(''); 
-            } else { 
-                dot.classList.add('d-none'); 
-                document.getElementById('noti-list').innerHTML = '<div class="p-4 text-center small text-muted">No new alerts</div>'; 
+            const bM = document.getElementById('badge-noti');
+            const bD = document.getElementById('badge-noti-d');
+            if(data && data.length) {
+                bM.classList.remove('d-none'); bD.classList.remove('d-none');
+            } else {
+                bM.classList.add('d-none'); bD.classList.add('d-none');
             }
         }
-        async function markRead() { 
-            await db.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id); 
-            document.getElementById('bell-dot').classList.add('d-none');
+        async function openNotis() {
+            const { data } = await db.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
+            const box = document.getElementById('noti-list');
+            if(!data.length) box.innerHTML = '<div class="p-4 text-center text-secondary">No notifications.</div>';
+            else {
+                box.innerHTML = data.map(n => `
+                    <div class="list-group-item bg-dark text-white border-secondary border-opacity-25 p-3">
+                        <div class="small ${n.is_read?'text-secondary':'fw-bold text-white'}">${n.message}</div>
+                    </div>`).join('');
+                // Mark read
+                await db.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
+                document.getElementById('badge-noti').classList.add('d-none');
+                document.getElementById('badge-noti-d').classList.add('d-none');
+            }
+            MODALS.noti.show();
         }
 
-        function toast(t,m,i) { 
-            document.getElementById('toast-title').innerText=t; document.getElementById('toast-msg').innerText=m; document.getElementById('toast-icon').innerText=i||'🔔'; 
-            bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); 
+        function showToast(title, msg, icon, colorClass) {
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            const ico = document.getElementById('toast-icon');
+            ico.setAttribute('class', colorClass); // Reset classes
+            lucide.createIcons(); // Refresh specific icon if needed, though attributes handle it
+            const t = bootstrap.Toast.getOrCreateInstance(document.getElementById('liveToast'));
+            t.show();
         }
+
     </script>
 </body>
 </html>
