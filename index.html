@@ -51,34 +51,34 @@
         .cursor-pointer { cursor: pointer; }
         .d-none-imp { display: none !important; }
 
-        /* === LAYOUT === */
+        /* DRIVE BUTTONS */
+        .drive-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px; border-radius: 8px;
+            background: var(--bg-subtle); border: 1px solid var(--border);
+            color: var(--text-sub); text-decoration: none;
+            transition: 0.2s;
+        }
+        .drive-btn:hover { background: #262c36; color: white; border-color: var(--primary); }
+
+        /* LAYOUT */
         #view-auth {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--bg-body);
-            z-index: 99999;
-            display: flex; align-items: center; justify-content: center;
-            padding: 20px;
+            background: var(--bg-body); z-index: 99999;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
 
         .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0;
-            width: var(--sidebar-w);
-            background: #010409;
-            border-right: 1px solid var(--border);
-            padding: 24px;
-            display: none; flex-direction: column;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w);
+            background: #010409; border-right: 1px solid var(--border);
+            padding: 24px; display: none; flex-direction: column; z-index: 1000;
         }
 
         .mobile-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: var(--nav-h);
-            background: rgba(13, 17, 23, 0.98);
-            border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom);
+            position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h);
+            background: rgba(13, 17, 23, 0.98); border-top: 1px solid var(--border);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
         }
 
         .main-wrapper { padding: 20px; max-width: 100%; }
@@ -91,7 +91,7 @@
             .main-wrapper { margin-left: var(--sidebar-w); padding: 40px; max-width: 1200px; }
         }
 
-        /* NAVIGATION & AVATARS */
+        /* NAV ITEMS */
         .nav-item-d {
             display: flex; align-items: center; gap: 12px; padding: 12px;
             border-radius: 6px; color: var(--text-sub); text-decoration: none;
@@ -111,13 +111,13 @@
             background: var(--bg-subtle); display: grid; place-items: center; font-size: 20px;
         }
 
-        /* STATUS BADGES */
+        /* BADGES */
         .badge-st { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .st-done { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
         .st-wait { background: rgba(210, 153, 34, 0.2); color: #d29922; }
         .st-rev { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
         .st-fut { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
-        .st-req { background: rgba(248, 81, 73, 0.2); color: #f85149; } /* Approval Req */
+        .st-req { background: rgba(248, 81, 73, 0.2); color: #f85149; }
     </style>
 </head>
 <body>
@@ -215,7 +215,7 @@
                     </div>
                     
                     <input type="text" id="inp-t" class="form-control form-control-lg bg-black text-white border-secondary mb-3" placeholder="Title">
-                    <textarea id="inp-d" class="form-control bg-black text-white border-secondary mb-3" rows="3" placeholder="Details..."></textarea>
+                    <textarea id="inp-d" class="form-control bg-black text-white border-secondary mb-3" rows="3" placeholder="Task Description & Details..."></textarea>
                     
                     <div id="sec-task-opt">
                         <label class="text-sub text-xs fw-bold mb-2">DUE DATE</label>
@@ -238,26 +238,26 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-secondary small mb-3">Please upload your files to the relevant folder before completing the task.</p>
+                    <p class="text-secondary small mb-3">Please upload your files to the relevant folder below. You must check the box to confirm upload before submitting for review.</p>
                     
                     <div class="d-grid gap-2 mb-4">
-                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
-                            <i data-lucide="folder" class="me-2 text-warning inline"></i> Admin & Finance
+                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-btn">
+                            <i data-lucide="folder" class="text-warning"></i> <span>Admin & Finance</span>
                         </a>
-                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
-                            <i data-lucide="cpu" class="me-2 text-info inline"></i> Machine Unit
+                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-btn">
+                            <i data-lucide="cpu" class="text-info"></i> <span>Machine Unit</span>
                         </a>
-                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
-                            <i data-lucide="image" class="me-2 text-danger inline"></i> Pictures
+                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-btn">
+                            <i data-lucide="image" class="text-danger"></i> <span>Pictures</span>
                         </a>
-                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
-                            <i data-lucide="file-text" class="me-2 text-primary inline"></i> Proposals & PPT
+                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-btn">
+                            <i data-lucide="file-text" class="text-primary"></i> <span>Proposals & PPT</span>
                         </a>
                     </div>
 
                     <div class="form-check bg-black p-3 rounded border border-secondary border-opacity-25">
                         <input class="form-check-input" type="checkbox" id="chk-done" onchange="toggleFin()">
-                        <label class="form-check-label text-white small">I have uploaded the files.</label>
+                        <label class="form-check-label text-white small">I verify that I have uploaded the required files.</label>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3">
@@ -431,6 +431,19 @@
                     ]);
                     const myCheckIn = a.find(x => x.user_id === STATE.user.id);
                     
+                    // Quick Drive Links
+                    const quickDrive = `
+                        <div class="col-12 mb-3">
+                            <h6 class="text-secondary text-xs fw-bold mb-2">QUICK DRIVE ACCESS</h6>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="folder" class="text-warning"></i> Admin</a>
+                                <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="cpu" class="text-info"></i> Machine</a>
+                                <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="image" class="text-danger"></i> Pics</a>
+                                <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="file-text" class="text-primary"></i> PPT</a>
+                            </div>
+                        </div>
+                    `;
+
                     if(STATE.user.role === 'LEADER') {
                         // Leader Home
                         const reqs = t.filter(x => x.status === 'ApprovalReq');
@@ -441,12 +454,13 @@
                         }).join('');
 
                         let alertsHtml = '';
-                        if(reqs.length > 0) alertsHtml += `<div class="alert alert-dark border-warning d-flex justify-content-between align-items-center"><div><strong class="text-warning">${reqs.length} Task(s)</strong> waiting for assignment approval.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-warning">View</button></div>`;
-                        if(revs.length > 0) alertsHtml += `<div class="alert alert-dark border-info d-flex justify-content-between align-items-center"><div><strong class="text-info">${revs.length} Task(s)</strong> waiting for completion review.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-info">Review</button></div>`;
+                        if(reqs.length > 0) alertsHtml += `<div class="alert alert-dark border-warning d-flex justify-content-between align-items-center mb-2"><div><strong class="text-warning">${reqs.length} Task(s)</strong> waiting for assignment approval.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-warning">View</button></div>`;
+                        if(revs.length > 0) alertsHtml += `<div class="alert alert-dark border-info d-flex justify-content-between align-items-center mb-3"><div><strong class="text-info">${revs.length} Task(s)</strong> waiting for completion review.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-info">Review</button></div>`;
 
                         c.innerHTML = `
                         <div class="row g-3">
                             <div class="col-12">${alertsHtml}</div>
+                            ${quickDrive}
                             <div class="col-12 col-md-4">
                                 <div class="card-box p-4 text-center h-100 d-flex flex-column justify-content-center">
                                     <h3 class="fw-bold text-white mb-0">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h3>
@@ -469,6 +483,7 @@
                         c.innerHTML = `
                         <div class="row g-3">
                             ${pend>0 ? `<div class="col-12"><div class="alert alert-dark border-secondary">You have <b>${pend}</b> tasks waiting for Leader approval.</div></div>`:''}
+                            ${quickDrive}
                             <div class="col-12 col-md-4">
                                 <div class="card-box p-4 text-center h-100 d-flex flex-column justify-content-center">
                                     <h1 class="fw-bold text-white mb-0">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h1>
@@ -524,7 +539,7 @@
                         const strDate = d.toISOString().split('T')[0];
                         labels.push(d.toLocaleDateString([],{weekday:'short'}));
 
-                        const countDone = allT.filter(x => x.status === 'Done' && x.updated_at.startsWith(strDate)).length;
+                        const countDone = allT.filter(x => x.status === 'Done' && x.updated_at && x.updated_at.startsWith(strDate)).length;
                         const countNew = allT.filter(x => x.created_at.startsWith(strDate)).length;
 
                         dataDone.push(countDone);
@@ -648,8 +663,8 @@
                                         <span class="badge-st ${badgeClass}">${t.status==='ApprovalReq'?'Waiting Approval':t.status}</span>
                                         <span class="text-xs text-secondary">${new Date(t.created_at).toLocaleDateString()}</span>
                                     </div>
-                                    <h5 class="fw-bold text-white text-truncate">${t.task_title}</h5>
-                                    <p class="small text-secondary mb-3 text-truncate">${t.description||''}</p>
+                                    <h5 class="fw-bold text-white">${t.task_title}</h5>
+                                    <p class="small text-secondary mb-3">${t.description||''}</p>
                                     ${btnHtml}
                                 </div>
                             </div>`;
@@ -669,7 +684,7 @@
 
                 if(STATE.page === 'arc') {
                     const { data } = await sbClient.from('tasks').select('updated_at').eq('status','Done');
-                    const ms = [...new Set(data.map(x=>x.updated_at.slice(0,7)))].sort().reverse();
+                    const ms = [...new Set(data.map(x=>x.updated_at ? x.updated_at.slice(0,7) : 'Unknown'))].sort().reverse();
                     c.innerHTML = ms.length ? `<div class="row g-3">${ms.map(m=>`<div class="col-6 col-md-3"><div onclick="openArc('${m}')" class="card-box p-4 text-center cursor-pointer hover-bg"><i data-lucide="folder-closed" class="text-warning mb-2" size="32"></i><div class="fw-bold text-white">${m}</div></div></div>`).join('')}</div>` : '<div class="text-center text-muted py-5">Archive is empty.</div>';
                 }
             } catch(e) { console.error(e); }
