@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SLBDMIS | Live V7</title>
     
+    <link rel="icon" href="data:,">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -173,7 +175,9 @@
         // --- 1. CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
-        const supabase = window.supabase.createClient(SB_URL, SB_KEY);
+        
+        // --- FIX FOR DUPLICATE ERROR: Check if it exists before creating ---
+        const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
         
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
@@ -312,8 +316,8 @@
         // HOME / MOMENTUM
         async function renderHome(c) {
             // Safe Fetch Pattern
-            let { data: hist } = await supabase.from('momentum_history').select('*').order('date', {ascending:true});
-            let { data: tasks } = await supabase.from('tasks').select('*');
+            let { data: hist } = await sbClient.from('momentum_history').select('*').order('date', {ascending:true});
+            let { data: tasks } = await sbClient.from('tasks').select('*');
             if(!hist) hist = []; if(!tasks) tasks = [];
 
             // Metrics
@@ -428,7 +432,7 @@
 
         // TASKS PAGE
         async function renderTasks(c) {
-            let { data: tasks } = await supabase.from('tasks').select('*').order('created_at', {ascending:false});
+            let { data: tasks } = await sbClient.from('tasks').select('*').order('created_at', {ascending:false});
             if(!tasks) tasks = [];
             
             c.innerHTML = `
@@ -453,7 +457,7 @@
 
         // CHECK IN PAGE
         async function renderAtt(c) {
-            let { data: logs } = await supabase.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(20);
+            let { data: logs } = await sbClient.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(20);
             if(!logs) logs = [];
             
             const today = new Date().toISOString().split('T')[0];
@@ -483,7 +487,7 @@
 
         // DECISIONS PAGE
         async function renderDec(c) {
-            let { data: decs } = await supabase.from('decisions').select('*').order('created_at', {ascending:false});
+            let { data: decs } = await sbClient.from('decisions').select('*').order('created_at', {ascending:false});
             if(!decs) decs = [];
             c.innerHTML = decs.map(d => `
                 <div class="glass-box p-3 mb-2 border-start border-4 border-secondary">
@@ -528,13 +532,13 @@
             try {
                 if(STATE.mode === 'task') {
                     const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
-                    await supabase.from('tasks').insert({
+                    await sbClient.from('tasks').insert({
                         task_title: title, description: desc, priority: document.getElementById('n-prio').value,
                         due_date: document.getElementById('n-date').value, creator_id: STATE.user.id,
                         tagged_members: tags, status: 'Ongoing'
                     });
                 } else {
-                    await supabase.from('decisions').insert({ subject: title, details: desc });
+                    await sbClient.from('decisions').insert({ subject: title, details: desc });
                 }
                 MODALS.create.hide();
                 notify('Created Successfully', '✅');
@@ -545,7 +549,7 @@
         // UPDATE PROGRESS
         async function apiUpdateProg(id, val) {
             notify('Saving...', '💾');
-            await supabase.from('tasks').update({progress_note:val}).eq('id',id);
+            await sbClient.from('tasks').update({progress_note:val}).eq('id',id);
             notify('Saved', '✅');
         }
 
@@ -566,7 +570,7 @@
         async function apiSubmit() {
             const id = document.getElementById('p-tid').value;
             notify('Submitting...', '🚀');
-            await supabase.from('tasks').update({status:'Review'}).eq('id',id);
+            await sbClient.from('tasks').update({status:'Review'}).eq('id',id);
             closeProof();
             loadPage(STATE.page, true);
             notify('Submitted to Leader', '✅');
@@ -575,9 +579,9 @@
         // APPROVE
         async function apiApprove(id) {
             notify('Approving...', '⚙️');
-            await supabase.from('tasks').update({status:'Done'}).eq('id',id);
+            await sbClient.from('tasks').update({status:'Done'}).eq('id',id);
             // Add Momentum
-            await supabase.from('momentum_history').insert({ date: new Date().toISOString().split('T')[0], score: 5 });
+            await sbClient.from('momentum_history').insert({ date: new Date().toISOString().split('T')[0], score: 5 });
             loadPage(STATE.page, true);
             notify('Approved & Momentum Up', '📈');
         }
@@ -585,7 +589,7 @@
         // CHECK IN
         async function apiCheckIn() {
             notify('Logging attendance...', '📍');
-            await supabase.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
+            await sbClient.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
             loadPage('att', true);
             notify('Checked In', '✅');
         }
