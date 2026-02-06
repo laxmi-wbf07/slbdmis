@@ -10,9 +10,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* === THEME & LAYOUT === */
+        /* === THEME === */
         :root { 
             --bg-body: #0d1117; 
             --bg-card: #161b22; 
@@ -32,7 +33,7 @@
             color: var(--text-main); 
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            padding-bottom: 90px; /* Mobile safe area */
+            padding-bottom: 90px;
         }
 
         .glass { background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(8px); }
@@ -116,6 +117,7 @@
         .st-wait { background: rgba(210, 153, 34, 0.2); color: #d29922; }
         .st-rev { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
         .st-fut { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
+        .st-req { background: rgba(248, 81, 73, 0.2); color: #f85149; } /* Approval Req */
     </style>
 </head>
 <body>
@@ -232,22 +234,34 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold">Proof of Work</h5>
+                    <h5 class="modal-title fw-bold">Upload Proof of Work</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
+                    <p class="text-secondary small mb-3">Please upload your files to the relevant folder before completing the task.</p>
+                    
                     <div class="d-grid gap-2 mb-4">
-                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25"><i data-lucide="folder" class="me-2 text-warning inline"></i> Admin & Finance</a>
-                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25"><i data-lucide="cpu" class="me-2 text-info inline"></i> Machine Unit</a>
-                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25"><i data-lucide="image" class="me-2 text-danger inline"></i> Pictures</a>
+                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
+                            <i data-lucide="folder" class="me-2 text-warning inline"></i> Admin & Finance
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
+                            <i data-lucide="cpu" class="me-2 text-info inline"></i> Machine Unit
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
+                            <i data-lucide="image" class="me-2 text-danger inline"></i> Pictures
+                        </a>
+                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="btn btn-dark text-start p-3 border border-secondary border-opacity-25">
+                            <i data-lucide="file-text" class="me-2 text-primary inline"></i> Proposals & PPT
+                        </a>
                     </div>
+
                     <div class="form-check bg-black p-3 rounded border border-secondary border-opacity-25">
                         <input class="form-check-input" type="checkbox" id="chk-done" onchange="toggleFin()">
                         <label class="form-check-label text-white small">I have uploaded the files.</label>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-3">
-                    <button id="btn-fin" onclick="finishTask()" class="btn btn-success w-100 py-3 rounded-pill fw-bold disabled">Mark Complete</button>
+                    <button id="btn-fin" onclick="finishTask()" class="btn btn-success w-100 py-3 rounded-pill fw-bold disabled">Submit for Review</button>
                 </div>
             </div>
         </div>
@@ -302,6 +316,7 @@
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+        let CHART_INST = null;
 
         const TEAM = [
             { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
@@ -364,7 +379,7 @@
             document.getElementById('desk-u-name').innerText = u.name;
             setupNav();
             nav('home');
-            setInterval(() => { if(STATE.page!=='arc') render(true); checkNoti(false); }, 4000);
+            setInterval(() => { if(STATE.page!=='arc' && STATE.page!=='ana' && STATE.page!=='mom') render(true); checkNoti(false); }, 5000);
             checkNoti(false);
         }
         function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
@@ -373,11 +388,17 @@
         function setupNav() {
             const pages = [
                 {id:'home', t:'Dashboard', i:'layout-grid'},
+                {id:'mom', t:'Momentum', i:'activity'},
                 {id:'task', t:'Tasks', i:'layers'},
                 {id:'future', t:'Not Yet', i:'hourglass'},
                 {id:'dec', t:'Decisions', i:'scroll-text'},
                 {id:'arc', t:'Records', i:'archive'}
             ];
+            // Add Analytics for Leader
+            if(STATE.user.role === 'LEADER') {
+                pages.splice(2, 0, {id:'ana', t:'Analytics', i:'bar-chart-2'});
+            }
+
             document.getElementById('nav-d-links').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="nav-item-d"><i data-lucide="${p.i}" size="18"></i> ${p.t}</a>`).join('');
             document.getElementById('nav-m-links').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="nav-item-m"><i data-lucide="${p.i}" size="22"></i> <span>${p.t}</span></a>`).join('');
         }
@@ -385,9 +406,10 @@
             STATE.page = p;
             document.querySelectorAll('.nav-item-d').forEach(e=>e.classList.remove('active'));
             document.querySelectorAll('.nav-item-m').forEach(e=>e.classList.remove('active'));
-            document.getElementById(`nd-${p}`).classList.add('active');
-            document.getElementById(`nm-${p}`).classList.add('active');
-            const titles = {home: STATE.user.role==='LEADER'?'Leader Overview':'My Workspace', task:'Tasks', future:'Future Ideas', dec:'Decision Log', arc:'Archives'};
+            if(document.getElementById(`nd-${p}`)) document.getElementById(`nd-${p}`).classList.add('active');
+            if(document.getElementById(`nm-${p}`)) document.getElementById(`nm-${p}`).classList.add('active');
+            
+            const titles = {home: STATE.user.role==='LEADER'?'Leader Overview':'My Workspace', ana:'Team Analytics', mom:'Momentum Rate', task:'Tasks', future:'Future Ideas', dec:'Decision Log', arc:'Archives'};
             document.getElementById('mob-pg-title').innerText = titles[p];
             document.getElementById('desk-pg-title').innerText = titles[p];
             render(false);
@@ -407,30 +429,24 @@
                         sbClient.from('tasks').select('*').neq('status','Future'),
                         sbClient.from('attendance').select('*').eq('date', today)
                     ]);
-
                     const myCheckIn = a.find(x => x.user_id === STATE.user.id);
                     
                     if(STATE.user.role === 'LEADER') {
-                        // === LEADER DASHBOARD ===
-                        const pending = t.filter(x => x.status === 'Pending' || x.status === 'Ongoing').length;
-                        const done = t.filter(x => x.status === 'Done').length;
-                        const review = t.filter(x => x.status === 'Review').length;
-
-                        // Build Attendance List
+                        // Leader Home
+                        const reqs = t.filter(x => x.status === 'ApprovalReq');
+                        const revs = t.filter(x => x.status === 'Review');
                         const attList = TEAM.map(member => {
                             const isHere = a.find(x => x.user_id === member.id);
-                            return `
-                            <div class="d-flex align-items-center justify-content-between p-2 border-bottom border-secondary border-opacity-25">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="text-xs">${member.av}</span>
-                                    <span class="small ${isHere ? 'text-white' : 'text-secondary'}">${member.name.split(' ')[0]}</span>
-                                </div>
-                                ${isHere ? '<span class="badge bg-success bg-opacity-25 text-success">Present</span>' : '<span class="badge bg-secondary bg-opacity-10 text-secondary">Absent</span>'}
-                            </div>`;
+                            return `<div class="d-flex align-items-center justify-content-between p-2 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2"><span class="text-xs">${member.av}</span><span class="small ${isHere?'text-white':'text-secondary'}">${member.name.split(' ')[0]}</span></div>${isHere?'<span class="badge bg-success bg-opacity-25 text-success">Present</span>':'<span class="badge bg-secondary bg-opacity-10 text-secondary">Absent</span>'}</div>`;
                         }).join('');
+
+                        let alertsHtml = '';
+                        if(reqs.length > 0) alertsHtml += `<div class="alert alert-dark border-warning d-flex justify-content-between align-items-center"><div><strong class="text-warning">${reqs.length} Task(s)</strong> waiting for assignment approval.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-warning">View</button></div>`;
+                        if(revs.length > 0) alertsHtml += `<div class="alert alert-dark border-info d-flex justify-content-between align-items-center"><div><strong class="text-info">${revs.length} Task(s)</strong> waiting for completion review.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-info">Review</button></div>`;
 
                         c.innerHTML = `
                         <div class="row g-3">
+                            <div class="col-12">${alertsHtml}</div>
                             <div class="col-12 col-md-4">
                                 <div class="card-box p-4 text-center h-100 d-flex flex-column justify-content-center">
                                     <h3 class="fw-bold text-white mb-0">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h3>
@@ -438,26 +454,21 @@
                                     ${myCheckIn ? '<button class="btn btn-success w-100 rounded-pill" disabled>Checked In ✅</button>' : '<button onclick="doCheckIn()" class="btn btn-primary w-100 rounded-pill shadow">Check In Now</button>'}
                                 </div>
                             </div>
-                            <div class="col-6 col-md-4">
-                                <div class="card-box p-3 h-100">
-                                    <h6 class="text-secondary text-xs fw-bold mb-3">WORKFLOW</h6>
-                                    <div class="d-flex justify-content-between mb-2"><span class="text-secondary">Pending</span><span class="text-white fw-bold">${pending}</span></div>
-                                    <div class="d-flex justify-content-between mb-2"><span class="text-info">Review</span><span class="text-info fw-bold">${review}</span></div>
-                                    <div class="d-flex justify-content-between"><span class="text-success">Done</span><span class="text-success fw-bold">${done}</span></div>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-4">
-                                <div class="card-box p-3 h-100">
+                            <div class="col-12 col-md-8">
+                                <div class="card-box h-100 p-3">
                                     <h6 class="text-secondary text-xs fw-bold mb-2">TEAM PULSE (${a.length}/${TEAM.length})</h6>
                                     ${attList}
                                 </div>
                             </div>
                         </div>`;
                     } else {
-                        // === MEMBER DASHBOARD ===
+                        // Member Home
                         const myT = t.filter(x => (x.tagged_members||[]).includes(STATE.user.id) && x.status !== 'Done');
+                        const pend = myT.filter(x => x.status === 'ApprovalReq').length;
+                        
                         c.innerHTML = `
                         <div class="row g-3">
+                            ${pend>0 ? `<div class="col-12"><div class="alert alert-dark border-secondary">You have <b>${pend}</b> tasks waiting for Leader approval.</div></div>`:''}
                             <div class="col-12 col-md-4">
                                 <div class="card-box p-4 text-center h-100 d-flex flex-column justify-content-center">
                                     <h1 class="fw-bold text-white mb-0">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h1>
@@ -468,11 +479,140 @@
                             <div class="col-12 col-md-8">
                                 <div class="card-box h-100 p-3">
                                     <h6 class="text-secondary small fw-bold mb-3 border-bottom border-secondary border-opacity-25 pb-2">MY ASSIGNED TASKS</h6>
-                                    ${myT.length ? myT.map(x => `<div class="p-3 border border-secondary border-opacity-25 rounded mb-2 bg-dark hover-bg" onclick="nav('task')" style="cursor:pointer"><div class="d-flex justify-content-between mb-1"><span class="badge-st st-wait">${x.status}</span><small class="text-secondary">${x.due_date||''}</small></div><div class="fw-bold text-white">${x.task_title}</div></div>`).join('') : '<div class="text-center text-muted py-5">No active tasks assigned to you.</div>'}
+                                    ${myT.length ? myT.map(x => `<div class="p-3 border border-secondary border-opacity-25 rounded mb-2 bg-dark hover-bg" onclick="nav('task')" style="cursor:pointer"><div class="d-flex justify-content-between mb-1"><span class="badge-st ${x.status==='ApprovalReq'?'st-req':'st-wait'}">${x.status==='ApprovalReq'?'Waiting Approval':x.status}</span><small class="text-secondary">${x.due_date||''}</small></div><div class="fw-bold text-white">${x.task_title}</div></div>`).join('') : '<div class="text-center text-muted py-5">No active tasks assigned to you.</div>'}
                                 </div>
                             </div>
                         </div>`;
                     }
+                }
+
+                // === MOMENTUM (GRAPH) ===
+                if(STATE.page === 'mom') {
+                    c.innerHTML = `
+                    <div class="card-box p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h6 class="fw-bold text-white m-0">Performance Trend (Last 7 Days)</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">Live</span>
+                        </div>
+                        <div style="height: 300px;">
+                            <canvas id="momChart"></canvas>
+                        </div>
+                        <div class="row mt-4 text-center">
+                            <div class="col-6 border-end border-secondary border-opacity-25">
+                                <small class="text-secondary d-block">Finished this week</small>
+                                <strong class="fs-4 text-success" id="mom-done-count">...</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-secondary d-block">New Tasks this week</small>
+                                <strong class="fs-4 text-primary" id="mom-new-count">...</strong>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    // Graph Logic
+                    const { data: allT } = await sbClient.from('tasks').select('created_at, updated_at, status');
+                    
+                    const labels = [];
+                    const dataDone = [];
+                    const dataNew = [];
+                    let totalDone = 0;
+                    let totalNew = 0;
+
+                    for(let i=6; i>=0; i--) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const strDate = d.toISOString().split('T')[0];
+                        labels.push(d.toLocaleDateString([],{weekday:'short'}));
+
+                        const countDone = allT.filter(x => x.status === 'Done' && x.updated_at.startsWith(strDate)).length;
+                        const countNew = allT.filter(x => x.created_at.startsWith(strDate)).length;
+
+                        dataDone.push(countDone);
+                        dataNew.push(countNew);
+                        totalDone += countDone;
+                        totalNew += countNew;
+                    }
+
+                    document.getElementById('mom-done-count').innerText = totalDone;
+                    document.getElementById('mom-new-count').innerText = totalNew;
+
+                    if(CHART_INST) CHART_INST.destroy();
+                    const ctx = document.getElementById('momChart').getContext('2d');
+                    CHART_INST = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                { label: 'Completed', data: dataDone, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', tension: 0.4, fill: true },
+                                { label: 'Created', data: dataNew, borderColor: '#2f81f7', backgroundColor: 'rgba(47, 129, 247, 0.0)', tension: 0.4, borderDash: [5, 5] }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: '#8b949e' } } },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#30363d' }, ticks: { color: '#8b949e', stepSize: 1 } },
+                                x: { grid: { display: false }, ticks: { color: '#8b949e' } }
+                            }
+                        }
+                    });
+                }
+
+                // === ANALYTICS (LEADER ONLY) ===
+                if(STATE.page === 'ana') {
+                    // Fetch all data
+                    const [ {data:tasks}, {data:atts} ] = await Promise.all([
+                        sbClient.from('tasks').select('*'),
+                        sbClient.from('attendance').select('*')
+                    ]);
+
+                    const totalTasks = tasks.length;
+                    const doneTasks = tasks.filter(t=>t.status==='Done').length;
+                    const completionRate = totalTasks ? Math.round((doneTasks/totalTasks)*100) : 0;
+
+                    // Leaderboard Logic
+                    const stats = TEAM.map(u => {
+                        const doneCount = tasks.filter(t => t.status==='Done' && (t.tagged_members||[]).includes(u.id)).length;
+                        const presentCount = atts.filter(a => a.user_id === u.id).length;
+                        return { ...u, done: doneCount, att: presentCount };
+                    }).sort((a,b) => b.done - a.done);
+
+                    c.innerHTML = `
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="card-box p-3 text-center">
+                                    <div class="text-secondary text-xs fw-bold">TOTAL TASKS</div>
+                                    <div class="display-6 fw-bold text-white">${totalTasks}</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card-box p-3 text-center">
+                                    <div class="text-secondary text-xs fw-bold">COMPLETION RATE</div>
+                                    <div class="display-6 fw-bold text-success">${completionRate}%</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card-box p-4">
+                                    <h6 class="fw-bold mb-3">Member Performance</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-dark table-hover mb-0">
+                                            <thead><tr><th class="text-secondary small">Member</th><th class="text-secondary small text-center">Tasks Done</th><th class="text-secondary small text-center">Days Present</th></tr></thead>
+                                            <tbody>
+                                                ${stats.map(s => `
+                                                    <tr>
+                                                        <td><div class="d-flex align-items-center gap-2"><span>${s.av}</span> <span>${s.name}</span></div></td>
+                                                        <td class="text-center fw-bold text-success">${s.done}</td>
+                                                        <td class="text-center text-secondary">${s.att}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
                 
                 // === TASKS PAGE ===
@@ -480,21 +620,40 @@
                     const { data } = await sbClient.from('tasks').select('*').neq('status','Future').order('created_at',{ascending:false});
                     if(!data.length) { c.innerHTML = '<div class="text-center text-muted py-5">No tasks found.</div>'; }
                     else {
-                        c.innerHTML = `<div class="row g-3">${data.map(t => `
+                        c.innerHTML = `<div class="row g-3">${data.map(t => {
+                            let badgeClass = 'st-wait';
+                            let borderClass = 'border-warning';
+                            let btnHtml = '';
+
+                            if(t.status === 'Done') { badgeClass='st-done'; borderClass='border-success'; }
+                            else if(t.status === 'Review') { badgeClass='st-rev'; borderClass='border-info'; }
+                            else if(t.status === 'ApprovalReq') { badgeClass='st-req'; borderClass='border-danger'; }
+
+                            // Logic for Buttons
+                            if(STATE.user.role === 'LEADER') {
+                                if(t.status === 'ApprovalReq') btnHtml = `<button onclick="doApproveCreate(${t.id})" class="btn btn-sm btn-outline-warning w-100">Approve Assignment</button>`;
+                                else if(t.status === 'Review') btnHtml = `<button onclick="doApproveFinish(${t.id})" class="btn btn-sm btn-success w-100 fw-bold">Approve Completion</button>`;
+                                else if(t.status !== 'Done') btnHtml = `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary w-100">Mark Done</button>`;
+                            } else {
+                                // Member
+                                if(t.status === 'Pending' || t.status === 'Ongoing') btnHtml = `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary w-100">Mark Done</button>`;
+                                else if(t.status === 'ApprovalReq') btnHtml = `<div class="text-center text-secondary text-xs fst-italic mt-2">Waiting for Leader Approval</div>`;
+                                else if(t.status === 'Review') btnHtml = `<div class="text-center text-info text-xs fst-italic mt-2">Under Review</div>`;
+                            }
+
+                            return `
                             <div class="col-12 col-lg-6">
-                                <div class="card-box p-3 border-start border-4 ${t.status==='Done'?'border-success':t.status==='Review'?'border-info':'border-warning'}">
+                                <div class="card-box p-3 border-start border-4 ${borderClass}">
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span class="badge-st ${t.status==='Done'?'st-done':t.status==='Review'?'st-rev':'st-wait'}">${t.status}</span>
+                                        <span class="badge-st ${badgeClass}">${t.status==='ApprovalReq'?'Waiting Approval':t.status}</span>
                                         <span class="text-xs text-secondary">${new Date(t.created_at).toLocaleDateString()}</span>
                                     </div>
                                     <h5 class="fw-bold text-white text-truncate">${t.task_title}</h5>
                                     <p class="small text-secondary mb-3 text-truncate">${t.description||''}</p>
-                                    <div class="d-flex gap-2">
-                                        ${t.status!=='Done' && t.status!=='Future' ? `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary flex-fill fw-bold">Mark Done</button>`:''}
-                                        ${STATE.user.role==='LEADER' && t.status==='Review' ? `<button onclick="doApprove(${t.id})" class="btn btn-sm btn-success flex-fill fw-bold">Approve</button>`:''}
-                                    </div>
+                                    ${btnHtml}
                                 </div>
-                            </div>`).join('')}</div>`;
+                            </div>`;
+                        }).join('')}</div>`;
                     }
                 }
 
@@ -541,23 +700,32 @@
                 await sbClient.from('decisions').insert({subject:t, details:d});
             } else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                const st = STATE.mode==='future'?'Future':(STATE.user.role==='LEADER'?'Ongoing':'Pending');
+                // LOGIC: If LEADER -> Pending (Active). If MEMBER -> ApprovalReq
+                const st = STATE.mode==='future' ? 'Future' : (STATE.user.role==='LEADER' ? 'Pending' : 'ApprovalReq');
+                
                 await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:st});
             }
-            MODALS.create.hide(); toast('Saved','Record created','check-circle','text-success'); render(false);
+            MODALS.create.hide(); 
+            toast('Saved', STATE.user.role==='LEADER'?'Task Active':'Sent for Approval', 'check-circle','text-success'); 
+            render(false);
         }
 
         function initDone(id) { STATE.tempId = id; document.getElementById('chk-done').checked=false; toggleFin(); MODALS.proof.show(); }
         function toggleFin() { document.getElementById('btn-fin').classList.toggle('disabled', !document.getElementById('chk-done').checked); }
         async function finishTask() {
+            // Task goes to Review
             await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.tempId);
             MODALS.proof.hide(); toast('Submitted','Sent for review','send','text-info'); render(false);
         }
+        
         async function doCheckIn() { 
             await sbClient.from('attendance').insert({user_id:STATE.user.id, date:new Date().toISOString().split('T')[0]}); 
             render(false); toast('Checked In','Attendance Logged','clock','text-success'); 
         }
-        async function doApprove(id) { await sbClient.from('tasks').update({status:'Done'}).eq('id',id); render(false); toast('Approved','Task Completed','check-circle','text-success'); }
+
+        // Leader Specific Actions
+        async function doApproveCreate(id) { await sbClient.from('tasks').update({status:'Pending'}).eq('id',id); render(false); toast('Assigned','Task is now active','thumbs-up','text-success'); }
+        async function doApproveFinish(id) { await sbClient.from('tasks').update({status:'Done'}).eq('id',id); render(false); toast('Approved','Task Completed','check-circle','text-success'); }
         async function doActivate(id) { await sbClient.from('tasks').update({status:'Pending'}).eq('id',id); render(false); toast('Activated','Idea moved to active','zap','text-warning'); }
 
         async function openArc(m) {
