@@ -3,41 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Leader V10</title>
-    <link rel="icon" href="data:,">
+    <title>SLBDMIS | Team Portal</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* VISUAL CORE */
-        :root { --bg: #0d1117; --glass: rgba(22, 27, 34, 0.95); --border: #30363d; --blue: #2f81f7; --red: #da3633; --green: #238636; }
-        body { background-color: var(--bg); color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 80px; }
+        /* --- THEME ENGINE --- */
+        :root { 
+            --bg: #090c10; 
+            --glass: rgba(22, 27, 34, 0.7); 
+            --glass-border: rgba(48, 54, 61, 0.6);
+            --primary: #2f81f7; 
+            --success: #2ea043;
+            --danger: #da3633;
+            --warning: #d29922;
+            --text-main: #f0f6fc;
+            --text-sub: #8b949e;
+        }
+
+        body { 
+            background-color: var(--bg); 
+            background-image: radial-gradient(circle at 50% 0%, rgba(47, 129, 247, 0.1) 0%, transparent 50%);
+            color: var(--text-main); 
+            font-family: 'Inter', sans-serif; 
+            padding-bottom: 90px; /* Space for mobile nav */
+        }
+
+        /* --- UI COMPONENTS --- */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
         
-        /* COMPONENTS */
-        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); overflow: hidden; }
-        .glass-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); padding: 10px 15px; font-weight: 600; font-size: 0.85rem; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* FORM ELEMENTS */
+        .form-control, .form-select {
+            background: rgba(1, 4, 9, 0.8) !important;
+            border: 1px solid #30363d !important;
+            color: white !important;
+            font-size: 0.95rem;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .form-control:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.15) !important;
+        }
+
+        /* NAVIGATION */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            background: #010409;
+            border-right: 1px solid #30363d;
+            display: none;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 100;
+        }
+        .main-content { margin: 0; padding: 15px; max-width: 1400px; }
         
-        .form-control, .form-select { background: #010409; border: 1px solid #30363d; color: white; font-size: 0.9rem; }
-        .form-control:focus { border-color: var(--blue); box-shadow: none; color: white; }
-        
-        /* SIDEBAR & NAV */
-        .sidebar { width: 260px; height: 100vh; position: fixed; background: #010409; border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 15px; z-index: 100; }
-        .main-content { margin: 0; padding: 15px; }
-        @media (min-width: 992px) { .sidebar { display: flex; } .main-content { margin-left: 260px; padding: 30px; } body { padding-bottom: 0; } .mobile-nav { display: none; } }
-        
-        /* AVATARS & ALERTS */
-        .avatar-btn { width: 50px; height: 50px; border-radius: 50%; background: #21262d; border: 2px solid transparent; font-size: 24px; display: grid; place-items: center; cursor: pointer; transition: 0.2s; }
-        .avatar-btn.active { border-color: var(--blue); background: rgba(47, 129, 247, 0.15); }
-        .noti-badge { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: var(--red); border-radius: 50%; display: none; }
-        .noti-badge.show { display: block; }
-        
-        /* UTILS */
-        .status-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-        .stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 15px; border-radius: 6px; text-align: center; }
+        @media (min-width: 992px) { 
+            .sidebar { display: flex; } 
+            .main-content { margin-left: 280px; padding: 40px; } 
+            body { padding-bottom: 0; } 
+            .mobile-nav { display: none !important; } 
+        }
+
+        /* AVATARS */
+        .user-avatar {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: #21262d;
+            display: grid; place-items: center;
+            font-size: 22px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .user-avatar.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(47, 129, 247, 0.4);
+            transform: scale(1.1);
+        }
+
+        /* STATUS BADGES */
+        .status-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+        .st-done { background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); }
+        .st-review { background: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid rgba(56, 139, 253, 0.4); }
+        .st-ongoing { background: rgba(210, 153, 34, 0.15); color: #d29922; border: 1px solid rgba(210, 153, 34, 0.4); }
+        .st-pending { background: rgba(139, 148, 158, 0.15); color: #8b949e; border: 1px solid rgba(139, 148, 158, 0.4); }
+        .st-rejected { background: rgba(218, 54, 51, 0.15); color: #f85149; border: 1px solid rgba(218, 54, 51, 0.4); }
+
+        /* NAV ITEM */
+        .nav-item-custom {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-sub);
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .nav-item-custom:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item-custom.active { background: rgba(47, 129, 247, 0.15); color: var(--primary); font-weight: 600; }
+
+        /* LOADING SPINNER */
+        .spinner-custom { width: 3rem; height: 3rem; border-width: 0.25em; border-color: var(--primary) transparent var(--primary) transparent; }
+
     </style>
 </head>
 <body>
@@ -45,96 +148,143 @@
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 10000;">
         <div id="sysToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert">
             <div class="d-flex">
-                <div class="toast-body d-flex align-items-center gap-2">
-                    <span id="toast-icon">🔔</span>
-                    <strong id="toast-msg">Alert</strong>
+                <div class="toast-body d-flex align-items-center gap-3 py-3">
+                    <span id="toast-icon" class="fs-5">🔔</span>
+                    <div>
+                        <strong id="toast-title" class="d-block text-white mb-0">Notification</strong>
+                        <small id="toast-msg" class="text-secondary">Just now</small>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3">
-        <h2 class="fw-bold text-white mb-1">SLBDMIS <span class="text-primary">V10</span></h2>
-        <p class="text-muted small mb-4">Official Team Portal</p>
-        
-        <div class="glass-box p-4 w-100" style="max-width: 400px;">
-            <div id="auth-step-1">
-                <div class="text-center text-muted small mb-3">SELECT PROFILE</div>
-                <div id="auth-list" class="d-flex flex-wrap justify-content-center gap-3 mb-2"></div>
+    <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3" style="background: #010409;">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-3" style="width: 60px; height: 60px;">
+                <i data-lucide="shield-check" size="32"></i>
             </div>
-            <div id="auth-step-2" class="d-none mt-4 animate-fade">
-                <input type="password" id="inp-cid" class="form-control text-center fs-5 fw-bold mb-3" placeholder="Enter CID" maxlength="11">
-                <button onclick="doLogin()" class="btn btn-primary w-100 fw-bold">Login</button>
-                <button onclick="resetAuth()" class="btn btn-sm btn-link text-muted w-100 mt-2 text-decoration-none">Back</button>
+            <h2 class="fw-bold text-white tracking-tight">SLBDMIS</h2>
+            <p class="text-secondary small">Secure Team Management Portal</p>
+        </div>
+        
+        <div class="glass-panel p-4 w-100" style="max-width: 420px;">
+            <div id="auth-step-1">
+                <div class="d-flex flex-wrap justify-content-center gap-4 mb-4" id="auth-list"></div>
+                <div class="text-center small text-secondary">Select your profile to continue</div>
+            </div>
+            
+            <div id="auth-step-2" class="d-none animate-fade">
+                <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded bg-dark border border-secondary border-opacity-25">
+                    <div id="sel-avatar" class="fs-4"></div>
+                    <div>
+                        <div id="sel-name" class="fw-bold text-white">Name</div>
+                        <div class="text-muted small">Enter your CID PIN</div>
+                    </div>
+                </div>
+                <input type="password" id="inp-cid" class="form-control text-center fs-4 fw-bold mb-3" placeholder="•••••••••••" maxlength="11" style="letter-spacing: 2px;">
+                <button onclick="doLogin()" class="btn btn-primary w-100 py-2 fw-bold">AUTHENTICATE</button>
+                <button onclick="resetAuth()" class="btn btn-link text-secondary w-100 mt-2 text-decoration-none small">Cancel</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
+        
         <nav class="sidebar">
-            <div class="mb-4 px-2 d-flex align-items-center gap-2 text-white">
-                <i data-lucide="shield" class="text-primary"></i>
+            <div class="mb-5 px-2 d-flex align-items-center gap-3 text-white">
+                <div class="bg-primary rounded p-1"><i data-lucide="layout" size="20" class="text-white"></i></div>
                 <span class="fw-bold tracking-tight">SLBDMIS</span>
             </div>
-            <div id="nav-links" class="d-flex flex-column gap-1 flex-grow-1"></div>
-            <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
-                <div class="d-flex align-items-center gap-2 px-2 mb-3">
+            
+            <div id="nav-links" class="flex-grow-1"></div>
+            
+            <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
+                <div class="d-flex align-items-center gap-3 px-2 mb-3">
                     <div id="u-avatar" class="fs-4"></div>
-                    <div class="lh-1">
+                    <div class="lh-sm">
                         <div id="u-name" class="fw-bold text-white small">User</div>
-                        <div id="u-role" class="text-muted" style="font-size:10px">Role</div>
+                        <div id="u-role" class="text-secondary" style="font-size:11px">Role</div>
                     </div>
                 </div>
-                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Logout</button>
+                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2">
+                    <i data-lucide="log-out" size="14"></i> Sign Out
+                </button>
             </div>
         </nav>
 
         <main class="main-content">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <h4 id="page-title" class="fw-bold text-white m-0">Dashboard</h4>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="position-relative cursor-pointer" onclick="MODALS.noti.show(); markRead()">
-                        <i data-lucide="bell" class="text-white"></i>
-                        <span id="bell-dot" class="noti-badge"></span>
+            <header class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h3 id="page-title" class="fw-bold text-white m-0">Overview</h3>
+                    <div class="text-secondary small d-flex align-items-center gap-2 mt-1">
+                        <span class="d-inline-block bg-success rounded-circle" style="width:6px;height:6px"></span> System Operational
                     </div>
-                    <button onclick="openCreate()" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm">
-                        <i data-lucide="plus" size="16"></i> <span class="d-none d-sm-inline">New</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="position-relative p-2 rounded hover-bg cursor-pointer" onclick="MODALS.noti.show(); markRead()">
+                        <i data-lucide="bell" class="text-white"></i>
+                        <span id="bell-dot" class="position-absolute top-0 end-0 p-1 bg-danger border border-dark rounded-circle d-none" style="transform: translate(-5px, 5px)"></span>
+                    </div>
+                    <button onclick="openCreate()" class="btn btn-primary fw-bold d-flex align-items-center gap-2 shadow-sm px-3">
+                        <i data-lucide="plus-circle" size="18"></i> <span class="d-none d-sm-inline">New Entry</span>
                     </button>
                 </div>
             </header>
+
             <div id="content-area"></div>
         </main>
 
-        <nav class="mobile-nav fixed-bottom d-lg-none bg-dark border-top border-secondary">
+        <nav class="mobile-nav fixed-bottom bg-dark border-top border-secondary border-opacity-50 pb-3 pt-2 px-3 d-lg-none" style="z-index: 1000;">
             <div class="row text-center m-0" id="mob-links"></div>
         </nav>
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-box border-0">
+            <div class="modal-content glass-panel border-0">
                 <div class="modal-body p-4">
-                    <h6 class="fw-bold text-white mb-3">Create Entry</h6>
-                    <div class="btn-group w-100 mb-3">
-                        <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm btn-primary">Task</button>
-                        <button onclick="setMode('decision')" id="btn-m-dec" class="btn btn-sm btn-outline-secondary">Decision</button>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold text-white m-0">Create New</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="p-1 bg-dark rounded border border-secondary border-opacity-25 d-flex mb-4">
+                        <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm flex-fill fw-bold rounded transition-all">Task</button>
+                        <button onclick="setMode('decision')" id="btn-m-dec" class="btn btn-sm flex-fill fw-bold rounded transition-all">Decision</button>
                     </div>
                     
-                    <input type="text" id="n-title" class="form-control mb-2" placeholder="Title">
-                    <textarea id="n-desc" class="form-control mb-3" rows="3" placeholder="Description"></textarea>
+                    <div class="mb-3">
+                        <label class="small text-secondary fw-bold mb-1">TITLE</label>
+                        <input type="text" id="n-title" class="form-control" placeholder="What needs to be done?">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small text-secondary fw-bold mb-1">DETAILS</label>
+                        <textarea id="n-desc" class="form-control" rows="3" placeholder="Provide context..."></textarea>
+                    </div>
                     
-                    <div id="div-task-opts">
-                        <div class="row g-2 mb-3">
-                            <div class="col-6"><select id="n-prio" class="form-select"><option>Normal</option><option>High</option></select></div>
-                            <div class="col-6"><input type="date" id="n-date" class="form-control"></div>
+                    <div id="div-task-opts" class="animate-fade">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="small text-secondary fw-bold mb-1">PRIORITY</label>
+                                <select id="n-prio" class="form-select"><option>Normal</option><option>High</option></select>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-secondary fw-bold mb-1">DUE DATE</label>
+                                <input type="date" id="n-date" class="form-control">
+                            </div>
                         </div>
-                        <label class="small text-muted fw-bold mb-2">Assign To:</label>
-                        <div id="n-members" class="d-flex flex-column gap-1 mb-3 bg-dark p-2 rounded" style="max-height:120px; overflow-y:auto"></div>
-                        <div id="create-warning" class="alert alert-warning py-2 mb-3 small d-none">
-                            <i data-lucide="alert-triangle" size="14"></i> Needs Leader Approval to start.
+                        <div class="mb-4">
+                            <label class="small text-secondary fw-bold mb-2">ASSIGN MEMBERS</label>
+                            <div id="n-members" class="d-flex flex-column gap-2 bg-dark p-3 rounded border border-secondary border-opacity-25" style="max-height:150px; overflow-y:auto"></div>
+                        </div>
+                        <div id="create-warning" class="alert alert-warning border-0 d-flex align-items-center gap-2 small mb-3 d-none">
+                            <i data-lucide="alert-triangle" size="16"></i> <span>Requires Leader approval to start.</span>
                         </div>
                     </div>
-                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Create</button>
+                    
+                    <button onclick="apiCreate()" class="btn btn-success w-100 py-2 fw-bold shadow">Publish</button>
                 </div>
             </div>
         </div>
@@ -142,12 +292,15 @@
 
     <div class="modal fade" id="modReject" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-box border-0">
-                <div class="modal-body p-4">
-                    <h6 class="fw-bold text-danger mb-2">Reject Task</h6>
-                    <p class="small text-muted">Why are you rejecting this? The member will be notified to fix it.</p>
+            <div class="modal-content glass-panel border-0">
+                <div class="modal-body p-4 text-center">
+                    <div class="mx-auto bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mb-3" style="width:50px; height:50px">
+                        <i data-lucide="x" size="24"></i>
+                    </div>
+                    <h5 class="fw-bold text-white">Reject Submission</h5>
+                    <p class="text-secondary small mb-4">Please provide a reason so the member can fix it.</p>
                     <input type="hidden" id="rej-tid">
-                    <textarea id="rej-reason" class="form-control mb-3" rows="3" placeholder="e.g., Files missing, Wrong format..."></textarea>
+                    <textarea id="rej-reason" class="form-control mb-3" rows="3" placeholder="Missing files, incorrect format..."></textarea>
                     <button onclick="apiReject()" class="btn btn-danger w-100 fw-bold">Confirm Rejection</button>
                 </div>
             </div>
@@ -156,16 +309,24 @@
 
     <div class="modal fade" id="modProof" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content glass-box border-0">
+            <div class="modal-content glass-panel border-0">
                 <div class="modal-body p-4">
-                    <h6 class="fw-bold text-white mb-2">Submit Work</h6>
+                    <h5 class="fw-bold text-white mb-2">Submit Work</h5>
+                    <p class="text-secondary small mb-4">Ensure all deliverables are uploaded to the Team Drive.</p>
                     <input type="hidden" id="p-tid">
-                    <a href="https://drive.google.com/drive/u/0/" target="_blank" class="btn btn-outline-light w-100 mb-3"><i data-lucide="external-link" size="14"></i> Open Drive</a>
-                    <div class="form-check mb-3">
+                    
+                    <a href="https://drive.google.com/drive/u/0/" target="_blank" class="btn btn-outline-secondary w-100 mb-3 py-2 d-flex align-items-center justify-content-center gap-2">
+                        <i data-lucide="external-link" size="16"></i> Open Google Drive
+                    </a>
+                    
+                    <div class="form-check p-3 rounded bg-dark border border-secondary border-opacity-25 mb-3">
                         <input class="form-check-input" type="checkbox" id="chk-proof" onchange="document.getElementById('btn-sub').disabled=!this.checked">
-                        <label class="form-check-label small text-white" for="chk-proof">I confirm files are uploaded</label>
+                        <label class="form-check-label small text-white ms-2" for="chk-proof">
+                            I certify that all files are uploaded and correct.
+                        </label>
                     </div>
-                    <button id="btn-sub" onclick="apiSubmit()" class="btn btn-success w-100 fw-bold" disabled>Send for Review</button>
+                    
+                    <button id="btn-sub" onclick="apiSubmit()" class="btn btn-success w-100 fw-bold py-2" disabled>Submit to Leader</button>
                 </div>
             </div>
         </div>
@@ -173,9 +334,9 @@
 
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
-            <div class="modal-content glass-box border-0">
+            <div class="modal-content glass-panel border-0">
                 <div class="modal-header glass-header border-0">
-                    <h6 class="modal-title text-white">Notifications</h6>
+                    <h6 class="m-0">Notifications</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -186,23 +347,23 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
+        // CONFIG
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const db = window.supabase.createClient(SB_URL, SB_KEY);
 
+        // --- UPDATED TEAM (Kuenley Removed, Ngawang Icon Changed) ---
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
-            { id: 3, name: "Kuenley", avatar: "👩‍💻", cid: "11006001849", role: "MEMBER" },
             { id: 4, name: "Laxmi", avatar: "👨‍🔬", cid: "11103002151", role: "MEMBER" },
-            { id: 5, name: "Ngawang", avatar: "👩", cid: "10801003243", role: "MEMBER" }
+            { id: 5, name: "Ngawang", avatar: "👨", cid: "10801003243", role: "MEMBER" }
         ];
 
         const STATE = { user: null, page: 'home', mode: 'task' };
         const MODALS = {};
 
-        // --- 2. INIT & AUTH ---
+        // INIT
         window.onload = () => {
             lucide.createIcons();
             MODALS.create = new bootstrap.Modal('#modCreate');
@@ -210,7 +371,7 @@
             MODALS.noti = new bootstrap.Modal('#modNoti');
             MODALS.reject = new bootstrap.Modal('#modReject');
 
-            const uid = localStorage.getItem('slbd_v10_uid');
+            const uid = localStorage.getItem('slbd_prod_uid');
             if(uid) {
                 STATE.user = TEAM.find(u => u.id == uid);
                 if(STATE.user) { startApp(); return; }
@@ -218,50 +379,54 @@
             renderAuth();
         };
 
+        // AUTH
         function renderAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="d-flex flex-column align-items-center gap-2" onclick="pickUser(${u.id}, this)">
-                    <div class="avatar-btn shadow">${u.avatar}</div>
-                    <span class="small fw-bold text-muted">${u.name.split(' ')[0]}</span>
+                <div class="d-flex flex-column align-items-center gap-2 cursor-pointer group" onclick="pickUser(${u.id})">
+                    <div class="user-avatar" id="av-${u.id}">${u.avatar}</div>
+                    <span class="small fw-bold text-secondary group-hover-white">${u.name.split(' ')[0]}</span>
                 </div>
             `).join('');
         }
 
-        function pickUser(id, el) {
-            document.querySelectorAll('.avatar-btn').forEach(x => x.classList.remove('active'));
-            el.querySelector('.avatar-btn').classList.add('active');
+        function pickUser(id) {
+            document.querySelectorAll('.user-avatar').forEach(x => x.classList.remove('selected'));
+            document.getElementById(`av-${id}`).classList.add('selected');
             STATE.selUser = TEAM.find(u => u.id === id);
+            
             document.getElementById('auth-step-1').classList.add('d-none');
             document.getElementById('auth-step-2').classList.remove('d-none');
+            document.getElementById('sel-avatar').innerHTML = STATE.selUser.avatar;
+            document.getElementById('sel-name').innerText = STATE.selUser.name;
+            document.getElementById('inp-cid').value = '';
             document.getElementById('inp-cid').focus();
         }
 
         function resetAuth() {
             document.getElementById('auth-step-1').classList.remove('d-none');
             document.getElementById('auth-step-2').classList.add('d-none');
-            document.getElementById('inp-cid').value = '';
         }
 
         function doLogin() {
             if(document.getElementById('inp-cid').value === STATE.selUser.cid) {
                 STATE.user = STATE.selUser;
-                localStorage.setItem('slbd_v10_uid', STATE.user.id);
+                localStorage.setItem('slbd_prod_uid', STATE.user.id);
                 document.getElementById('view-auth').classList.add('d-none');
                 startApp();
             } else {
-                notify('Invalid CID', '❌');
+                toast('Authentication Failed', 'Incorrect CID PIN', '❌');
             }
         }
 
         function logout() {
-            if(confirm('Logout?')) {
-                localStorage.removeItem('slbd_v10_uid');
+            if(confirm('Securely log out?')) {
+                localStorage.removeItem('slbd_prod_uid');
                 location.reload();
             }
         }
 
-        // --- 3. APP NAVIGATION ---
+        // NAVIGATION
         function startApp() {
             document.getElementById('view-app').classList.remove('d-none');
             document.getElementById('u-avatar').innerHTML = STATE.user.avatar;
@@ -269,37 +434,66 @@
             document.getElementById('u-role').innerText = STATE.user.role;
 
             const pages = [
-                {id:'home', t:'Dashboard', i:'layout-dashboard'},
+                {id:'home', t:'Overview', i:'layout-grid'},
                 {id:'task', t:'All Tasks', i:'check-square'},
                 {id:'att', t:'Attendance', i:'clock'},
                 {id:'dec', t:'Decisions', i:'file-text'}
             ];
             
-            // Leader Only Stats
-            if(STATE.user.role === 'LEADER') pages.push({id:'stats', t:'Performance', i:'bar-chart-2'});
+            if(STATE.user.role === 'LEADER') pages.push({id:'stats', t:'Super Analytics', i:'bar-chart-2'});
 
-            const navHtml = (p, mob) => mob 
-                ? `<div class="col py-2" onclick="nav('${p.id}')"><i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary':''}"></i><div style="font-size:10px">${p.t}</div></div>`
-                : `<div onclick="nav('${p.id}')" class="d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none" style="cursor:pointer" id="lnk-${p.id}"><i data-lucide="${p.i}" size="18"></i><span class="small fw-bold">${p.t}</span></div>`;
+            // Desktop Nav
+            document.getElementById('nav-links').innerHTML = pages.map(p => `
+                <div class="nav-item-custom" id="lnk-${p.id}" onclick="nav('${p.id}')">
+                    <i data-lucide="${p.i}" size="18"></i> <span>${p.t}</span>
+                </div>
+            `).join('');
 
-            document.getElementById('nav-links').innerHTML = pages.map(p => navHtml(p, false)).join('');
-            document.getElementById('mob-links').innerHTML = pages.map(p => navHtml(p, true)).join('');
+            // Mobile Nav
+            document.getElementById('mob-links').innerHTML = pages.map(p => `
+                <div class="col py-2" onclick="nav('${p.id}')">
+                    <i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary text-opacity-100':'text-secondary'} mb-1"></i>
+                    <div style="font-size:10px" class="${STATE.page===p.id?'text-white fw-bold':'text-secondary'}">${p.t}</div>
+                </div>
+            `).join('');
             
             nav('home');
-            setInterval(() => { checkNotis(); if(STATE.page==='home') refreshData(true); }, 8000);
+            
+            // Poller
+            setInterval(() => {
+                checkNotis();
+                if(STATE.page === 'home') refreshData(true);
+            }, 5000);
         }
 
         function nav(pg) {
             STATE.page = pg;
-            document.querySelectorAll('[id^="lnk-"]').forEach(e => e.className = "d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none");
-            if(document.getElementById(`lnk-${pg}`)) document.getElementById(`lnk-${pg}`).className = "d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 bg-primary bg-opacity-10 text-primary user-select-none";
+            // Update UI Active States
+            document.querySelectorAll('.nav-item-custom').forEach(e => e.classList.remove('active'));
+            if(document.getElementById(`lnk-${pg}`)) document.getElementById(`lnk-${pg}`).classList.add('active');
+            
+            // Mobile Update
+            const pages = [
+                {id:'home', t:'Overview', i:'layout-grid'},
+                {id:'task', t:'All Tasks', i:'check-square'},
+                {id:'att', t:'Attendance', i:'clock'},
+                {id:'dec', t:'Decisions', i:'file-text'}
+            ];
+            if(STATE.user.role === 'LEADER') pages.push({id:'stats', t:'Super Analytics', i:'bar-chart-2'});
+            document.getElementById('mob-links').innerHTML = pages.map(p => `
+                <div class="col py-2" onclick="nav('${p.id}')">
+                    <i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary text-opacity-100':'text-secondary'} mb-1"></i>
+                    <div style="font-size:10px" class="${STATE.page===p.id?'text-white fw-bold':'text-secondary'}">${p.t}</div>
+                </div>
+            `).join('');
+
             document.getElementById('page-title').innerText = pg === 'stats' ? 'Team Performance' : (pg.charAt(0).toUpperCase() + pg.slice(1));
             refreshData(false);
         }
 
         async function refreshData(silent) {
             const box = document.getElementById('content-area');
-            if(!silent) box.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+            if(!silent) box.innerHTML = '<div class="d-flex justify-content-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
             
             try {
                 if(STATE.page === 'home') await renderHome(box);
@@ -311,53 +505,69 @@
             } catch(e) { console.error(e); }
         }
 
-        // --- 4. PAGE LOGIC ---
-        
+        // --- PAGES ---
+
         async function renderHome(c) {
             const { data: tasks } = await db.from('tasks').select('*');
             const { data: mom } = await db.from('momentum_history').select('*').order('date', {ascending:true});
             
-            // Data Prep
+            // Filter Logic
             const score = mom.length ? mom[mom.length-1].score : 100;
-            const pendingProps = tasks.filter(t => t.status === 'Pending');
-            const forReview = tasks.filter(t => t.status === 'Review');
             const myTasks = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id));
-            const myPending = tasks.filter(t => t.status === 'Pending' && t.creator_id === STATE.user.id);
-            const myRejected = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) && t.rejection_reason);
+            const forReview = tasks.filter(t => t.status === 'Review');
+            const pending = tasks.filter(t => t.status === 'Pending');
+            const rejected = tasks.filter(t => t.status === 'Ongoing' && t.rejection_reason && (t.tagged_members||[]).includes(STATE.user.id));
 
-            let chartHtml = `
-                <div class="glass-box p-3 mb-4 d-none d-md-block">
-                    <h6 class="glass-header border-0 pt-0">Momentum Trend</h6>
-                    <div style="height:200px"><canvas id="mainChart"></canvas></div>
+            // View Components
+            const chartSection = `
+                <div class="glass-panel p-3 mb-4 d-none d-lg-block">
+                    <div class="glass-header border-0 pt-0 pb-2">
+                        <span>Momentum Trend</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">Score: ${score}</span>
+                    </div>
+                    <div style="height:180px"><canvas id="mainChart"></canvas></div>
                 </div>`;
             
-            let mobStats = `
-                <div class="row g-2 mb-3 d-md-none">
-                    <div class="col-6"><div class="stat-card"><div class="h2 fw-bold text-white m-0">${score}</div><div class="small text-muted">Momentum</div></div></div>
-                    <div class="col-6"><div class="stat-card"><div class="h2 fw-bold text-success m-0">${tasks.filter(t=>t.status==='Done').length}</div><div class="small text-muted">Completed</div></div></div>
+            const mobStats = `
+                <div class="row g-2 mb-4 d-lg-none">
+                    <div class="col-6">
+                        <div class="glass-panel p-3 text-center">
+                            <div class="h2 fw-bold text-white m-0">${score}</div>
+                            <div class="small text-secondary text-uppercase fw-bold" style="font-size:10px">Momentum</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="glass-panel p-3 text-center">
+                            <div class="h2 fw-bold text-success m-0">${tasks.filter(t=>t.status==='Done').length}</div>
+                            <div class="small text-secondary text-uppercase fw-bold" style="font-size:10px">Completed</div>
+                        </div>
+                    </div>
                 </div>`;
 
             c.innerHTML = `
                 ${mobStats}
-                ${chartHtml}
-                <div class="row g-3">
+                ${chartSection}
+                <div class="row g-4">
                     <div class="col-lg-7">
-                        ${STATE.user.role === 'LEADER' ? renderLeaderDash(pendingProps, forReview) : renderMemberDash(myTasks, myPending, myRejected)}
+                        ${STATE.user.role === 'LEADER' ? renderLeaderDash(pending, forReview) : renderMemberDash(myTasks, rejected)}
                     </div>
                     <div class="col-lg-5">
-                        <div class="glass-box h-100">
+                        <div class="glass-panel h-100">
                             <div class="glass-header">
                                 <span>Recent Activity</span>
                                 <i data-lucide="activity" size="14"></i>
                             </div>
-                            <div class="p-3">
-                                ${tasks.slice(0,5).map(t => `
-                                    <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10">
-                                        <div class="lh-1">
+                            <div class="p-0">
+                                ${tasks.slice(0,6).map(t => `
+                                    <div class="p-3 border-bottom border-secondary border-opacity-10 d-flex justify-content-between align-items-center">
+                                        <div>
                                             <div class="small fw-bold text-white mb-1">${t.task_title}</div>
-                                            <div class="small text-muted" style="font-size:10px">${new Date(t.created_at).toLocaleDateString()}</div>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="user-avatar" style="width:20px;height:20px;font-size:12px">${getTeamAvatar(t.creator_id)}</div>
+                                                <span class="text-muted" style="font-size:11px">${new Date(t.created_at).toLocaleDateString()}</span>
+                                            </div>
                                         </div>
-                                        <span class="status-pill text-${t.status==='Done'?'success':'secondary'} border-${t.status==='Done'?'success':'secondary'}">${t.status}</span>
+                                        ${getBadge(t.status)}
                                     </div>
                                 `).join('')}
                             </div>
@@ -369,27 +579,30 @@
             if(document.getElementById('mainChart')) {
                 new Chart(document.getElementById('mainChart'), {
                     type: 'line',
-                    data: { labels: mom.map(m=>m.date.slice(5)), datasets: [{ label:'Score', data:mom.map(m=>m.score), borderColor:'#2f81f7', tension:0.4 }] },
-                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{color:'#30363d'}}} }
+                    data: { labels: mom.map(m=>m.date.slice(5)), datasets: [{ label:'Score', data:mom.map(m=>m.score), borderColor:'#2f81f7', backgroundColor:'rgba(47,129,247,0.1)', fill:true, tension:0.4, pointRadius:0 }] },
+                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{grid:{color:'#30363d'}}} }
                 });
             }
         }
 
-        function renderLeaderDash(props, reviews) {
+        function renderLeaderDash(pending, reviews) {
             return `
-                <div class="d-flex flex-column gap-3">
-                    <div class="glass-box border-start border-4 border-warning">
+                <div class="d-flex flex-column gap-4">
+                    <div class="glass-panel">
                         <div class="glass-header text-warning">
-                            <span>Task Proposals (Must Approve to Start)</span>
-                            <span class="badge bg-warning text-dark">${props.length}</span>
+                            <span class="d-flex align-items-center gap-2"><i data-lucide="clipboard-list" size="16"></i> Proposals (Pending)</span>
+                            <span class="badge bg-warning text-dark">${pending.length}</span>
                         </div>
                         <div class="p-3">
-                            ${props.length === 0 ? '<div class="text-muted small">No new proposals.</div>' : props.map(t => `
-                                <div class="bg-dark p-3 rounded mb-2">
-                                    <h6 class="small fw-bold text-white mb-1">${t.task_title}</h6>
-                                    <p class="small text-muted mb-2">${t.description}</p>
+                            ${pending.length === 0 ? '<div class="text-center text-muted py-3 small">No new proposals</div>' : pending.map(t => `
+                                <div class="bg-dark p-3 rounded mb-2 border border-secondary border-opacity-25">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6 class="fw-bold text-white m-0">${t.task_title}</h6>
+                                        <span class="small text-muted">by ${getTeamName(t.creator_id)}</span>
+                                    </div>
+                                    <p class="small text-secondary mb-3">${t.description}</p>
                                     <div class="d-flex gap-2">
-                                        <button onclick="apiLeaderStart(${t.id}, ${t.creator_id})" class="btn btn-sm btn-success w-100 fw-bold">Approve & Start</button>
+                                        <button onclick="apiLeaderStart(${t.id}, ${t.creator_id})" class="btn btn-sm btn-success flex-fill fw-bold">Approve & Start</button>
                                         <button onclick="apiDelete(${t.id})" class="btn btn-sm btn-outline-danger"><i data-lucide="trash-2" size="14"></i></button>
                                     </div>
                                 </div>
@@ -397,19 +610,19 @@
                         </div>
                     </div>
 
-                    <div class="glass-box border-start border-4 border-info">
+                    <div class="glass-panel">
                         <div class="glass-header text-info">
-                            <span>Review Completed Tasks</span>
+                            <span class="d-flex align-items-center gap-2"><i data-lucide="eye" size="16"></i> For Review</span>
                             <span class="badge bg-info text-dark">${reviews.length}</span>
                         </div>
                         <div class="p-3">
-                            ${reviews.length === 0 ? '<div class="text-muted small">No pending reviews.</div>' : reviews.map(t => `
-                                <div class="bg-dark p-3 rounded mb-2">
-                                    <h6 class="small fw-bold text-white mb-1">${t.task_title}</h6>
-                                    <div class="small text-white mb-2">Submitted by: ${getTeamName(t.tagged_members[0])}</div>
+                            ${reviews.length === 0 ? '<div class="text-center text-muted py-3 small">No tasks waiting for review</div>' : reviews.map(t => `
+                                <div class="bg-dark p-3 rounded mb-2 border border-secondary border-opacity-25">
+                                    <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
+                                    <div class="small text-secondary mb-3">Submitted by: <span class="text-white">${getTeamName(t.tagged_members[0])}</span></div>
                                     <div class="d-flex gap-2">
-                                        <button onclick="apiApprove(${t.id}, ${t.tagged_members[0]})" class="btn btn-sm btn-success w-100 fw-bold">Accept</button>
-                                        <button onclick="openReject(${t.id})" class="btn btn-sm btn-danger w-100 fw-bold">Reject</button>
+                                        <button onclick="apiApprove(${t.id}, ${t.tagged_members[0]})" class="btn btn-sm btn-success flex-fill fw-bold">Accept Work</button>
+                                        <button onclick="openReject(${t.id})" class="btn btn-sm btn-danger flex-fill fw-bold">Reject</button>
                                     </div>
                                 </div>
                             `).join('')}
@@ -419,89 +632,63 @@
             `;
         }
 
-        function renderMemberDash(active, pending, rejected) {
+        function renderMemberDash(active, rejected) {
             return `
-                <div class="d-flex flex-column gap-3">
+                <div class="d-flex flex-column gap-4">
                     ${rejected.length ? `
-                    <div class="glass-box border-start border-4 border-danger">
-                        <div class="glass-header text-danger">⚠️ Needs Attention (Returned)</div>
+                    <div class="glass-panel border-danger">
+                        <div class="glass-header text-danger bg-danger bg-opacity-10">
+                            <span>⚠️ Action Required (Returned)</span>
+                        </div>
                         <div class="p-3">
                             ${rejected.map(t => `
-                                <div class="bg-dark p-3 rounded mb-2">
-                                    <h6 class="fw-bold text-white small">${t.task_title}</h6>
-                                    <div class="text-danger small fw-bold mb-2">Reason: "${t.rejection_reason}"</div>
-                                    <button onclick="openProof(${t.id})" class="btn btn-sm btn-primary w-100">Fix & Resubmit</button>
+                                <div class="bg-dark p-3 rounded mb-2 border border-danger border-opacity-25">
+                                    <h6 class="fw-bold text-white mb-1">${t.task_title}</h6>
+                                    <div class="p-2 bg-danger bg-opacity-10 rounded text-danger small mb-3"><strong>Fix:</strong> ${t.rejection_reason}</div>
+                                    <button onclick="openProof(${t.id})" class="btn btn-sm btn-primary w-100 fw-bold">Fix & Resubmit</button>
                                 </div>
                             `).join('')}
                         </div>
                     </div>` : ''}
 
-                    ${pending.length ? `
-                    <div class="glass-box border-start border-4 border-secondary">
-                        <div class="glass-header text-muted">Waiting Leader Approval</div>
-                        <div class="p-3">
-                            ${pending.map(t => `<div class="small text-muted mb-1">• ${t.task_title}</div>`).join('')}
+                    <div class="glass-panel">
+                        <div class="glass-header">
+                            <span>My Active Tasks</span>
                         </div>
-                    </div>` : ''}
-
-                    <div class="glass-box">
-                        <div class="glass-header">My Active Tasks</div>
                         <div class="p-3">
-                            ${active.length === 0 ? '<div class="text-muted small">No active tasks.</div>' : active.map(t => `
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between small mb-1">
+                            ${active.length === 0 ? '<div class="text-center text-muted py-4"><i data-lucide="coffee" class="mb-2"></i><br>All caught up!</div>' : active.map(t => `
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-2 align-items-center">
                                         <span class="fw-bold text-white">${t.task_title}</span>
-                                        <span class="text-primary cursor-pointer fw-bold" onclick="openProof(${t.id})">SUBMIT</span>
+                                        <button class="btn btn-xs btn-outline-primary py-0 fw-bold" style="font-size:10px" onclick="openProof(${t.id})">SUBMIT</button>
                                     </div>
-                                    <input class="form-control form-control-sm" value="${t.progress_note||''}" placeholder="Update progress..." onchange="apiNote(${t.id}, this.value)">
+                                    <input class="form-control form-control-sm" value="${t.progress_note||''}" placeholder="Type progress update..." onchange="apiNote(${t.id}, this.value)">
                                 </div>
                             `).join('')}
                         </div>
                     </div>
                 </div>
             `;
-        }
-
-        async function renderStats(c) {
-            const { data: tasks } = await db.from('tasks').select('*');
-            const { data: att } = await db.from('attendance').select('*');
-            
-            const stats = TEAM.map(u => {
-                const myTasks = tasks.filter(t => (t.tagged_members||[]).includes(u.id));
-                const done = myTasks.filter(t => t.status === 'Done').length;
-                return { ...u, done, active: myTasks.filter(t=>t.status==='Ongoing').length, att: att.filter(a=>a.user_id===u.id).length, rate: myTasks.length ? Math.round((done/myTasks.length)*100) : 0 };
-            });
-
-            c.innerHTML = `<div class="row g-3">${stats.map(s => `
-                <div class="col-md-6 col-xl-4">
-                    <div class="glass-box p-3">
-                        <div class="d-flex align-items-center gap-3 mb-3">
-                            <div class="avatar-btn">${s.avatar}</div>
-                            <div><h6 class="m-0 text-white fw-bold">${s.name}</h6><span class="badge bg-secondary" style="font-size:10px">${s.role}</span></div>
-                            <div class="ms-auto h4 m-0 text-success fw-bold">${s.rate}%</div>
-                        </div>
-                        <div class="d-flex justify-content-between text-center bg-dark rounded p-2">
-                            <div><div class="fw-bold text-white">${s.done}</div><div class="small text-muted" style="font-size:10px">Done</div></div>
-                            <div><div class="fw-bold text-warning">${s.active}</div><div class="small text-muted" style="font-size:10px">Active</div></div>
-                            <div><div class="fw-bold text-info">${s.att}</div><div class="small text-muted" style="font-size:10px">Attended</div></div>
-                        </div>
-                    </div>
-                </div>
-            `).join('')}</div>`;
         }
 
         async function renderTasks(c) {
             const { data: tasks } = await db.from('tasks').select('*').neq('status', 'Pending').order('created_at', {ascending:false});
             c.innerHTML = `<div class="d-flex flex-column gap-3">${tasks.map(t => `
-                <div class="glass-box p-3">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="status-pill text-${t.status==='Done'?'success':(t.status==='Review'?'info':'warning')} border-${t.status==='Done'?'success':(t.status==='Review'?'info':'warning')}">${t.status}</span>
+                <div class="glass-panel p-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        ${getBadge(t.status)}
                         <span class="small text-muted">Due: ${t.due_date}</span>
                     </div>
                     <h5 class="fw-bold text-white mb-1">${t.task_title}</h5>
-                    <p class="small text-muted mb-2">${t.description}</p>
-                    <div class="small text-secondary pt-2 border-top border-secondary border-opacity-25">
-                        Assigned: ${t.tagged_members?.map(id=>TEAM.find(u=>u.id==id)?.name.split(' ')[0]).join(', ') || 'None'}
+                    <p class="small text-secondary mb-3">${t.description}</p>
+                    <div class="d-flex align-items-center gap-2 pt-2 border-top border-secondary border-opacity-25">
+                        <span class="small text-muted">Assigned:</span>
+                        ${(t.tagged_members||[]).map(id => `
+                            <div class="d-flex align-items-center gap-1 bg-dark px-2 rounded-pill border border-secondary border-opacity-25">
+                                <span class="small" style="font-size:10px">${getTeamAvatar(id)}</span>
+                                <span class="small text-white" style="font-size:11px">${getTeamName(id).split(' ')[0]}</span>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `).join('')}</div>`;
@@ -513,48 +700,118 @@
             const checked = logs.find(l => l.user_id === STATE.user.id && l.date === today);
 
             c.innerHTML = `
-                <div class="glass-box p-4 text-center mb-4">
-                    <h1 class="text-white fw-bold">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h1>
-                    <p class="text-muted small">${new Date().toDateString()}</p>
-                    ${checked ? `<button class="btn btn-success px-4" disabled>✅ Checked In</button>` : `<button onclick="apiCheckIn()" class="btn btn-primary px-4 fw-bold shadow">Check In Now</button>`}
+                <div class="glass-panel p-5 text-center mb-4">
+                    <div class="mb-2 text-primary"><i data-lucide="clock" size="32"></i></div>
+                    <h1 class="text-white fw-bold mb-0">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h1>
+                    <p class="text-muted small mb-4">${new Date().toDateString()}</p>
+                    ${checked 
+                        ? `<button class="btn btn-success px-5 py-2 fw-bold" disabled>Checked In <i data-lucide="check" class="ms-1" size="16"></i></button>` 
+                        : `<button onclick="apiCheckIn()" class="btn btn-primary px-5 py-2 fw-bold shadow-lg">Check In Now</button>`}
                 </div>
-                <div class="glass-box"><div class="glass-header">Recent Logs</div><div>${logs.map(l => {
-                    const u = TEAM.find(x=>x.id==l.user_id);
-                    return `<div class="d-flex justify-content-between px-3 py-2 border-bottom border-secondary border-opacity-10"><span class="small text-white">${u.avatar} ${u.name}</span><span class="small text-muted font-monospace">${new Date(l.created_at).toLocaleTimeString()}</span></div>`
-                }).join('')}</div></div>
+                <div class="glass-panel">
+                    <div class="glass-header">Recent Logs</div>
+                    <div class="p-0">
+                        ${logs.map(l => {
+                            const u = TEAM.find(x=>x.id==l.user_id);
+                            if(!u) return ''; // Skip removed users
+                            return `<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom border-secondary border-opacity-10">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="user-avatar" style="width:24px;height:24px;font-size:14px">${u.avatar}</div>
+                                    <span class="small text-white">${u.name}</span>
+                                </div>
+                                <span class="small text-secondary font-monospace">${new Date(l.created_at).toLocaleTimeString()}</span>
+                            </div>`
+                        }).join('')}
+                    </div>
+                </div>
             `;
         }
         
-        async function renderDec(c) {
-            const { data } = await db.from('decisions').select('*').order('created_at',{ascending:false});
-            c.innerHTML = data.map(d=>`<div class="glass-box p-3 mb-2 border-start border-4 border-secondary"><h6 class="text-white fw-bold">${d.subject}</h6><p class="small text-muted m-0">${d.details}</p></div>`).join('');
+        async function renderStats(c) {
+            const { data: tasks } = await db.from('tasks').select('*');
+            const { data: att } = await db.from('attendance').select('*');
+            
+            c.innerHTML = `<div class="row g-3">${TEAM.map(u => {
+                const myTasks = tasks.filter(t => (t.tagged_members||[]).includes(u.id));
+                const done = myTasks.filter(t => t.status === 'Done').length;
+                const active = myTasks.filter(t => t.status === 'Ongoing').length;
+                const checkins = att.filter(a => a.user_id === u.id).length;
+                const rate = myTasks.length ? Math.round((done/myTasks.length)*100) : 0;
+                
+                return `
+                <div class="col-md-6 col-xl-4">
+                    <div class="glass-panel p-3 h-100">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="user-avatar shadow-sm">${u.avatar}</div>
+                            <div>
+                                <h6 class="m-0 text-white fw-bold">${u.name}</h6>
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25" style="font-size:9px">${u.role}</span>
+                            </div>
+                            <div class="ms-auto text-end">
+                                <div class="h4 m-0 text-success fw-bold">${rate}%</div>
+                                <div class="small text-muted" style="font-size:9px">SUCCESS RATE</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between text-center bg-dark rounded p-2 border border-secondary border-opacity-25">
+                            <div class="flex-fill border-end border-secondary border-opacity-25"><div class="fw-bold text-white">${done}</div><div class="small text-muted" style="font-size:9px">DONE</div></div>
+                            <div class="flex-fill border-end border-secondary border-opacity-25"><div class="fw-bold text-warning">${active}</div><div class="small text-muted" style="font-size:9px">ACTIVE</div></div>
+                            <div class="flex-fill"><div class="fw-bold text-info">${checkins}</div><div class="small text-muted" style="font-size:9px">ATTEND</div></div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('')}</div>`;
         }
 
-        // --- 5. INTERACTIVE ACTIONS ---
+        async function renderDec(c) {
+            const { data } = await db.from('decisions').select('*').order('created_at',{ascending:false});
+            c.innerHTML = data.map(d=>`
+                <div class="glass-panel p-3 mb-3 border-start border-4 border-secondary">
+                    <h6 class="text-white fw-bold">${d.subject}</h6>
+                    <p class="small text-secondary m-0">${d.details}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- ACTIONS ---
 
         function setMode(m) {
             STATE.mode = m;
-            document.getElementById('btn-m-task').className = m==='task'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
-            document.getElementById('btn-m-dec').className = m==='decision'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
+            const tBtn = document.getElementById('btn-m-task');
+            const dBtn = document.getElementById('btn-m-dec');
+            
+            if(m === 'task') {
+                tBtn.classList.replace('btn-outline-secondary', 'btn-primary');
+                tBtn.classList.add('btn-primary'); tBtn.classList.remove('btn-transparent', 'text-secondary');
+                dBtn.classList.add('btn-transparent', 'text-secondary'); dBtn.classList.remove('btn-primary');
+            } else {
+                dBtn.classList.add('btn-primary'); dBtn.classList.remove('btn-transparent', 'text-secondary');
+                tBtn.classList.add('btn-transparent', 'text-secondary'); tBtn.classList.remove('btn-primary');
+            }
+            
             document.getElementById('div-task-opts').classList.toggle('d-none', m!=='task');
             
-            // Show warning if member creates task
+            // Warnings
             if(m==='task' && STATE.user.role === 'MEMBER') document.getElementById('create-warning').classList.remove('d-none');
             else document.getElementById('create-warning').classList.add('d-none');
             
-            if(m==='task') document.getElementById('n-members').innerHTML = TEAM.map(u=>`<label class="d-flex align-items-center p-1"><input type="checkbox" class="chk-mem me-2" value="${u.id}"><span class="small text-white">${u.name}</span></label>`).join('');
+            if(m==='task') document.getElementById('n-members').innerHTML = TEAM.map(u=>`
+                <label class="d-flex align-items-center p-2 rounded hover-bg cursor-pointer bg-dark border border-secondary border-opacity-10">
+                    <input type="checkbox" class="chk-mem form-check-input me-2" value="${u.id}">
+                    <span class="small text-white">${u.avatar} ${u.name}</span>
+                </label>`).join('');
         }
+
         function openCreate() { setMode('task'); MODALS.create.show(); }
 
         async function apiCreate() {
             const title = document.getElementById('n-title').value;
             const desc = document.getElementById('n-desc').value;
-            if(!title) return notify('Title required', '⚠️');
+            if(!title) return toast('Error', 'Title is required', '⚠️');
             
-            notify('Saving...', '⏳');
+            toast('Processing', 'Saving your entry...', '⏳');
+            
             if(STATE.mode === 'task') {
                 const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
-                // IF LEADER -> Ongoing, IF MEMBER -> Pending
                 const status = STATE.user.role === 'LEADER' ? 'Ongoing' : 'Pending';
                 
                 await db.from('tasks').insert({
@@ -562,16 +819,13 @@
                     due_date: document.getElementById('n-date').value, creator_id: STATE.user.id, tagged_members: tags, status: status
                 });
                 
-                if(status === 'Pending') {
-                    // Notify Leader
-                    sendNoti(1, `${STATE.user.name} proposed a new task.`, 'info');
-                    notify('Proposal Sent', '📩');
-                } else {
-                    tags.forEach(id => sendNoti(id, `New Task: ${title}`, 'info'));
-                    notify('Task Created', '✅');
-                }
+                if(status === 'Pending') sendNoti(1, `${STATE.user.name} proposed: ${title}`, 'info');
+                else tags.forEach(id => sendNoti(id, `New Task: ${title}`, 'info'));
+                
+                toast('Success', status==='Pending'?'Proposal sent to Leader':'Task created', '✅');
             } else {
                 await db.from('decisions').insert({subject:title, details:desc});
+                toast('Success', 'Decision Logged', '✅');
             }
             MODALS.create.hide();
             refreshData(false);
@@ -579,13 +833,13 @@
 
         async function apiLeaderStart(tid, creatorId) {
             await db.from('tasks').update({status:'Ongoing'}).eq('id', tid);
-            sendNoti(creatorId, 'Your task proposal was approved!', 'success');
-            notify('Task Started', '🚀');
+            sendNoti(creatorId, 'Proposal Approved & Started', 'success');
+            toast('Approved', 'Task is now active', '🚀');
             refreshData(false);
         }
 
         async function apiDelete(tid) {
-            if(confirm('Delete this proposal?')) {
+            if(confirm('Delete this?')) {
                 await db.from('tasks').delete().eq('id', tid);
                 refreshData(false);
             }
@@ -595,17 +849,17 @@
         async function apiSubmit() {
             const id = document.getElementById('p-tid').value;
             await db.from('tasks').update({status:'Review'}).eq('id',id);
-            sendNoti(1, `${STATE.user.name} submitted work.`, 'alert');
+            sendNoti(1, `${STATE.user.name} submitted work for review`, 'alert');
             MODALS.proof.hide();
-            notify('Submitted', '🚀');
+            toast('Submitted', 'Sent to Leader for review', '📨');
             refreshData(false);
         }
 
         async function apiApprove(tid, uid) {
             await db.from('tasks').update({status:'Done'}).eq('id', tid);
             await db.from('momentum_history').insert({date: new Date().toISOString().split('T')[0], score: 5});
-            sendNoti(uid, 'Task approved by Leader!', 'success');
-            notify('Approved', '⭐');
+            sendNoti(uid, 'Task Accepted by Leader!', 'success');
+            toast('Great Job', 'Task marked as Done', '⭐');
             refreshData(false);
         }
 
@@ -613,32 +867,67 @@
         async function apiReject() {
             const tid = document.getElementById('rej-tid').value;
             const reason = document.getElementById('rej-reason').value;
-            if(!reason) return notify('Reason required', '⚠️');
+            if(!reason) return toast('Error', 'Reason required', '⚠️');
             
             await db.from('tasks').update({status:'Ongoing', rejection_reason: reason}).eq('id', tid);
-            // We need to find who to notify - simplistic approach: notify the first tagged person
+            
+            // Notify first tagged member
             const { data } = await db.from('tasks').select('tagged_members').eq('id', tid).single();
-            if(data && data.tagged_members[0]) sendNoti(data.tagged_members[0], `Task Rejected: ${reason}`, 'alert');
+            if(data && data.tagged_members[0]) sendNoti(data.tagged_members[0], `Task Returned: ${reason}`, 'alert');
             
             MODALS.reject.hide();
-            notify('Task Rejected', '↩️');
+            toast('Returned', 'Task sent back for changes', '↩️');
             refreshData(false);
         }
 
         async function apiNote(id, val) { await db.from('tasks').update({progress_note:val}).eq('id',id); }
-        async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); notify('Checked In', '✅'); refreshData(false); }
+        async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); toast('Checked In', 'Time logged successfully', '✅'); refreshData(false); }
 
-        // --- 6. UTILS ---
+        // --- UTILS ---
+        
         async function sendNoti(uid, msg, type) { await db.from('notifications').insert({user_id: uid, message: msg, type: type}); }
+        
         async function checkNotis() {
-            const { data } = await db.from('notifications').select('*').eq('user_id', STATE.user.id).eq('is_read', false);
-            document.getElementById('bell-dot').classList.toggle('show', data && data.length > 0);
-            if(data && data.length) document.getElementById('noti-list').innerHTML = data.map(n=>`<div class="list-group-item bg-dark text-white border-bottom border-secondary border-opacity-25"><div class="small fw-bold">${n.message}</div><div class="text-muted" style="font-size:10px">${new Date(n.created_at).toLocaleTimeString()}</div></div>`).join('');
-            else document.getElementById('noti-list').innerHTML = '<div class="p-3 text-center text-muted small">No new notifications</div>';
+            const { data } = await db.from('notifications').select('*').eq('user_id', STATE.user.id).eq('is_read', false).order('created_at', {ascending:false});
+            
+            const dot = document.getElementById('bell-dot');
+            if(data && data.length > 0) {
+                dot.classList.remove('d-none');
+                document.getElementById('noti-list').innerHTML = data.map(n => `
+                    <div class="list-group-item bg-dark text-white border-bottom border-secondary border-opacity-25 p-3">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i data-lucide="${n.type==='alert'?'alert-circle':(n.type==='success'?'check-circle':'info')}" size="14" class="text-${n.type==='alert'?'danger':(n.type==='success'?'success':'info')}"></i>
+                            <span class="small fw-bold">${n.message}</span>
+                        </div>
+                        <div class="text-muted small" style="font-size:10px">${new Date(n.created_at).toLocaleTimeString()}</div>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            } else {
+                dot.classList.add('d-none');
+                document.getElementById('noti-list').innerHTML = '<div class="p-4 text-center text-muted small">No new notifications</div>';
+            }
         }
-        async function markRead() { await db.from('notifications').update({is_read: true}).eq('user_id', STATE.user.id); document.getElementById('bell-dot').classList.remove('show'); }
-        function notify(msg, icon) { document.getElementById('toast-msg').innerText=msg; document.getElementById('toast-icon').innerText=icon||'🔔'; bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); }
+
+        async function markRead() { 
+            await db.from('notifications').update({is_read: true}).eq('user_id', STATE.user.id); 
+            document.getElementById('bell-dot').classList.add('d-none'); 
+        }
+
+        function toast(title, msg, icon) {
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerText = icon || '🔔';
+            const t = bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast'));
+            t.show();
+        }
+
         function getTeamName(id) { return TEAM.find(u=>u.id==id)?.name || 'Unknown'; }
+        function getTeamAvatar(id) { return TEAM.find(u=>u.id==id)?.avatar || '?'; }
+        function getBadge(status) {
+            const map = { 'Pending':'st-pending', 'Ongoing':'st-ongoing', 'Review':'st-review', 'Done':'st-done' };
+            return `<span class="status-badge ${map[status]||'st-pending'}">${status}</span>`;
+        }
     </script>
 </body>
 </html>
