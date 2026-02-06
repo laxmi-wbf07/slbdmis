@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Leader V9</title>
+    <title>SLBDMIS | Leader V10</title>
     <link rel="icon" href="data:,">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,63 +13,59 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* CORE THEME */
-        :root { --bg: #0d1117; --glass: rgba(22, 27, 34, 0.95); --border: #30363d; --blue: #2f81f7; --green: #238636; }
-        body { background-color: var(--bg); color: #c9d1d9; font-family: system-ui, -apple-system, sans-serif; padding-bottom: 80px; }
+        /* VISUAL CORE */
+        :root { --bg: #0d1117; --glass: rgba(22, 27, 34, 0.95); --border: #30363d; --blue: #2f81f7; --red: #da3633; --green: #238636; }
+        body { background-color: var(--bg); color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 80px; }
         
-        /* GLASS COMPONENTS */
-        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden; }
-        .glass-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); padding: 12px 15px; font-weight: 600; font-size: 0.9rem; color: #fff; }
+        /* COMPONENTS */
+        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); overflow: hidden; }
+        .glass-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); padding: 10px 15px; font-weight: 600; font-size: 0.85rem; color: #fff; display: flex; justify-content: space-between; align-items: center; }
         
-        /* FORMS */
         .form-control, .form-select { background: #010409; border: 1px solid #30363d; color: white; font-size: 0.9rem; }
-        .form-control:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.1); color: white; }
+        .form-control:focus { border-color: var(--blue); box-shadow: none; color: white; }
         
-        /* NAVIGATION */
+        /* SIDEBAR & NAV */
         .sidebar { width: 260px; height: 100vh; position: fixed; background: #010409; border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 15px; z-index: 100; }
         .main-content { margin: 0; padding: 15px; }
         @media (min-width: 992px) { .sidebar { display: flex; } .main-content { margin-left: 260px; padding: 30px; } body { padding-bottom: 0; } .mobile-nav { display: none; } }
         
-        /* NOTIFICATIONS & AVATARS */
-        .avatar-btn { width: 55px; height: 55px; border-radius: 50%; background: #21262d; border: 2px solid transparent; font-size: 26px; display: grid; place-items: center; cursor: pointer; transition: 0.2s; }
+        /* AVATARS & ALERTS */
+        .avatar-btn { width: 50px; height: 50px; border-radius: 50%; background: #21262d; border: 2px solid transparent; font-size: 24px; display: grid; place-items: center; cursor: pointer; transition: 0.2s; }
         .avatar-btn.active { border-color: var(--blue); background: rgba(47, 129, 247, 0.15); }
-        .noti-badge { position: absolute; top: -5px; right: -5px; width: 10px; height: 10px; background: #f85149; border-radius: 50%; border: 2px solid var(--bg); display: none; }
+        .noti-badge { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: var(--red); border-radius: 50%; display: none; }
         .noti-badge.show { display: block; }
         
         /* UTILS */
-        .status-pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+        .status-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
         .stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 15px; border-radius: 6px; text-align: center; }
-        .stat-num { font-size: 1.5rem; font-weight: 800; color: white; }
-        .stat-label { font-size: 0.75rem; color: #8b949e; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 10000;">
-        <div id="sysToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="sysToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2">
                     <span id="toast-icon">🔔</span>
-                    <strong id="toast-msg">Notification</strong>
+                    <strong id="toast-msg">Alert</strong>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3">
-        <h1 class="fw-bold text-white mb-2">SLBDMIS <span class="text-primary">V9</span></h1>
-        <p class="text-muted small mb-4">Secure Team Environment</p>
+        <h2 class="fw-bold text-white mb-1">SLBDMIS <span class="text-primary">V10</span></h2>
+        <p class="text-muted small mb-4">Official Team Portal</p>
         
         <div class="glass-box p-4 w-100" style="max-width: 400px;">
             <div id="auth-step-1">
-                <div class="text-center text-muted small mb-3">IDENTIFY YOURSELF</div>
+                <div class="text-center text-muted small mb-3">SELECT PROFILE</div>
                 <div id="auth-list" class="d-flex flex-wrap justify-content-center gap-3 mb-2"></div>
             </div>
-            
             <div id="auth-step-2" class="d-none mt-4 animate-fade">
-                <input type="password" id="inp-cid" class="form-control text-center fs-5 fw-bold mb-3" placeholder="Enter CID PIN" maxlength="11">
-                <button onclick="doLogin()" class="btn btn-primary w-100 fw-bold">AUTHENTICATE</button>
-                <button onclick="resetAuth()" class="btn btn-sm btn-link text-muted w-100 mt-2 text-decoration-none">Cancel</button>
+                <input type="password" id="inp-cid" class="form-control text-center fs-5 fw-bold mb-3" placeholder="Enter CID" maxlength="11">
+                <button onclick="doLogin()" class="btn btn-primary w-100 fw-bold">Login</button>
+                <button onclick="resetAuth()" class="btn btn-sm btn-link text-muted w-100 mt-2 text-decoration-none">Back</button>
             </div>
         </div>
     </div>
@@ -77,12 +73,10 @@
     <div id="view-app" class="d-none">
         <nav class="sidebar">
             <div class="mb-4 px-2 d-flex align-items-center gap-2 text-white">
-                <div class="bg-primary rounded-circle" style="width:8px; height:8px;"></div>
-                <span class="fw-bold tracking-tight">SLBDMIS MANAGER</span>
+                <i data-lucide="shield" class="text-primary"></i>
+                <span class="fw-bold tracking-tight">SLBDMIS</span>
             </div>
-            
             <div id="nav-links" class="d-flex flex-column gap-1 flex-grow-1"></div>
-            
             <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
                 <div class="d-flex align-items-center gap-2 px-2 mb-3">
                     <div id="u-avatar" class="fs-4"></div>
@@ -91,27 +85,23 @@
                         <div id="u-role" class="text-muted" style="font-size:10px">Role</div>
                     </div>
                 </div>
-                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Sign Out</button>
+                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Logout</button>
             </div>
         </nav>
 
         <main class="main-content">
             <header class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 id="page-title" class="fw-bold text-white m-0">Dashboard</h4>
-                    <span class="small text-muted" id="sync-status">Live</span>
-                </div>
+                <h4 id="page-title" class="fw-bold text-white m-0">Dashboard</h4>
                 <div class="d-flex align-items-center gap-3">
                     <div class="position-relative cursor-pointer" onclick="MODALS.noti.show(); markRead()">
                         <i data-lucide="bell" class="text-white"></i>
                         <span id="bell-dot" class="noti-badge"></span>
                     </div>
                     <button onclick="openCreate()" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm">
-                        <i data-lucide="plus" size="16"></i> <span class="d-none d-sm-inline">New Entry</span>
+                        <i data-lucide="plus" size="16"></i> <span class="d-none d-sm-inline">New</span>
                     </button>
                 </div>
             </header>
-
             <div id="content-area"></div>
         </main>
 
@@ -124,24 +114,41 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-box border-0">
                 <div class="modal-body p-4">
-                    <h6 class="fw-bold text-white mb-3">Create New</h6>
+                    <h6 class="fw-bold text-white mb-3">Create Entry</h6>
                     <div class="btn-group w-100 mb-3">
                         <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm btn-primary">Task</button>
                         <button onclick="setMode('decision')" id="btn-m-dec" class="btn btn-sm btn-outline-secondary">Decision</button>
                     </div>
                     
                     <input type="text" id="n-title" class="form-control mb-2" placeholder="Title">
-                    <textarea id="n-desc" class="form-control mb-3" rows="3" placeholder="Details"></textarea>
+                    <textarea id="n-desc" class="form-control mb-3" rows="3" placeholder="Description"></textarea>
                     
                     <div id="div-task-opts">
                         <div class="row g-2 mb-3">
                             <div class="col-6"><select id="n-prio" class="form-select"><option>Normal</option><option>High</option></select></div>
                             <div class="col-6"><input type="date" id="n-date" class="form-control"></div>
                         </div>
-                        <label class="small text-muted fw-bold mb-2">Assign:</label>
+                        <label class="small text-muted fw-bold mb-2">Assign To:</label>
                         <div id="n-members" class="d-flex flex-column gap-1 mb-3 bg-dark p-2 rounded" style="max-height:120px; overflow-y:auto"></div>
+                        <div id="create-warning" class="alert alert-warning py-2 mb-3 small d-none">
+                            <i data-lucide="alert-triangle" size="14"></i> Needs Leader Approval to start.
+                        </div>
                     </div>
-                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Publish</button>
+                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modReject" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-box border-0">
+                <div class="modal-body p-4">
+                    <h6 class="fw-bold text-danger mb-2">Reject Task</h6>
+                    <p class="small text-muted">Why are you rejecting this? The member will be notified to fix it.</p>
+                    <input type="hidden" id="rej-tid">
+                    <textarea id="rej-reason" class="form-control mb-3" rows="3" placeholder="e.g., Files missing, Wrong format..."></textarea>
+                    <button onclick="apiReject()" class="btn btn-danger w-100 fw-bold">Confirm Rejection</button>
                 </div>
             </div>
         </div>
@@ -151,15 +158,14 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-box border-0">
                 <div class="modal-body p-4">
-                    <h6 class="fw-bold text-white mb-2">Submit Proof</h6>
-                    <p class="small text-muted">Upload to Drive, then confirm.</p>
+                    <h6 class="fw-bold text-white mb-2">Submit Work</h6>
                     <input type="hidden" id="p-tid">
                     <a href="https://drive.google.com/drive/u/0/" target="_blank" class="btn btn-outline-light w-100 mb-3"><i data-lucide="external-link" size="14"></i> Open Drive</a>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="chk-proof" onchange="document.getElementById('btn-sub').disabled=!this.checked">
-                        <label class="form-check-label small text-white" for="chk-proof">I have uploaded the correct files</label>
+                        <label class="form-check-label small text-white" for="chk-proof">I confirm files are uploaded</label>
                     </div>
-                    <button id="btn-sub" onclick="apiSubmit()" class="btn btn-success w-100 fw-bold" disabled>Submit to Leader</button>
+                    <button id="btn-sub" onclick="apiSubmit()" class="btn btn-success w-100 fw-bold" disabled>Send for Review</button>
                 </div>
             </div>
         </div>
@@ -180,7 +186,7 @@
     </div>
 
     <script>
-        // 1. CONFIG
+        // --- 1. CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const db = window.supabase.createClient(SB_URL, SB_KEY);
@@ -193,17 +199,18 @@
             { id: 5, name: "Ngawang", avatar: "👩", cid: "10801003243", role: "MEMBER" }
         ];
 
-        const STATE = { user: null, page: 'home', mode: 'task', timer: null };
+        const STATE = { user: null, page: 'home', mode: 'task' };
         const MODALS = {};
 
-        // 2. INIT
+        // --- 2. INIT & AUTH ---
         window.onload = () => {
             lucide.createIcons();
             MODALS.create = new bootstrap.Modal('#modCreate');
             MODALS.proof = new bootstrap.Modal('#modProof');
             MODALS.noti = new bootstrap.Modal('#modNoti');
+            MODALS.reject = new bootstrap.Modal('#modReject');
 
-            const uid = localStorage.getItem('slbd_v9_uid');
+            const uid = localStorage.getItem('slbd_v10_uid');
             if(uid) {
                 STATE.user = TEAM.find(u => u.id == uid);
                 if(STATE.user) { startApp(); return; }
@@ -211,7 +218,6 @@
             renderAuth();
         };
 
-        // 3. AUTH
         function renderAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
@@ -240,7 +246,7 @@
         function doLogin() {
             if(document.getElementById('inp-cid').value === STATE.selUser.cid) {
                 STATE.user = STATE.selUser;
-                localStorage.setItem('slbd_v9_uid', STATE.user.id);
+                localStorage.setItem('slbd_v10_uid', STATE.user.id);
                 document.getElementById('view-auth').classList.add('d-none');
                 startApp();
             } else {
@@ -250,12 +256,12 @@
 
         function logout() {
             if(confirm('Logout?')) {
-                localStorage.removeItem('slbd_v9_uid');
+                localStorage.removeItem('slbd_v10_uid');
                 location.reload();
             }
         }
 
-        // 4. MAIN ENGINE
+        // --- 3. APP NAVIGATION ---
         function startApp() {
             document.getElementById('view-app').classList.remove('d-none');
             document.getElementById('u-avatar').innerHTML = STATE.user.avatar;
@@ -263,16 +269,14 @@
             document.getElementById('u-role').innerText = STATE.user.role;
 
             const pages = [
-                {id:'home', t:'Overview', i:'layout-dashboard'},
-                {id:'task', t:'Tasks', i:'check-square'},
+                {id:'home', t:'Dashboard', i:'layout-dashboard'},
+                {id:'task', t:'All Tasks', i:'check-square'},
                 {id:'att', t:'Attendance', i:'clock'},
                 {id:'dec', t:'Decisions', i:'file-text'}
             ];
             
-            // Only Leader gets Analytics
-            if(STATE.user.role === 'LEADER') {
-                pages.push({id:'stats', t:'Performance', i:'bar-chart-2'});
-            }
+            // Leader Only Stats
+            if(STATE.user.role === 'LEADER') pages.push({id:'stats', t:'Performance', i:'bar-chart-2'});
 
             const navHtml = (p, mob) => mob 
                 ? `<div class="col py-2" onclick="nav('${p.id}')"><i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary':''}"></i><div style="font-size:10px">${p.t}</div></div>`
@@ -282,19 +286,14 @@
             document.getElementById('mob-links').innerHTML = pages.map(p => navHtml(p, true)).join('');
             
             nav('home');
-            
-            // Background Sync & Notification Poller
-            setInterval(() => {
-                checkNotis();
-                if(STATE.page === 'home') refreshData(true);
-            }, 10000); // 10s
+            setInterval(() => { checkNotis(); if(STATE.page==='home') refreshData(true); }, 8000);
         }
 
         function nav(pg) {
             STATE.page = pg;
             document.querySelectorAll('[id^="lnk-"]').forEach(e => e.className = "d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none");
             if(document.getElementById(`lnk-${pg}`)) document.getElementById(`lnk-${pg}`).className = "d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 bg-primary bg-opacity-10 text-primary user-select-none";
-            document.getElementById('page-title').innerText = pg === 'stats' ? 'Super Analytics' : (pg.charAt(0).toUpperCase() + pg.slice(1));
+            document.getElementById('page-title').innerText = pg === 'stats' ? 'Team Performance' : (pg.charAt(0).toUpperCase() + pg.slice(1));
             refreshData(false);
         }
 
@@ -309,52 +308,54 @@
                 if(STATE.page === 'dec') await renderDec(box);
                 if(STATE.page === 'stats') await renderStats(box);
                 lucide.createIcons();
-            } catch(e) {
-                console.error(e);
-            }
+            } catch(e) { console.error(e); }
         }
 
-        // 5. PAGES
+        // --- 4. PAGE LOGIC ---
         
         async function renderHome(c) {
             const { data: tasks } = await db.from('tasks').select('*');
-            const { data: momentum } = await db.from('momentum_history').select('*').order('date', {ascending:true});
+            const { data: mom } = await db.from('momentum_history').select('*').order('date', {ascending:true});
             
+            // Data Prep
+            const score = mom.length ? mom[mom.length-1].score : 100;
+            const pendingProps = tasks.filter(t => t.status === 'Pending');
+            const forReview = tasks.filter(t => t.status === 'Review');
             const myTasks = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id));
-            const reviewTasks = tasks.filter(t => t.status === 'Review');
-            const score = momentum.length ? momentum[momentum.length-1].score : 100;
-            const diff = momentum.length > 1 ? score - momentum[momentum.length-2].score : 0;
+            const myPending = tasks.filter(t => t.status === 'Pending' && t.creator_id === STATE.user.id);
+            const myRejected = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) && t.rejection_reason);
 
-            // Chart Logic (Hidden on Mobile)
             let chartHtml = `
                 <div class="glass-box p-3 mb-4 d-none d-md-block">
                     <h6 class="glass-header border-0 pt-0">Momentum Trend</h6>
                     <div style="height:200px"><canvas id="mainChart"></canvas></div>
                 </div>`;
             
-            // Mobile Stats (Visible on Mobile)
-            let mobileStats = `
+            let mobStats = `
                 <div class="row g-2 mb-3 d-md-none">
-                    <div class="col-6"><div class="stat-card"><div class="stat-num">${score}</div><div class="stat-label">Momentum</div></div></div>
-                    <div class="col-6"><div class="stat-card"><div class="stat-num text-success">+${diff}</div><div class="stat-label">Gain</div></div></div>
+                    <div class="col-6"><div class="stat-card"><div class="h2 fw-bold text-white m-0">${score}</div><div class="small text-muted">Momentum</div></div></div>
+                    <div class="col-6"><div class="stat-card"><div class="h2 fw-bold text-success m-0">${tasks.filter(t=>t.status==='Done').length}</div><div class="small text-muted">Completed</div></div></div>
                 </div>`;
 
             c.innerHTML = `
-                ${mobileStats}
+                ${mobStats}
                 ${chartHtml}
                 <div class="row g-3">
-                    <div class="col-lg-6">
-                        ${STATE.user.role === 'LEADER' ? renderLeaderReview(reviewTasks) : renderMyWork(myTasks)}
+                    <div class="col-lg-7">
+                        ${STATE.user.role === 'LEADER' ? renderLeaderDash(pendingProps, forReview) : renderMemberDash(myTasks, myPending, myRejected)}
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-lg-5">
                         <div class="glass-box h-100">
-                            <div class="glass-header">Activity Feed</div>
+                            <div class="glass-header">
+                                <span>Recent Activity</span>
+                                <i data-lucide="activity" size="14"></i>
+                            </div>
                             <div class="p-3">
                                 ${tasks.slice(0,5).map(t => `
                                     <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-10">
-                                        <div class="d-flex gap-2">
-                                            <div class="text-${t.status==='Done'?'success':'warning'}"><i data-lucide="activity" size="16"></i></div>
-                                            <span class="small fw-bold text-white">${t.task_title}</span>
+                                        <div class="lh-1">
+                                            <div class="small fw-bold text-white mb-1">${t.task_title}</div>
+                                            <div class="small text-muted" style="font-size:10px">${new Date(t.created_at).toLocaleDateString()}</div>
                                         </div>
                                         <span class="status-pill text-${t.status==='Done'?'success':'secondary'} border-${t.status==='Done'?'success':'secondary'}">${t.status}</span>
                                     </div>
@@ -365,104 +366,132 @@
                 </div>
             `;
 
-            // Init Chart (Only if visible)
             if(document.getElementById('mainChart')) {
                 new Chart(document.getElementById('mainChart'), {
                     type: 'line',
-                    data: {
-                        labels: momentum.map(m=>m.date.slice(5)),
-                        datasets: [{ label:'Score', data:momentum.map(m=>m.score), borderColor:'#2f81f7', tension:0.4 }]
-                    },
+                    data: { labels: mom.map(m=>m.date.slice(5)), datasets: [{ label:'Score', data:mom.map(m=>m.score), borderColor:'#2f81f7', tension:0.4 }] },
                     options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{grid:{color:'#30363d'}}} }
                 });
             }
         }
 
-        function renderLeaderReview(tasks) {
+        function renderLeaderDash(props, reviews) {
             return `
-                <div class="glass-box h-100 border-start border-4 border-info">
-                    <div class="glass-header text-info d-flex justify-content-between">
-                        <span>Waiting Approval</span>
-                        <span class="badge bg-info text-dark">${tasks.length}</span>
-                    </div>
-                    <div class="p-3">
-                        ${tasks.length === 0 ? '<p class="text-muted small">No pending approvals.</p>' : tasks.map(t => `
-                            <div class="bg-dark p-3 rounded mb-2">
-                                <h6 class="text-white mb-1 small fw-bold">${t.task_title}</h6>
-                                <p class="text-muted small mb-2">${t.description}</p>
-                                <button onclick="apiApprove(${t.id}, ${t.creator_id})" class="btn btn-sm btn-success w-100 fw-bold">Approve Completion</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderMyWork(tasks) {
-            return `
-                <div class="glass-box h-100">
-                    <div class="glass-header">My Active Tasks</div>
-                    <div class="p-3">
-                        ${tasks.length === 0 ? '<p class="text-muted small">You are clear!</p>' : tasks.map(t => `
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between small mb-1">
-                                    <span class="fw-bold text-white">${t.task_title}</span>
-                                    <span class="text-primary cursor-pointer fw-bold" onclick="openProof(${t.id})">SUBMIT</span>
+                <div class="d-flex flex-column gap-3">
+                    <div class="glass-box border-start border-4 border-warning">
+                        <div class="glass-header text-warning">
+                            <span>Task Proposals (Must Approve to Start)</span>
+                            <span class="badge bg-warning text-dark">${props.length}</span>
+                        </div>
+                        <div class="p-3">
+                            ${props.length === 0 ? '<div class="text-muted small">No new proposals.</div>' : props.map(t => `
+                                <div class="bg-dark p-3 rounded mb-2">
+                                    <h6 class="small fw-bold text-white mb-1">${t.task_title}</h6>
+                                    <p class="small text-muted mb-2">${t.description}</p>
+                                    <div class="d-flex gap-2">
+                                        <button onclick="apiLeaderStart(${t.id}, ${t.creator_id})" class="btn btn-sm btn-success w-100 fw-bold">Approve & Start</button>
+                                        <button onclick="apiDelete(${t.id})" class="btn btn-sm btn-outline-danger"><i data-lucide="trash-2" size="14"></i></button>
+                                    </div>
                                 </div>
-                                <input class="form-control form-control-sm" value="${t.progress_note||''}" placeholder="Update progress..." onchange="apiNote(${t.id}, this.value)">
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="glass-box border-start border-4 border-info">
+                        <div class="glass-header text-info">
+                            <span>Review Completed Tasks</span>
+                            <span class="badge bg-info text-dark">${reviews.length}</span>
+                        </div>
+                        <div class="p-3">
+                            ${reviews.length === 0 ? '<div class="text-muted small">No pending reviews.</div>' : reviews.map(t => `
+                                <div class="bg-dark p-3 rounded mb-2">
+                                    <h6 class="small fw-bold text-white mb-1">${t.task_title}</h6>
+                                    <div class="small text-white mb-2">Submitted by: ${getTeamName(t.tagged_members[0])}</div>
+                                    <div class="d-flex gap-2">
+                                        <button onclick="apiApprove(${t.id}, ${t.tagged_members[0]})" class="btn btn-sm btn-success w-100 fw-bold">Accept</button>
+                                        <button onclick="openReject(${t.id})" class="btn btn-sm btn-danger w-100 fw-bold">Reject</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        // --- SUPER ANALYTICS (LEADER ONLY) ---
+        function renderMemberDash(active, pending, rejected) {
+            return `
+                <div class="d-flex flex-column gap-3">
+                    ${rejected.length ? `
+                    <div class="glass-box border-start border-4 border-danger">
+                        <div class="glass-header text-danger">⚠️ Needs Attention (Returned)</div>
+                        <div class="p-3">
+                            ${rejected.map(t => `
+                                <div class="bg-dark p-3 rounded mb-2">
+                                    <h6 class="fw-bold text-white small">${t.task_title}</h6>
+                                    <div class="text-danger small fw-bold mb-2">Reason: "${t.rejection_reason}"</div>
+                                    <button onclick="openProof(${t.id})" class="btn btn-sm btn-primary w-100">Fix & Resubmit</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+
+                    ${pending.length ? `
+                    <div class="glass-box border-start border-4 border-secondary">
+                        <div class="glass-header text-muted">Waiting Leader Approval</div>
+                        <div class="p-3">
+                            ${pending.map(t => `<div class="small text-muted mb-1">• ${t.task_title}</div>`).join('')}
+                        </div>
+                    </div>` : ''}
+
+                    <div class="glass-box">
+                        <div class="glass-header">My Active Tasks</div>
+                        <div class="p-3">
+                            ${active.length === 0 ? '<div class="text-muted small">No active tasks.</div>' : active.map(t => `
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between small mb-1">
+                                        <span class="fw-bold text-white">${t.task_title}</span>
+                                        <span class="text-primary cursor-pointer fw-bold" onclick="openProof(${t.id})">SUBMIT</span>
+                                    </div>
+                                    <input class="form-control form-control-sm" value="${t.progress_note||''}" placeholder="Update progress..." onchange="apiNote(${t.id}, this.value)">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         async function renderStats(c) {
-            // Fetch All Data
             const { data: tasks } = await db.from('tasks').select('*');
             const { data: att } = await db.from('attendance').select('*');
             
-            // Calculate Stats Per User
             const stats = TEAM.map(u => {
                 const myTasks = tasks.filter(t => (t.tagged_members||[]).includes(u.id));
                 const done = myTasks.filter(t => t.status === 'Done').length;
-                const active = myTasks.filter(t => t.status === 'Ongoing').length;
-                const checkins = att.filter(a => a.user_id === u.id).length;
-                const rate = myTasks.length ? Math.round((done/myTasks.length)*100) : 0;
-                return { ...u, done, active, checkins, rate };
+                return { ...u, done, active: myTasks.filter(t=>t.status==='Ongoing').length, att: att.filter(a=>a.user_id===u.id).length, rate: myTasks.length ? Math.round((done/myTasks.length)*100) : 0 };
             });
 
-            c.innerHTML = `
-                <div class="row g-3">
-                    ${stats.map(s => `
-                        <div class="col-md-6 col-xl-4">
-                            <div class="glass-box p-3">
-                                <div class="d-flex align-items-center gap-3 mb-3">
-                                    <div class="avatar-btn">${s.avatar}</div>
-                                    <div>
-                                        <h6 class="m-0 text-white fw-bold">${s.name}</h6>
-                                        <span class="badge bg-secondary text-white" style="font-size:10px">${s.role}</span>
-                                    </div>
-                                    <div class="ms-auto text-end">
-                                        <div class="h4 m-0 text-success fw-bold">${s.rate}%</div>
-                                        <div class="small text-muted" style="font-size:10px">Success Rate</div>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-between text-center bg-dark rounded p-2">
-                                    <div><div class="fw-bold text-white">${s.done}</div><div class="small text-muted" style="font-size:10px">Done</div></div>
-                                    <div><div class="fw-bold text-warning">${s.active}</div><div class="small text-muted" style="font-size:10px">Active</div></div>
-                                    <div><div class="fw-bold text-info">${s.checkins}</div><div class="small text-muted" style="font-size:10px">Attended</div></div>
-                                </div>
-                            </div>
+            c.innerHTML = `<div class="row g-3">${stats.map(s => `
+                <div class="col-md-6 col-xl-4">
+                    <div class="glass-box p-3">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="avatar-btn">${s.avatar}</div>
+                            <div><h6 class="m-0 text-white fw-bold">${s.name}</h6><span class="badge bg-secondary" style="font-size:10px">${s.role}</span></div>
+                            <div class="ms-auto h4 m-0 text-success fw-bold">${s.rate}%</div>
                         </div>
-                    `).join('')}
+                        <div class="d-flex justify-content-between text-center bg-dark rounded p-2">
+                            <div><div class="fw-bold text-white">${s.done}</div><div class="small text-muted" style="font-size:10px">Done</div></div>
+                            <div><div class="fw-bold text-warning">${s.active}</div><div class="small text-muted" style="font-size:10px">Active</div></div>
+                            <div><div class="fw-bold text-info">${s.att}</div><div class="small text-muted" style="font-size:10px">Attended</div></div>
+                        </div>
+                    </div>
                 </div>
-            `;
+            `).join('')}</div>`;
         }
 
         async function renderTasks(c) {
-            const { data: tasks } = await db.from('tasks').select('*').order('created_at', {ascending:false});
+            const { data: tasks } = await db.from('tasks').select('*').neq('status', 'Pending').order('created_at', {ascending:false});
             c.innerHTML = `<div class="d-flex flex-column gap-3">${tasks.map(t => `
                 <div class="glass-box p-3">
                     <div class="d-flex justify-content-between mb-1">
@@ -487,35 +516,32 @@
                 <div class="glass-box p-4 text-center mb-4">
                     <h1 class="text-white fw-bold">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h1>
                     <p class="text-muted small">${new Date().toDateString()}</p>
-                    ${checked 
-                        ? `<button class="btn btn-success px-4" disabled>✅ Checked In</button>` 
-                        : `<button onclick="apiCheckIn()" class="btn btn-primary px-4 fw-bold shadow">Check In Now</button>`}
+                    ${checked ? `<button class="btn btn-success px-4" disabled>✅ Checked In</button>` : `<button onclick="apiCheckIn()" class="btn btn-primary px-4 fw-bold shadow">Check In Now</button>`}
                 </div>
-                <div class="glass-box">
-                    <div class="glass-header">Recent Logs</div>
-                    <div>${logs.map(l => {
-                        const u = TEAM.find(x=>x.id==l.user_id);
-                        return `<div class="d-flex justify-content-between px-3 py-2 border-bottom border-secondary border-opacity-10">
-                            <span class="small text-white">${u.avatar} ${u.name}</span>
-                            <span class="small text-muted font-monospace">${new Date(l.created_at).toLocaleTimeString()}</span>
-                        </div>`
-                    }).join('')}</div>
-                </div>
+                <div class="glass-box"><div class="glass-header">Recent Logs</div><div>${logs.map(l => {
+                    const u = TEAM.find(x=>x.id==l.user_id);
+                    return `<div class="d-flex justify-content-between px-3 py-2 border-bottom border-secondary border-opacity-10"><span class="small text-white">${u.avatar} ${u.name}</span><span class="small text-muted font-monospace">${new Date(l.created_at).toLocaleTimeString()}</span></div>`
+                }).join('')}</div></div>
             `;
         }
-
+        
         async function renderDec(c) {
-            const { data: d } = await db.from('decisions').select('*').order('created_at',{ascending:false});
-            c.innerHTML = d.map(x => `<div class="glass-box p-3 mb-2 border-start border-4 border-secondary"><h6 class="text-white fw-bold">${x.subject}</h6><p class="small text-muted m-0">${x.details}</p></div>`).join('');
+            const { data } = await db.from('decisions').select('*').order('created_at',{ascending:false});
+            c.innerHTML = data.map(d=>`<div class="glass-box p-3 mb-2 border-start border-4 border-secondary"><h6 class="text-white fw-bold">${d.subject}</h6><p class="small text-muted m-0">${d.details}</p></div>`).join('');
         }
 
-        // 6. ACTIONS (Logic with Notifications)
+        // --- 5. INTERACTIVE ACTIONS ---
 
         function setMode(m) {
             STATE.mode = m;
             document.getElementById('btn-m-task').className = m==='task'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
             document.getElementById('btn-m-dec').className = m==='decision'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
             document.getElementById('div-task-opts').classList.toggle('d-none', m!=='task');
+            
+            // Show warning if member creates task
+            if(m==='task' && STATE.user.role === 'MEMBER') document.getElementById('create-warning').classList.remove('d-none');
+            else document.getElementById('create-warning').classList.add('d-none');
+            
             if(m==='task') document.getElementById('n-members').innerHTML = TEAM.map(u=>`<label class="d-flex align-items-center p-1"><input type="checkbox" class="chk-mem me-2" value="${u.id}"><span class="small text-white">${u.name}</span></label>`).join('');
         }
         function openCreate() { setMode('task'); MODALS.create.show(); }
@@ -528,83 +554,91 @@
             notify('Saving...', '⏳');
             if(STATE.mode === 'task') {
                 const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
+                // IF LEADER -> Ongoing, IF MEMBER -> Pending
+                const status = STATE.user.role === 'LEADER' ? 'Ongoing' : 'Pending';
+                
                 await db.from('tasks').insert({
                     task_title: title, description: desc, priority: document.getElementById('n-prio').value,
-                    due_date: document.getElementById('n-date').value, creator_id: STATE.user.id, tagged_members: tags, status: 'Ongoing'
+                    due_date: document.getElementById('n-date').value, creator_id: STATE.user.id, tagged_members: tags, status: status
                 });
-                // Notify assigned members
-                tags.forEach(uid => sendNoti(uid, `New Task: ${title}`, 'info'));
+                
+                if(status === 'Pending') {
+                    // Notify Leader
+                    sendNoti(1, `${STATE.user.name} proposed a new task.`, 'info');
+                    notify('Proposal Sent', '📩');
+                } else {
+                    tags.forEach(id => sendNoti(id, `New Task: ${title}`, 'info'));
+                    notify('Task Created', '✅');
+                }
             } else {
                 await db.from('decisions').insert({subject:title, details:desc});
             }
             MODALS.create.hide();
-            notify('Created', '✅');
             refreshData(false);
         }
 
-        async function apiCheckIn() {
-            await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
+        async function apiLeaderStart(tid, creatorId) {
+            await db.from('tasks').update({status:'Ongoing'}).eq('id', tid);
+            sendNoti(creatorId, 'Your task proposal was approved!', 'success');
+            notify('Task Started', '🚀');
             refreshData(false);
-            notify('Checked In', '✅');
+        }
+
+        async function apiDelete(tid) {
+            if(confirm('Delete this proposal?')) {
+                await db.from('tasks').delete().eq('id', tid);
+                refreshData(false);
+            }
         }
 
         function openProof(id) { document.getElementById('p-tid').value=id; MODALS.proof.show(); }
         async function apiSubmit() {
             const id = document.getElementById('p-tid').value;
             await db.from('tasks').update({status:'Review'}).eq('id',id);
-            // Notify Leader (ID 1 is Pema)
-            await sendNoti(1, `${STATE.user.name} submitted a task for review`, 'alert');
+            sendNoti(1, `${STATE.user.name} submitted work.`, 'alert');
             MODALS.proof.hide();
-            notify('Submitted for Review', '🚀');
+            notify('Submitted', '🚀');
             refreshData(false);
         }
 
-        async function apiApprove(tid, creatorId) {
+        async function apiApprove(tid, uid) {
             await db.from('tasks').update({status:'Done'}).eq('id', tid);
-            await db.from('momentum_history').insert({date: new Date().toISOString().split('T')[0], score: 5}); // Add score
-            // Notify Creator
-            await sendNoti(creatorId, `Task approved by Leader!`, 'success');
-            notify('Approved & Momentum +5', '⭐');
+            await db.from('momentum_history').insert({date: new Date().toISOString().split('T')[0], score: 5});
+            sendNoti(uid, 'Task approved by Leader!', 'success');
+            notify('Approved', '⭐');
             refreshData(false);
         }
 
-        async function apiNote(id, val) {
-            await db.from('tasks').update({progress_note:val}).eq('id',id);
+        function openReject(id) { document.getElementById('rej-tid').value=id; MODALS.reject.show(); }
+        async function apiReject() {
+            const tid = document.getElementById('rej-tid').value;
+            const reason = document.getElementById('rej-reason').value;
+            if(!reason) return notify('Reason required', '⚠️');
+            
+            await db.from('tasks').update({status:'Ongoing', rejection_reason: reason}).eq('id', tid);
+            // We need to find who to notify - simplistic approach: notify the first tagged person
+            const { data } = await db.from('tasks').select('tagged_members').eq('id', tid).single();
+            if(data && data.tagged_members[0]) sendNoti(data.tagged_members[0], `Task Rejected: ${reason}`, 'alert');
+            
+            MODALS.reject.hide();
+            notify('Task Rejected', '↩️');
+            refreshData(false);
         }
 
-        // 7. NOTIFICATION SYSTEM
-        async function sendNoti(uid, msg, type) {
-            await db.from('notifications').insert({user_id: uid, message: msg, type: type});
-        }
+        async function apiNote(id, val) { await db.from('tasks').update({progress_note:val}).eq('id',id); }
+        async function apiCheckIn() { await db.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]}); notify('Checked In', '✅'); refreshData(false); }
 
+        // --- 6. UTILS ---
+        async function sendNoti(uid, msg, type) { await db.from('notifications').insert({user_id: uid, message: msg, type: type}); }
         async function checkNotis() {
             const { data } = await db.from('notifications').select('*').eq('user_id', STATE.user.id).eq('is_read', false);
-            const badge = document.getElementById('bell-dot');
-            if(data && data.length > 0) {
-                badge.classList.add('show');
-                document.getElementById('noti-list').innerHTML = data.map(n => `
-                    <div class="list-group-item bg-dark text-white border-bottom border-secondary border-opacity-25">
-                        <div class="small fw-bold">${n.message}</div>
-                        <div class="text-muted" style="font-size:10px">${new Date(n.created_at).toLocaleTimeString()}</div>
-                    </div>
-                `).join('');
-            } else {
-                badge.classList.remove('show');
-                document.getElementById('noti-list').innerHTML = '<div class="p-3 text-center text-muted small">No new notifications</div>';
-            }
+            document.getElementById('bell-dot').classList.toggle('show', data && data.length > 0);
+            if(data && data.length) document.getElementById('noti-list').innerHTML = data.map(n=>`<div class="list-group-item bg-dark text-white border-bottom border-secondary border-opacity-25"><div class="small fw-bold">${n.message}</div><div class="text-muted" style="font-size:10px">${new Date(n.created_at).toLocaleTimeString()}</div></div>`).join('');
+            else document.getElementById('noti-list').innerHTML = '<div class="p-3 text-center text-muted small">No new notifications</div>';
         }
-
-        async function markRead() {
-            await db.from('notifications').update({is_read: true}).eq('user_id', STATE.user.id);
-            document.getElementById('bell-dot').classList.remove('show');
-        }
-
-        function notify(msg, icon) {
-            document.getElementById('toast-msg').innerText = msg;
-            document.getElementById('toast-icon').innerText = icon || '🔔';
-            const t = bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast'));
-            t.show();
-        }
+        async function markRead() { await db.from('notifications').update({is_read: true}).eq('user_id', STATE.user.id); document.getElementById('bell-dot').classList.remove('show'); }
+        function notify(msg, icon) { document.getElementById('toast-msg').innerText=msg; document.getElementById('toast-icon').innerText=icon||'🔔'; bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); }
+        function getTeamName(id) { return TEAM.find(u=>u.id==id)?.name || 'Unknown'; }
     </script>
 </body>
 </html>
