@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Live V7</title>
+    <title>SLBDMIS | Final V8</title>
     
     <link rel="icon" href="data:,">
     
@@ -14,29 +14,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* VISUAL STYLE */
+        /* VISUAL CORE */
         :root { --bg: #0d1117; --glass: rgba(22, 27, 34, 0.95); --border: rgba(48, 54, 61, 0.7); --accent: #238636; --blue: #2f81f7; }
-        body { background-color: var(--bg); color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding-bottom: 80px; }
+        body { background-color: var(--bg); color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding-bottom: 80px; }
         
-        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-        .glass-box-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); padding: 10px 15px; font-weight: 600; font-size: 0.9rem; }
-        
+        /* Components */
+        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .glass-box-header { background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); padding: 12px 15px; font-weight: 600; font-size: 0.9rem; }
         .form-control, .form-select { background: #010409; border: 1px solid #30363d; color: white; font-size: 0.9rem; }
         .form-control:focus { background: #010409; border-color: var(--blue); color: white; box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.15); }
         
-        /* Sidebar */
+        /* Layout */
         .sidebar { width: 250px; height: 100vh; position: fixed; background: #010409; border-right: 1px solid #30363d; display: none; flex-direction: column; padding: 15px; z-index: 99; }
         .main-content { margin: 0; padding: 15px; }
         @media (min-width: 992px) { .sidebar { display: flex; } .main-content { margin-left: 250px; padding: 30px; } body { padding-bottom: 0; } .mobile-nav { display: none; } }
 
-        /* Utilities */
+        /* Avatars & Badges */
         .avatar-btn { width: 60px; height: 60px; border-radius: 50%; background: #21262d; border: 2px solid transparent; font-size: 30px; display: grid; place-items: center; cursor: pointer; transition: 0.2s; }
         .avatar-btn.active { border-color: var(--blue); background: rgba(56, 139, 253, 0.2); }
-        .status-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; border: 1px solid; }
+        .status-badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; border: 1px solid; text-transform: uppercase; font-weight: 700; }
         .live-dot { height: 8px; width: 8px; background-color: #2ea043; border-radius: 50%; display: inline-block; animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.4); } 50% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(46, 160, 67, 0); } 100% { opacity: 1; } }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* Checkboxes */
+        /* Interactive Elements */
         .member-check { display: flex; align-items: center; padding: 8px; background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .member-check:hover { border-color: var(--blue); }
         .member-check input { margin-right: 10px; }
@@ -45,7 +45,7 @@
 <body>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 10000;">
-        <div id="liveToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="sysToast" class="toast align-items-center text-bg-dark border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2">
                     <span id="toast-icon">ℹ️</span>
@@ -57,14 +57,14 @@
 
     <div id="view-auth" class="min-vh-100 d-flex flex-column align-items-center justify-content-center p-3">
         <div class="text-center mb-4">
-            <h1 class="fw-bold text-white mb-0">SLBDMIS <span style="color:var(--blue)">LIVE</span></h1>
-            <p class="text-muted small">Momentum & Activity Tracker</p>
+            <h1 class="fw-bold text-white mb-0">SLBDMIS <span class="text-primary">V8</span></h1>
+            <p class="text-muted small">Central Command</p>
         </div>
         <div class="glass-box p-4 w-100" style="max-width: 400px;">
-            <div class="text-center text-muted small mb-3">SELECT IDENTITY</div>
+            <div class="text-center text-muted small mb-3">SELECT PROFILE</div>
             <div id="auth-list" class="d-flex flex-wrap justify-content-center gap-3 mb-4"></div>
             
-            <div id="auth-pin" class="d-none">
+            <div id="auth-pin" class="d-none animate-fade">
                 <input type="password" id="inp-cid" class="form-control text-center fs-5 fw-bold mb-3" placeholder="Enter CID" maxlength="11">
                 <button onclick="doLogin()" class="btn btn-primary w-100 fw-bold">Authenticate</button>
             </div>
@@ -77,9 +77,7 @@
                 <div class="bg-primary rounded-circle p-1" style="width:10px; height:10px;"></div>
                 <span class="fw-bold text-white tracking-tight">SLBDMIS</span>
             </div>
-            
             <div id="nav-links" class="d-flex flex-column gap-1 flex-grow-1"></div>
-            
             <div class="mt-auto pt-3 border-top border-secondary border-opacity-25">
                 <div class="d-flex align-items-center gap-2 px-2 mb-3">
                     <div id="u-avatar" class="fs-5"></div>
@@ -94,15 +92,14 @@
 
         <main class="main-content">
             <header class="d-flex justify-content-between align-items-center mb-4">
-                <h4 id="page-header" class="fw-bold m-0 text-white">Overview</h4>
+                <h4 id="page-header" class="fw-bold m-0 text-white">Dashboard</h4>
                 <div class="d-flex align-items-center gap-3">
-                    <div class="small text-muted d-none d-sm-block"><span class="live-dot me-1"></span>Sync: <span id="sync-time">Just now</span></div>
+                    <div class="small text-muted d-none d-sm-block"><span class="live-dot me-1"></span><span id="sync-time">Syncing...</span></div>
                     <button onclick="openCreate()" class="btn btn-primary btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm">
                         <i data-lucide="plus-circle" size="16"></i> New
                     </button>
                 </div>
             </header>
-            
             <div id="content-area"></div>
         </main>
 
@@ -115,70 +112,65 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-box border-0">
                 <div class="modal-body p-4">
-                    <h6 class="fw-bold mb-3 text-white">New Entry</h6>
+                    <h6 class="fw-bold mb-3 text-white">Create New Entry</h6>
                     <div class="btn-group w-100 mb-3">
                         <button onclick="setMode('task')" id="btn-m-task" class="btn btn-sm btn-primary">Task</button>
                         <button onclick="setMode('decision')" id="btn-m-dec" class="btn btn-sm btn-outline-secondary">Decision</button>
                     </div>
                     
-                    <input type="text" id="n-title" class="form-control mb-2" placeholder="Title">
-                    <textarea id="n-desc" class="form-control mb-3" rows="3" placeholder="Details"></textarea>
+                    <input type="text" id="n-title" class="form-control mb-2" placeholder="Title/Subject">
+                    <textarea id="n-desc" class="form-control mb-3" rows="3" placeholder="Description or Details"></textarea>
                     
                     <div id="div-task-opts">
                         <div class="row g-2 mb-3">
                             <div class="col-6"><select id="n-prio" class="form-select"><option>Normal</option><option>High</option></select></div>
                             <div class="col-6"><input type="date" id="n-date" class="form-control"></div>
                         </div>
-                        <label class="small text-muted fw-bold mb-2">Assign To:</label>
+                        <label class="small text-muted fw-bold mb-2">Assign Members:</label>
                         <div id="n-members" class="d-flex flex-column gap-1 mb-3" style="max-height:120px; overflow-y:auto"></div>
                     </div>
-
-                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Publish</button>
+                    <button onclick="apiCreate()" class="btn btn-success w-100 fw-bold">Publish Entry</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modProof" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal fade" id="modProof" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-box border-0">
                 <div class="modal-body p-4">
                     <h6 class="fw-bold mb-2">Submit Task</h6>
-                    <p class="small text-muted">Ensure files are on Google Drive before submitting.</p>
+                    <p class="small text-muted">Upload work to Google Drive first.</p>
                     <input type="hidden" id="p-tid">
                     
-                    <a href="https://drive.google.com/drive/u/0/" target="_blank" onclick="notify('Opening Drive...', '📂')" class="btn btn-outline-light w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
-                        <i data-lucide="external-link" size="14"></i> Open Drive
+                    <a href="https://drive.google.com/drive/u/0/" target="_blank" class="btn btn-outline-light w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
+                        <i data-lucide="external-link" size="14"></i> Open Google Drive
                     </a>
 
                     <div class="bg-dark p-3 rounded border border-secondary border-opacity-25 mb-3">
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="chk1" onchange="validateProof()">
-                            <label class="form-check-label small" for="chk1">Files uploaded successfully</label>
+                            <input class="form-check-input" type="checkbox" id="chk1" onchange="checkProof()">
+                            <label class="form-check-label small" for="chk1">Files uploaded to Drive</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="chk2" onchange="validateProof()">
-                            <label class="form-check-label small" for="chk2">Correct naming convention used</label>
+                            <input class="form-check-input" type="checkbox" id="chk2" onchange="checkProof()">
+                            <label class="form-check-label small" for="chk2">Correct file naming used</label>
                         </div>
                     </div>
-
-                    <div class="d-flex gap-2">
-                        <button onclick="closeProof()" class="btn btn-light flex-grow-1">Cancel</button>
-                        <button id="btn-submit-proof" onclick="apiSubmit()" class="btn btn-success flex-grow-1 fw-bold" disabled>Submit</button>
-                    </div>
+                    <button id="btn-sub-proof" onclick="apiSubmit()" class="btn btn-success w-100 fw-bold" disabled>Submit for Review</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
+        // --- CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         
-        // --- FIX FOR DUPLICATE ERROR: Check if it exists before creating ---
-        const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
-        
+        // RENAMED CLIENT TO AVOID CONFLICTS
+        const appDB = window.supabase.createClient(SB_URL, SB_KEY);
+
         const TEAM = [
             { id: 1, name: "Pema Ugyen", avatar: "👨‍💼", cid: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel", avatar: "👨‍💻", cid: "11302003634", role: "MEMBER" },
@@ -190,32 +182,32 @@
         const STATE = { user: null, page: 'home', mode: 'task', timer: null };
         const MODALS = {};
 
-        // --- 2. INITIALIZATION ---
+        // --- INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
             MODALS.create = new bootstrap.Modal('#modCreate');
             MODALS.proof = new bootstrap.Modal('#modProof');
 
-            const storedID = localStorage.getItem('slbd_uid_v7');
-            if (storedID) {
-                STATE.user = TEAM.find(u => u.id == storedID);
+            const savedID = localStorage.getItem('slbd_v8_uid');
+            if(savedID) {
+                STATE.user = TEAM.find(u => u.id == savedID);
                 if(STATE.user) { startApp(); return; }
             }
             renderAuth();
         };
 
-        // --- 3. AUTHENTICATION LOGIC ---
+        // --- AUTH SYSTEM ---
         function renderAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="d-flex flex-column align-items-center gap-2" onclick="selectUser(${u.id}, this)">
+                <div class="d-flex flex-column align-items-center gap-2" onclick="pickUser(${u.id}, this)">
                     <div class="avatar-btn shadow">${u.avatar}</div>
                     <span class="small fw-bold text-muted">${u.name.split(' ')[0]}</span>
                 </div>
             `).join('');
         }
 
-        function selectUser(id, el) {
+        function pickUser(id, el) {
             document.querySelectorAll('.avatar-btn').forEach(x => x.classList.remove('active'));
             el.querySelector('.avatar-btn').classList.add('active');
             STATE.selUser = TEAM.find(u => u.id === id);
@@ -224,37 +216,35 @@
         }
 
         function doLogin() {
-            notify('Authenticating...', '🔒');
-            setTimeout(() => {
-                if(document.getElementById('inp-cid').value === STATE.selUser.cid) {
-                    STATE.user = STATE.selUser;
-                    localStorage.setItem('slbd_uid_v7', STATE.user.id);
-                    document.getElementById('view-auth').classList.add('d-none');
-                    notify('Welcome Back', '👋');
-                    startApp();
-                } else {
-                    notify('Invalid CID', '❌');
-                }
-            }, 800);
+            const val = document.getElementById('inp-cid').value;
+            if(val === STATE.selUser.cid) {
+                STATE.user = STATE.selUser;
+                localStorage.setItem('slbd_v8_uid', STATE.user.id);
+                document.getElementById('view-auth').classList.add('d-none');
+                notify('Welcome Back', '👋');
+                startApp();
+            } else {
+                notify('Invalid CID', '❌');
+            }
         }
 
         function logout() {
-            if(confirm('Log out?')) {
-                localStorage.removeItem('slbd_uid_v7');
+            if(confirm('Logout?')) {
+                localStorage.removeItem('slbd_v8_uid');
                 location.reload();
             }
         }
 
-        // --- 4. APP ENGINE ---
+        // --- NAVIGATION & ENGINE ---
         function startApp() {
             document.getElementById('view-app').classList.remove('d-none');
             
-            // Sidebar User Info
+            // Set User Info
             document.getElementById('u-avatar').innerHTML = STATE.user.avatar;
             document.getElementById('u-name').innerText = STATE.user.name;
             document.getElementById('u-role').innerText = STATE.user.role;
 
-            // Nav Rendering
+            // Define Pages
             const pages = [
                 {id: 'home', t: 'Overview', i: 'activity'},
                 {id: 'task', t: 'Tasks', i: 'check-circle'},
@@ -262,36 +252,33 @@
                 {id: 'dec', t: 'Decisions', i: 'book'}
             ];
 
-            const navItem = (p, isMob) => isMob 
+            // Render Nav
+            const navHTML = (p, mob) => mob 
                 ? `<div class="col py-2" onclick="nav('${p.id}')"><i data-lucide="${p.i}" class="${STATE.page===p.id?'text-primary':''}"></i><div style="font-size:10px">${p.t}</div></div>`
-                : `<div onclick="nav('${p.id}')" class="d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none" style="cursor:pointer" id="lnk-${p.id}"><i data-lucide="${p.i}" size="18"></i><span class="small fw-bold">${p.t}</span></div>`;
+                : `<div onclick="nav('${p.id}')" class="d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none" style="cursor:pointer" id="l-${p.id}"><i data-lucide="${p.i}" size="18"></i><span class="small fw-bold">${p.t}</span></div>`;
 
-            const renderNav = () => {
-                document.getElementById('nav-links').innerHTML = pages.map(p => navItem(p, false)).join('');
-                document.getElementById('mob-links').innerHTML = pages.map(p => navItem(p, true)).join('');
-                if(document.getElementById(`lnk-${STATE.page}`)) {
-                    document.getElementById(`lnk-${STATE.page}`).classList.add('bg-primary', 'bg-opacity-10', 'text-primary');
-                    document.getElementById(`lnk-${STATE.page}`).classList.remove('text-secondary');
-                }
-                lucide.createIcons();
-            };
+            document.getElementById('nav-links').innerHTML = pages.map(p => navHTML(p, false)).join('');
+            document.getElementById('mob-links').innerHTML = pages.map(p => navHTML(p, true)).join('');
             
-            window.renderNav = renderNav;
-            nav('home');
+            nav('home'); // Load Home
 
-            // AUTO SYNC ENGINE (Every 60s)
-            if(STATE.timer) clearInterval(STATE.timer);
-            STATE.timer = setInterval(() => {
-                loadPage(STATE.page, true); // Silent refresh
+            // Auto Sync Loop
+            setInterval(() => {
+                loadPage(STATE.page, true);
                 document.getElementById('sync-time').innerText = new Date().toLocaleTimeString();
-                notify('Data Synced', '🔄');
-            }, 60000); // 1 minute interval
+            }, 30000); // 30s
         }
 
         function nav(pg) {
             STATE.page = pg;
-            window.renderNav();
-            document.getElementById('page-header').innerText = pg === 'home' ? 'Team Velocity' : (pg.charAt(0).toUpperCase() + pg.slice(1));
+            // Highlight Desktop Nav
+            document.querySelectorAll('[id^="l-"]').forEach(e => e.className = "d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 text-secondary user-select-none");
+            if(document.getElementById(`l-${pg}`)) document.getElementById(`l-${pg}`).className = "d-flex align-items-center gap-3 px-3 py-2 rounded mb-1 bg-primary bg-opacity-10 text-primary user-select-none";
+            
+            // Header Text
+            document.getElementById('page-header').innerText = pg === 'home' ? 'Team Overview' : pg.charAt(0).toUpperCase() + pg.slice(1);
+            
+            // Load Content
             loadPage(pg, false);
         }
 
@@ -305,175 +292,125 @@
                 if(pg === 'att') await renderAtt(box);
                 if(pg === 'dec') await renderDec(box);
                 lucide.createIcons();
-            } catch (err) {
-                console.error(err);
-                if(!silent) box.innerHTML = `<div class="alert alert-danger">Connection Error: ${err.message}</div>`;
+            } catch(e) {
+                console.error(e);
+                if(!silent) box.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
             }
         }
 
-        // --- 5. PAGE RENDERERS ---
+        // --- PAGE LOGIC ---
         
-        // HOME / MOMENTUM
         async function renderHome(c) {
-            // Safe Fetch Pattern
-            let { data: hist } = await sbClient.from('momentum_history').select('*').order('date', {ascending:true});
-            let { data: tasks } = await sbClient.from('tasks').select('*');
-            if(!hist) hist = []; if(!tasks) tasks = [];
-
-            // Metrics
+            const { data: hist } = await appDB.from('momentum_history').select('*').order('date', {ascending:true});
+            const { data: tasks } = await appDB.from('tasks').select('*');
+            
             const todayStr = new Date().toISOString().split('T')[0];
-            const todayDone = tasks.filter(t => t.status === 'Done' && t.created_at.includes(todayStr)).length;
-            
+            const todayDone = tasks.filter(t => t.status === 'Done' && t.created_at.startsWith(todayStr)).length;
             const lastScore = hist.length ? hist[hist.length-1].score : 100;
-            const liveScore = lastScore + (todayDone * 5); // Algo
-            const prevScore = hist.length > 1 ? hist[hist.length-2].score : 100;
-            const diff = liveScore - prevScore;
+            const currentScore = lastScore + (todayDone * 5);
             
-            const myActive = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id));
-            const review = tasks.filter(t => t.status === 'Review');
+            const myTasks = tasks.filter(t => t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id));
+            const forReview = tasks.filter(t => t.status === 'Review');
 
             c.innerHTML = `
-                <div class="glass-box p-4 mb-4 position-relative overflow-hidden">
+                <div class="glass-box p-4 mb-4">
                     <div class="row align-items-center">
-                        <div class="col-7">
-                            <div class="small text-muted fw-bold ls-1 mb-1">MOMENTUM INDEX</div>
-                            <h1 class="display-3 fw-bold text-white m-0 tracking-tight">${liveScore}</h1>
-                            <div class="badge ${diff>=0?'bg-success':'bg-danger'} bg-opacity-25 ${diff>=0?'text-success':'text-danger'} mt-2">
-                                ${diff>=0?'+':''}${diff} pts today
-                            </div>
+                        <div class="col-8">
+                            <div class="small text-muted fw-bold ls-1">MOMENTUM SCORE</div>
+                            <h1 class="display-3 fw-bold text-white m-0">${currentScore}</h1>
+                            <div class="text-success small">+${todayDone*5} pts today</div>
                         </div>
-                        <div class="col-5">
-                            <div style="height:120px;"><canvas id="chartHome"></canvas></div>
-                        </div>
+                        <div class="col-4 text-end opacity-50"><i data-lucide="zap" size="64"></i></div>
                     </div>
                 </div>
-
                 <div class="row g-3">
-                    <div class="col-lg-6">
-                        ${STATE.user.role === 'LEADER' ? renderLeaderBox(review) : renderMyTasks(myActive)}
+                    <div class="col-md-6">
+                        ${STATE.user.role === 'LEADER' ? renderLeaderBox(forReview) : renderMemberBox(myTasks)}
                     </div>
-                    <div class="col-lg-6">
-                        <div class="glass-box h-100">
-                            <div class="glass-box-header">Recent Activity</div>
-                            <div class="p-3">
-                                ${tasks.slice(0, 5).map(t => `
-                                    <div class="d-flex gap-2 mb-3 pb-2 border-bottom border-secondary border-opacity-10">
-                                        <div class="text-${t.status==='Done'?'success':'warning'}"><i data-lucide="${t.status==='Done'?'check-circle':'clock'}" size="16"></i></div>
-                                        <div class="lh-1">
-                                            <div class="small fw-bold text-white">${t.task_title}</div>
-                                            <div class="small text-muted mt-1" style="font-size:10px">${t.status} • ${new Date(t.created_at).toLocaleDateString()}</div>
-                                        </div>
+                    <div class="col-md-6">
+                        <div class="glass-box h-100 p-3">
+                            <h6 class="glass-box-header border-0 px-0 pt-0">Recent Activity</h6>
+                            ${tasks.slice(0,5).map(t => `
+                                <div class="d-flex gap-2 mb-2 pb-2 border-bottom border-secondary border-opacity-10">
+                                    <i data-lucide="${t.status==='Done'?'check-circle':'clock'}" size="16" class="text-${t.status==='Done'?'success':'warning'}"></i>
+                                    <div class="lh-1">
+                                        <div class="small fw-bold text-white">${t.task_title}</div>
+                                        <div class="small text-muted" style="font-size:10px">${t.status}</div>
                                     </div>
-                                `).join('') || '<div class="text-muted small">No recent activity.</div>'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Draw Chart
-            const ctx = document.getElementById('chartHome');
-            if(ctx) {
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: hist.map(x=>x.date).concat(['Today']),
-                        datasets: [{
-                            data: hist.map(x=>x.score).concat([liveScore]),
-                            borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.2)',
-                            borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0
-                        }]
-                    },
-                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false}, y:{display:false}} }
-                });
-            }
-        }
-
-        function renderLeaderBox(reviews) {
-            return `
-                <div class="glass-box h-100 border-start border-4 border-info">
-                    <div class="glass-box-header text-info d-flex justify-content-between">
-                        <span>Waiting Review</span>
-                        <span class="badge bg-info text-dark">${reviews.length}</span>
-                    </div>
-                    <div class="p-3">
-                        ${reviews.length === 0 ? '<span class="small text-muted">All clear.</span>' : ''}
-                        ${reviews.map(t => `
-                            <div class="p-2 mb-2 bg-dark rounded d-flex justify-content-between align-items-center">
-                                <span class="small text-white fw-bold">${t.task_title}</span>
-                                <button onclick="apiApprove(${t.id})" class="btn btn-sm btn-success py-0" style="font-size:11px">Approve</button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderMyTasks(tasks) {
-            return `
-                <div class="glass-box h-100">
-                    <div class="glass-box-header">My Active Tasks</div>
-                    <div class="p-3">
-                        ${tasks.length === 0 ? '<span class="small text-muted">No active tasks.</span>' : ''}
-                        ${tasks.map(t => `
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between small mb-1">
-                                    <span class="fw-bold text-white">${t.task_title}</span>
-                                    <span class="text-primary cursor-pointer" onclick="openProof(${t.id})">Submit</span>
                                 </div>
-                                <input type="text" class="form-control form-control-sm text-muted" value="${t.progress_note||''}" placeholder="Update status..." 
-                                    onchange="apiUpdateProg(${t.id}, this.value)">
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
         }
 
-        // TASKS PAGE
-        async function renderTasks(c) {
-            let { data: tasks } = await sbClient.from('tasks').select('*').order('created_at', {ascending:false});
-            if(!tasks) tasks = [];
-            
-            c.innerHTML = `
-                <div class="d-flex flex-column gap-3">
-                    ${tasks.map(t => `
-                        <div class="glass-box p-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="status-badge ${t.status==='Done'?'text-success border-success':(t.status==='Review'?'text-info border-info':'text-warning border-warning')}">${t.status}</span>
-                                <span class="small text-muted">Due: ${t.due_date}</span>
-                            </div>
-                            <h5 class="fw-bold text-white m-0">${t.task_title}</h5>
-                            <p class="small text-muted mt-1 mb-2">${t.description}</p>
-                            <div class="d-flex justify-content-between align-items-center border-top border-secondary border-opacity-25 pt-2">
-                                <span class="small text-secondary">Assigned: ${getMembers(t.tagged_members)}</span>
-                                ${t.status === 'Ongoing' && (t.tagged_members||[]).includes(STATE.user.id) ? `<button onclick="openProof(${t.id})" class="btn btn-sm btn-primary">Submit</button>` : ''}
-                            </div>
+        function renderLeaderBox(tasks) {
+            return `
+                <div class="glass-box h-100 p-3 border-start border-4 border-info">
+                    <h6 class="fw-bold text-info mb-3">Waiting Review (${tasks.length})</h6>
+                    ${tasks.length ? tasks.map(t => `
+                        <div class="bg-dark p-2 rounded mb-2 d-flex justify-content-between align-items-center">
+                            <span class="small text-white fw-bold">${t.task_title}</span>
+                            <button onclick="apiApprove(${t.id})" class="btn btn-sm btn-success py-0" style="font-size:11px">Approve</button>
                         </div>
-                    `).join('')}
+                    `).join('') : '<div class="text-muted small">No pending reviews.</div>'}
                 </div>
             `;
         }
 
-        // CHECK IN PAGE
+        function renderMemberBox(tasks) {
+            return `
+                <div class="glass-box h-100 p-3">
+                    <h6 class="fw-bold text-white mb-3">My Tasks (${tasks.length})</h6>
+                    ${tasks.length ? tasks.map(t => `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="fw-bold">${t.task_title}</span>
+                                <span class="text-primary cursor-pointer" onclick="openProof(${t.id})">Submit</span>
+                            </div>
+                            <input class="form-control form-control-sm" placeholder="Update status..." value="${t.progress_note||''}" onchange="apiUpdateNote(${t.id}, this.value)">
+                        </div>
+                    `).join('') : '<div class="text-muted small">All caught up!</div>'}
+                </div>
+            `;
+        }
+
+        async function renderTasks(c) {
+            const { data: tasks } = await appDB.from('tasks').select('*').order('created_at', {ascending:false});
+            c.innerHTML = `<div class="d-flex flex-column gap-3">
+                ${tasks.map(t => `
+                    <div class="glass-box p-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="status-badge ${t.status==='Done'?'text-success border-success':(t.status==='Review'?'text-info border-info':'text-warning border-warning')}">${t.status}</span>
+                            <span class="small text-muted">Due: ${t.due_date}</span>
+                        </div>
+                        <h5 class="fw-bold text-white m-0">${t.task_title}</h5>
+                        <p class="small text-muted mt-1 mb-2">${t.description}</p>
+                        <div class="small text-secondary pt-2 border-top border-secondary border-opacity-25">
+                            Assigned: ${getNames(t.tagged_members)}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
         async function renderAtt(c) {
-            let { data: logs } = await sbClient.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(20);
-            if(!logs) logs = [];
-            
+            const { data: logs } = await appDB.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(15);
             const today = new Date().toISOString().split('T')[0];
-            const hasChecked = logs.find(l => l.user_id === STATE.user.id && l.date === today);
+            const checkedIn = logs.some(l => l.user_id === STATE.user.id && l.date === today);
 
             c.innerHTML = `
-                <div class="text-center glass-box p-4 mb-4">
-                    <h2 class="text-white mb-0">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</h2>
+                <div class="glass-box p-4 text-center mb-4">
+                    <h2 class="text-white">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h2>
                     <p class="text-muted small mb-3">${new Date().toDateString()}</p>
-                    ${hasChecked 
-                        ? `<button class="btn btn-success btn-sm px-4 fw-bold" disabled>✅ Checked In</button>`
+                    ${checkedIn 
+                        ? `<button class="btn btn-success btn-sm px-4" disabled>✅ Checked In</button>` 
                         : `<button onclick="apiCheckIn()" class="btn btn-primary px-4 fw-bold shadow">Check In Now</button>`}
                 </div>
                 <div class="glass-box">
-                    <div class="glass-box-header">Today's Log</div>
-                    <div class="d-flex flex-column">
+                    <div class="glass-box-header">Recent Logs</div>
+                    <div>
                         ${logs.map(l => `
                             <div class="d-flex justify-content-between px-3 py-2 border-bottom border-secondary border-opacity-10">
                                 <div class="small"><span class="me-2">${l.users.avatar}</span>${l.users.name}</div>
@@ -485,34 +422,29 @@
             `;
         }
 
-        // DECISIONS PAGE
         async function renderDec(c) {
-            let { data: decs } = await sbClient.from('decisions').select('*').order('created_at', {ascending:false});
-            if(!decs) decs = [];
+            const { data: decs } = await appDB.from('decisions').select('*').order('created_at', {ascending:false});
             c.innerHTML = decs.map(d => `
                 <div class="glass-box p-3 mb-2 border-start border-4 border-secondary">
                     <h6 class="fw-bold text-white m-0">${d.subject}</h6>
                     <p class="small text-muted mt-1 mb-0">${d.details}</p>
                 </div>
-            `).join('') || '<div class="text-center text-muted py-5">No records found.</div>';
+            `).join('') || '<div class="text-center text-muted py-5">No decisions recorded.</div>';
         }
 
-        // --- 6. API ACTIONS (With Notifications) ---
-        
-        // Helper
-        function getMembers(ids) {
-            if(!ids || !ids.length) return 'None';
-            return ids.map(id => TEAM.find(u=>u.id==id)?.name.split(' ')[0]).join(', ');
+        // --- ACTIONS ---
+        function getNames(ids) {
+            if(!ids) return 'None';
+            return ids.map(id => TEAM.find(u=>u.id==id)?.name.split(' ')[0] || 'Unk').join(', ');
         }
 
-        // CREATE
         function setMode(m) {
             STATE.mode = m;
             document.getElementById('btn-m-task').className = m==='task'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
             document.getElementById('btn-m-dec').className = m==='decision'?'btn btn-sm btn-primary':'btn btn-sm btn-outline-secondary';
             document.getElementById('div-task-opts').classList.toggle('d-none', m!=='task');
             
-            if(m==='task') {
+            if(m === 'task') {
                 document.getElementById('n-members').innerHTML = TEAM.map(u => `
                     <label class="member-check">
                         <input type="checkbox" class="chk-mem" value="${u.id}">
@@ -528,78 +460,59 @@
             const desc = document.getElementById('n-desc').value;
             if(!title) return notify('Title required', '⚠️');
 
-            notify('Publishing...', '⏳');
-            try {
-                if(STATE.mode === 'task') {
-                    const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
-                    await sbClient.from('tasks').insert({
-                        task_title: title, description: desc, priority: document.getElementById('n-prio').value,
-                        due_date: document.getElementById('n-date').value, creator_id: STATE.user.id,
-                        tagged_members: tags, status: 'Ongoing'
-                    });
-                } else {
-                    await sbClient.from('decisions').insert({ subject: title, details: desc });
-                }
-                MODALS.create.hide();
-                notify('Created Successfully', '✅');
-                loadPage(STATE.page, true);
-            } catch(e) { notify('Error Creating', '❌'); }
+            notify('Saving...', '⏳');
+            if(STATE.mode === 'task') {
+                const tags = Array.from(document.querySelectorAll('.chk-mem:checked')).map(x=>parseInt(x.value));
+                await appDB.from('tasks').insert({
+                    task_title: title, description: desc, priority: document.getElementById('n-prio').value,
+                    due_date: document.getElementById('n-date').value, creator_id: STATE.user.id,
+                    tagged_members: tags, status: 'Ongoing'
+                });
+            } else {
+                await appDB.from('decisions').insert({subject: title, details: desc});
+            }
+            MODALS.create.hide();
+            notify('Created!', '✅');
+            loadPage(STATE.page, true);
         }
 
-        // UPDATE PROGRESS
-        async function apiUpdateProg(id, val) {
-            notify('Saving...', '💾');
-            await sbClient.from('tasks').update({progress_note:val}).eq('id',id);
-            notify('Saved', '✅');
+        async function apiCheckIn() {
+            await appDB.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
+            notify('Checked In', '✅');
+            loadPage('att', true);
         }
 
-        // SUBMIT PROOF
-        function openProof(id) {
-            document.getElementById('p-tid').value = id;
-            document.getElementById('chk1').checked = false;
-            document.getElementById('chk2').checked = false;
-            validateProof();
-            MODALS.proof.show();
+        async function apiUpdateNote(id, val) {
+            await appDB.from('tasks').update({progress_note: val}).eq('id', id);
+            notify('Note Saved', '💾');
         }
-        function validateProof() {
+
+        // Proof Logic
+        function openProof(id) { document.getElementById('p-tid').value=id; MODALS.proof.show(); }
+        function checkProof() {
             const ok = document.getElementById('chk1').checked && document.getElementById('chk2').checked;
-            document.getElementById('btn-submit-proof').disabled = !ok;
+            document.getElementById('btn-sub-proof').disabled = !ok;
         }
-        function closeProof() { if(document.activeElement) document.activeElement.blur(); MODALS.proof.hide(); }
-        
         async function apiSubmit() {
             const id = document.getElementById('p-tid').value;
-            notify('Submitting...', '🚀');
-            await sbClient.from('tasks').update({status:'Review'}).eq('id',id);
-            closeProof();
+            await appDB.from('tasks').update({status:'Review'}).eq('id', id);
+            MODALS.proof.hide();
+            notify('Submitted', '🚀');
             loadPage(STATE.page, true);
-            notify('Submitted to Leader', '✅');
         }
 
-        // APPROVE
         async function apiApprove(id) {
-            notify('Approving...', '⚙️');
-            await sbClient.from('tasks').update({status:'Done'}).eq('id',id);
-            // Add Momentum
-            await sbClient.from('momentum_history').insert({ date: new Date().toISOString().split('T')[0], score: 5 });
+            await appDB.from('tasks').update({status:'Done'}).eq('id', id);
+            // Add global momentum
+            await appDB.from('momentum_history').insert({date: new Date().toISOString().split('T')[0], score: 5});
+            notify('Approved', '🌟');
             loadPage(STATE.page, true);
-            notify('Approved & Momentum Up', '📈');
         }
 
-        // CHECK IN
-        async function apiCheckIn() {
-            notify('Logging attendance...', '📍');
-            await sbClient.from('attendance').insert({user_id: STATE.user.id, date: new Date().toISOString().split('T')[0]});
-            loadPage('att', true);
-            notify('Checked In', '✅');
-        }
-
-        // NOTIFICATION UI
         function notify(msg, icon) {
             document.getElementById('toast-msg').innerText = msg;
             document.getElementById('toast-icon').innerText = icon || 'ℹ️';
-            const t = bootstrap.Toast.getOrCreateInstance(document.getElementById('liveToast'));
-            t.show();
+            bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
         }
     </script>
 </body>
