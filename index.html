@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Final</title>
+    <title>SLBDMIS | Multi-User</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -26,7 +27,6 @@
             overscroll-behavior-y: none;
         }
 
-        /* Glass Cards */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(12px);
@@ -36,7 +36,6 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Inputs */
         .form-control, .form-select {
             background-color: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--glass-border);
@@ -51,7 +50,6 @@
             box-shadow: none;
         }
 
-        /* Drive Buttons */
         .drive-card {
             border: 1px solid var(--glass-border);
             background: rgba(255,255,255,0.05);
@@ -63,7 +61,6 @@
         }
         .drive-card:active { transform: scale(0.98); background: rgba(59, 130, 246, 0.2); }
 
-        /* Navigation */
         .mobile-nav {
             background: rgba(15, 23, 42, 0.95);
             border-top: 1px solid var(--glass-border);
@@ -73,7 +70,6 @@
         .nav-icon { color: #64748b; transition: 0.2s; }
         .nav-icon.active { color: #3b82f6; transform: translateY(-2px); }
 
-        /* Desktop Sidebar */
         .sidebar {
             width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
             background: #0f172a; border-right: 1px solid var(--glass-border);
@@ -88,7 +84,6 @@
             body { padding-bottom: 0; }
         }
 
-        /* Avatar */
         .avatar-circle {
             width: 60px; height: 60px; border-radius: 50%;
             background: rgba(255,255,255,0.05);
@@ -121,7 +116,6 @@
     </div>
 
     <div id="view-dashboard" class="d-none">
-        
         <nav class="sidebar">
             <div class="d-flex align-items-center gap-3 mb-5">
                 <div class="bg-primary rounded p-1"><i data-lucide="layout-grid" class="text-white"></i></div>
@@ -179,7 +173,7 @@
                         </div>
                     </div>
                     
-                    <label class="small text-muted fw-bold mb-2" id="lbl-assign">ASSIGN TO:</label>
+                    <label class="small text-muted fw-bold mb-2" id="lbl-assign">ASSIGN TO (Multi-select):</label>
                     <div id="assign-list" class="d-flex flex-column gap-2 mb-3 p-2 rounded bg-black bg-opacity-25" style="max-height:150px; overflow-y:auto;"></div>
                     
                     <button onclick="submitItem()" class="btn btn-success w-100 fw-bold py-2">Publish</button>
@@ -192,28 +186,15 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-panel border-0">
                 <div class="modal-body">
-                    <h5 class="fw-bold mb-3">Step 1: Upload to Drive</h5>
+                    <h5 class="fw-bold mb-3">Step 1: Upload</h5>
                     <input type="hidden" id="proof-task-id">
-                    
-                    <div class="alert alert-info small py-2"><i data-lucide="info" size="14"></i> Open a folder to enable the 'Done' button.</div>
-
                     <div class="d-grid gap-2 mb-4">
-                        <div class="drive-card" onclick="openDrive('admin')">
-                            <i data-lucide="folder" class="text-warning"></i> <span class="fw-bold">Admin & Finance</span>
-                        </div>
-                        <div class="drive-card" onclick="openDrive('machine')">
-                            <i data-lucide="cpu" class="text-info"></i> <span class="fw-bold">Machine Unit</span>
-                        </div>
-                        <div class="drive-card" onclick="openDrive('pics')">
-                            <i data-lucide="image" class="text-danger"></i> <span class="fw-bold">Pictures / Events</span>
-                        </div>
-                        <div class="drive-card" onclick="openDrive('ppt')">
-                            <i data-lucide="file-text" class="text-success"></i> <span class="fw-bold">Proposals & PPT</span>
-                        </div>
+                        <div class="drive-card" onclick="openDrive('admin')"><i data-lucide="folder" class="text-warning"></i> <span>Admin</span></div>
+                        <div class="drive-card" onclick="openDrive('machine')"><i data-lucide="cpu" class="text-info"></i> <span>Machine</span></div>
+                        <div class="drive-card" onclick="openDrive('pics')"><i data-lucide="image" class="text-danger"></i> <span>Events</span></div>
+                        <div class="drive-card" onclick="openDrive('ppt')"><i data-lucide="file-text" class="text-success"></i> <span>PPTs</span></div>
                     </div>
-
-                    <h5 class="fw-bold mb-2">Step 2: Confirm</h5>
-                    <button id="btn-final-done" onclick="confirmDone()" class="btn btn-secondary w-100 fw-bold" disabled>❌ Link Not Opened</button>
+                    <button id="btn-final-done" onclick="confirmDone()" class="btn btn-secondary w-100 fw-bold" disabled>❌ Open Drive First</button>
                     <button onclick="bsModalProof.hide()" class="btn btn-link text-white text-decoration-none w-100 mt-2">Cancel</button>
                 </div>
             </div>
@@ -221,7 +202,7 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
+        // 1. CONFIG
         const SUPABASE_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -244,12 +225,10 @@
         const STATE = { user: null, page: 'overview', createType: 'task', selUser: null };
         let bsModalCreate, bsModalProof;
 
-        // --- 2. INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
             bsModalCreate = new bootstrap.Modal('#modalCreate');
             bsModalProof = new bootstrap.Modal('#modalProof');
-            
             const savedID = localStorage.getItem('slbd_uid');
             if(savedID) {
                 const u = TEAM.find(x => x.id == savedID);
@@ -258,7 +237,7 @@
             showLogin();
         };
 
-        // --- 3. AUTHENTICATION ---
+        // 2. AUTH
         function showLogin() {
             document.getElementById('view-login').classList.remove('d-none');
             document.getElementById('login-avatars').innerHTML = TEAM.map(u => `
@@ -268,14 +247,12 @@
                 </div>
             `).join('');
         }
-
         function pickUser(id, el) {
             document.querySelectorAll('.avatar-circle').forEach(b => b.classList.remove('selected'));
             el.querySelector('.avatar-circle').classList.add('selected');
             STATE.selUser = TEAM.find(u => u.id === id);
             document.getElementById('login-form').classList.remove('d-none');
         }
-
         function attemptLogin() {
             if(document.getElementById('input-cid').value === STATE.selUser.cid) {
                 STATE.user = STATE.selUser;
@@ -283,15 +260,9 @@
                 initApp();
             } else { toast('❌ Incorrect CID'); }
         }
+        function logout() { if(confirm('Logout?')) { localStorage.removeItem('slbd_uid'); location.reload(); } }
 
-        function logout() {
-            if(confirm('Logout?')) {
-                localStorage.removeItem('slbd_uid');
-                location.reload();
-            }
-        }
-
-        // --- 4. APP NAVIGATION ---
+        // 3. NAV
         function initApp() {
             document.getElementById('view-login').classList.add('d-none');
             document.getElementById('view-dashboard').classList.remove('d-none');
@@ -306,7 +277,6 @@
             ];
             if(STATE.user.role === 'LEADER') pages.push({id:'team', i:'users', t:'Team View'});
 
-            // Render Nav
             const navHTML = (isMob) => pages.map(p => isMob 
                 ? `<div class="col" onclick="go('${p.id}')"><div class="nav-icon p-2" id="mn-${p.id}"><i data-lucide="${p.i}"></i><div style="font-size:10px">${p.t}</div></div></div>`
                 : `<a href="#" onclick="go('${p.id}')" id="dn-${p.id}" class="text-decoration-none text-secondary d-flex gap-3 px-3 py-2 rounded mb-1 align-items-center"><i data-lucide="${p.i}" size="18"></i><span class="fw-medium">${p.t}</span></a>`
@@ -314,29 +284,23 @@
 
             document.getElementById('sidebar-menu').innerHTML = navHTML(false);
             document.getElementById('mobile-menu').innerHTML = navHTML(true);
-            
             go('overview');
-            setInterval(() => loadContent(STATE.page, true), 8000); // Auto-refresh
+            setInterval(() => loadContent(STATE.page, true), 8000);
         }
 
         function go(pg) {
             STATE.page = pg;
             document.getElementById('page-title').innerText = pg === 'dec' ? 'Decision Log' : pg.toUpperCase();
-            
-            // Highlight Nav
             document.querySelectorAll('#sidebar-menu a').forEach(a => { a.classList.remove('bg-primary','text-white'); a.classList.add('text-secondary'); });
             document.querySelectorAll('.nav-icon').forEach(a => { a.classList.remove('active'); });
-            
             const dn = document.getElementById(`dn-${pg}`); if(dn) { dn.classList.add('bg-primary','text-white'); dn.classList.remove('text-secondary'); }
             const mn = document.getElementById(`mn-${pg}`); if(mn) mn.classList.add('active');
-            
             loadContent(pg, false);
         }
 
         async function loadContent(pg, silent) {
             const box = document.getElementById('app-content');
             if(!silent) box.innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-primary spinner-border-sm"></div></div>';
-            
             try {
                 if(pg === 'overview') await pgOverview(box);
                 if(pg === 'tasks') await pgTasks(box);
@@ -348,11 +312,19 @@
             } catch(e) { console.error(e); }
         }
 
-        // --- 5. PAGE RENDERERS ---
+        // 4. PAGES
+        function getNames(ids) {
+            if(!ids || !ids.length) return 'Unassigned';
+            return ids.map(id => TEAM.find(u=>u.id==id)?.name.split(' ')[0]).join(', ');
+        }
+
         async function pgOverview(c) {
             const {data: t} = await sb.from('tasks').select('*');
-            const myActive = t.filter(x => x.status === 'Ongoing' && x.assignee_id === STATE.user.id);
-            const doneData = TEAM.map(u => t.filter(x => x.status === 'Done' && x.assignee_id === u.id).length);
+            // Filter: Task is mine if my ID is in the tagged_members list
+            const myActive = t.filter(x => x.status === 'Ongoing' && x.tagged_members && x.tagged_members.includes(STATE.user.id));
+            
+            // Chart Data: Count tasks where user is in the tagged list AND status is Done
+            const doneData = TEAM.map(u => t.filter(x => x.status === 'Done' && x.tagged_members && x.tagged_members.includes(u.id)).length);
 
             c.innerHTML = `
                 <div class="glass-panel p-3 mb-4" style="height:200px"><canvas id="ch1"></canvas></div>
@@ -366,7 +338,6 @@
                     `).join('') || '<div class="col-12 text-center text-muted py-3">No active tasks.</div>'}
                 </div>
             `;
-            
             new Chart(document.getElementById('ch1'), {
                 type: 'bar',
                 data: { labels: TEAM.map(u=>u.name.split(' ')[0]), datasets: [{data:doneData, backgroundColor:'#3b82f6'}] },
@@ -375,9 +346,14 @@
         }
 
         async function pgTasks(c) {
-            let q = sb.from('tasks').select('*, users!assignee_id(name)').order('created_at',{ascending:false});
-            if(STATE.user.role === 'MEMBER') q = q.or(`assignee_id.eq.${STATE.user.id},creator_id.eq.${STATE.user.id}`);
-            const {data: tasks} = await q;
+            // Fetch ALL tasks then filter in JS to avoid complex Supabase Array query syntax
+            const {data: allTasks} = await sb.from('tasks').select('*').order('created_at',{ascending:false});
+            
+            let tasks = allTasks;
+            if(STATE.user.role === 'MEMBER') {
+                // Show if I created it OR if I am tagged in it
+                tasks = allTasks.filter(t => t.creator_id === STATE.user.id || (t.tagged_members && t.tagged_members.includes(STATE.user.id)));
+            }
 
             c.innerHTML = tasks.map(t => `
                 <div class="glass-panel p-3 mb-3">
@@ -387,7 +363,7 @@
                     </div>
                     <p class="small text-muted mb-2 text-truncate">${t.description||'--'}</p>
                     <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-secondary border-opacity-10">
-                        <small class="text-info fw-bold">To: ${t.users ? t.users.name.split(' ')[0] : 'Unassigned'}</small>
+                        <small class="text-info fw-bold">To: ${getNames(t.tagged_members)}</small>
                         <div class="d-flex gap-2">
                             ${t.status==='Ongoing' ? `<button onclick="startProof('${t.id}')" class="btn btn-sm btn-success fw-bold px-3">Done</button>` : ''}
                             ${t.status==='Waiting' && STATE.user.role==='LEADER' ? `<button onclick="updTask('${t.id}','Ongoing')" class="btn btn-sm btn-primary">Approve</button>` : ''}
@@ -402,7 +378,6 @@
             const today = new Date().toISOString().split('T')[0];
             const {data: me} = await sb.from('attendance').select('*').eq('user_id',STATE.user.id).eq('date',today).single();
             const {data: all} = await sb.from('attendance').select('*, users(name,avatar)').order('created_at',{ascending:false}).limit(15);
-            
             c.innerHTML = `
                 <div class="glass-panel p-3 mb-4 d-flex justify-content-between align-items-center">
                     <div><div class="fw-bold text-white">${today}</div></div>
@@ -424,7 +399,7 @@
                     <div class="d-flex justify-content-between"><h6 class="fw-bold text-white">${x.subject}</h6><small class="text-muted">${new Date(x.created_at).toLocaleDateString()}</small></div>
                     <p class="small text-muted mb-2">${x.details}</p>
                     <div class="d-flex justify-content-between align-items-center pt-2">
-                        <small class="text-info">Recorded by ${x.users.name}</small>
+                        <small class="text-info">Involved: ${getNames(x.tagged_members)}</small>
                         ${STATE.user.role==='LEADER' ? `<button onclick="delItem('decisions','${x.id}')" class="btn btn-sm text-danger"><i data-lucide="trash-2" size="14"></i></button>` : ''}
                     </div>
                 </div>`).join('') : '<div class="text-center py-5 text-muted">No decisions recorded.</div>';
@@ -446,12 +421,12 @@
             c.innerHTML = `<div class="row g-3">${u.filter(x=>x.role!=='LEADER').map(x => `
                 <div class="col-md-6"><div class="glass-panel p-3 h-100">
                     <div class="d-flex gap-2 align-items-center mb-3"><span class="fs-2">${x.avatar}</span><h5 class="m-0">${x.name}</h5></div>
-                    ${t.filter(k=>k.assignee_id==x.id).map(k=>`<div class="bg-black bg-opacity-25 p-1 px-2 rounded mb-1 small d-flex justify-content-between"><span>${k.task_title}</span><span class="text-primary">${k.status}</span></div>`).join('') || '<div class="small text-muted">Free</div>'}
+                    ${t.filter(k=>k.tagged_members && k.tagged_members.includes(x.id)).map(k=>`<div class="bg-black bg-opacity-25 p-1 px-2 rounded mb-1 small d-flex justify-content-between"><span>${k.task_title}</span><span class="text-primary">${k.status}</span></div>`).join('') || '<div class="small text-muted">Free</div>'}
                 </div></div>
             `).join('')}</div>`;
         }
 
-        // --- 6. ACTIONS ---
+        // 5. ACTIONS
         function setCreateType(t) {
             STATE.createType = t;
             ['task','decision','opp'].forEach(x => {
@@ -459,13 +434,12 @@
                 b.className = x===t ? 'btn btn-sm btn-primary flex-grow-1' : 'btn btn-sm text-muted flex-grow-1';
             });
             document.getElementById('task-fields').classList.toggle('d-none', t!=='task');
-            document.getElementById('lbl-assign').innerText = t==='task' ? "ASSIGN TO (Select 1):" : "TAG PEOPLE:";
             
-            // Generate list (INCLUDES Leader for Self-Assignment)
+            // Generate list (CHECKBOXES for everyone)
             document.getElementById('assign-list').innerHTML = TEAM.map(x => `
                 <div class="form-check">
-                    <input class="form-check-input tag-chk" type="${t==='task'?'radio':'checkbox'}" name="assign" value="${x.id}" id="tag-${x.id}">
-                    <label class="form-check-label text-white small" for="tag-${x.id}">${x.avatar} ${x.name} ${x.id===STATE.user.id?'(You)' : ''}</label>
+                    <input class="form-check-input tag-chk" type="checkbox" value="${x.id}" id="tag-${x.id}">
+                    <label class="form-check-label text-white small" for="tag-${x.id}">${x.avatar} ${x.name}</label>
                 </div>
             `).join('');
         }
@@ -480,18 +454,20 @@
         async function submitItem() {
             const ti = document.getElementById('new-title').value;
             const de = document.getElementById('new-desc').value;
+            // Collect ALL checked IDs
             const tags = Array.from(document.querySelectorAll('.tag-chk:checked')).map(x => parseInt(x.value));
             
             if(!ti) return toast('❌ Title required');
 
             let err;
             if(STATE.createType === 'task') {
-                const ass = tags[0] || null;
-                // If Leader assigns anyone (including self), it starts as Ongoing
-                const stat = (STATE.user.role==='LEADER' && ass) ? 'Ongoing' : 'Waiting';
+                if(tags.length === 0) return toast('❌ Assign to at least 1 person');
+                // Use first person as "primary assignee" for DB compatibility, but store ALL in tagged_members
+                const primary = tags[0];
+                const stat = (STATE.user.role==='LEADER') ? 'Ongoing' : 'Waiting';
                 const {error} = await sb.from('tasks').insert({
                     task_title:ti, description:de, priority:document.getElementById('new-prio').value, due_date:document.getElementById('new-date').value,
-                    creator_id:STATE.user.id, assignee_id:ass, tagged_members:tags, status:stat
+                    creator_id:STATE.user.id, assignee_id:primary, tagged_members:tags, status:stat
                 });
                 err = error;
             } else if(STATE.createType === 'decision') {
@@ -506,31 +482,27 @@
             else { bsModalCreate.hide(); loadContent(STATE.page, true); toast('✅ Created'); }
         }
 
-        // --- 7. DRIVE UPLOAD LOGIC ---
         function startProof(id) {
             document.getElementById('proof-task-id').value = id;
             const btn = document.getElementById('btn-final-done');
             btn.disabled = true;
             btn.className = 'btn btn-secondary w-100 fw-bold';
-            btn.innerHTML = '❌ Link Not Opened';
+            btn.innerHTML = '❌ Open Drive First';
             bsModalProof.show();
         }
-
         function openDrive(key) {
             window.open(DRIVE_LINKS[key], '_blank');
             const btn = document.getElementById('btn-final-done');
             btn.disabled = false;
             btn.className = 'btn btn-success w-100 fw-bold';
-            btn.innerHTML = '✅ I Have Uploaded - Mark Done';
+            btn.innerHTML = '✅ Mark Done';
         }
-
         async function confirmDone() {
             const id = document.getElementById('proof-task-id').value;
             await sb.from('tasks').update({status:'Done'}).eq('id',id);
-            bsModalProof.hide(); loadContent('tasks',true); toast('🎉 Task Completed');
+            bsModalProof.hide(); loadContent('tasks',true); toast('🎉 Completed');
         }
 
-        // --- 8. UTILS ---
         async function doCheckIn() {
             const {error} = await sb.from('attendance').insert({user_id:STATE.user.id, date:new Date().toISOString().split('T')[0]});
             if(!error) { loadContent('att',true); toast('Checked In'); } else toast('Error');
