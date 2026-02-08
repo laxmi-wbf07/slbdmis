@@ -1,283 +1,157 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <title>SLBDMIS | Commander V10.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TASK FORCE COMMAND</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        /* === THEME: COMMANDER V10.1 === */
         :root {
-            --bg-body: #000000;
-            --bg-card: #0F0F0F;
-            --bg-hover: #161616;
-            --border: #222222;
-            --primary: #3B82F6;
-            --primary-glow: rgba(59, 130, 246, 0.2);
-            --success: #10B981;
-            --danger: #EF4444;
-            --warning: #F59E0B;
-            --text-main: #FFFFFF;
-            --text-sub: #888888;
+            --primary: #3b82f6;
+            --bg: #050505;
+            --card: #121212;
+            --text: #e5e5e5;
+            --accent: #f59e0b;
         }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* UTILS */
+        .card-box { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
+        .btn-primary { background: var(--primary); border: none; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .cursor-pointer { cursor: pointer; }
+        
+        /* ANIMATIONS */
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+        /* SILENCE INDICATOR */
+        .silence-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #333; color: #888; display: flex; align-items: center; gap: 4px; }
+        .silence-badge.active { background: #dc3545; color: white; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.7;} 100% {opacity:1;} }
 
-        /* === CORE UI === */
-        .glass-panel {
-            background: rgba(15, 15, 15, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
+        /* UPLOAD ICONS */
+        .sub-opt { border: 1px solid rgba(255,255,255,0.1); background: #000; transition: 0.2s; }
+        .sub-opt:hover { background: #1a1a1a; border-color: var(--primary); }
+        .sub-opt.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
 
-        .card-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            overflow: hidden;
-            position: relative;
-        }
+        /* AUTH & BOOT */
+        #view-boot, #view-auth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .pin-pad { width: 40px; height: 40px; margin: 0 5px; text-align: center; background: #222; border: 1px solid #444; color: white; border-radius: 8px; font-size: 20px; }
 
-        /* === SUBMISSION SELECTOR === */
-        .sub-opt {
-            transition: all 0.2s ease;
-            background: var(--bg-hover);
-            border: 1px solid var(--border);
-            opacity: 0.7;
-        }
-        .sub-opt:hover { opacity: 1; border-color: var(--primary); }
-        .sub-opt.active {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: var(--primary) !important;
-            opacity: 1;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
-        }
-
-        /* === ANALYTICS & GRAPH === */
-        canvas { width: 100%; height: 180px; display: block; }
-        .analytic-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .analytic-row:last-child { border-bottom: none; }
-        .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
-
-        /* === NAVIGATION === */
-        .quick-link {
-            background: var(--bg-hover);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 90px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: var(--text-sub);
-            transition: 0.2s;
-        }
-        .quick-link:active { transform: scale(0.96); border-color: var(--primary); color: white; }
-
-        .nav-tabs-custom {
-            display: flex;
-            background: var(--bg-hover);
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-        }
-        .nav-tab-item {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            font-size: 12px;
-            font-weight: 800;
-            border-radius: 8px;
-            cursor: pointer;
-            color: var(--text-sub);
-            transition: all 0.2s;
-            text-transform: uppercase;
-        }
-        .nav-tab-item.active {
-            background: var(--bg-card);
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            border: 1px solid var(--border);
-        }
-
-        /* === SILENCE INDICATORS === */
-        .silent-badge {
-            font-size: 10px;
-            font-weight: 700;
-            background: #111;
-            color: #444;
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid #222;
-        }
-        .silent-badge.active {
-            color: var(--danger);
-            border-color: rgba(239, 68, 68, 0.4);
-            background: rgba(239, 68, 68, 0.1);
-            animation: pulse-red 3s infinite;
-        }
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-
-        /* === RESPONSIVE LAYOUT === */
-        @media (min-width: 992px) {
-            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #050505; border-right: 1px solid var(--border); padding: 30px; z-index: 1000; }
-            .main-content { margin-left: 260px; padding: 40px; max-width: 1400px; }
-            .mobile-only { display: none !important; }
-        }
-        @media (max-width: 991px) {
-            .sidebar, .desktop-only { display: none !important; }
-            .mobile-head { position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 1000; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; }
-            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #000; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: 10px; z-index: 1000; }
-            .main-content { padding: 80px 16px 100px 16px; }
-        }
+        /* NAVIGATION */
+        .nav-link-custom { color: #666; transition: 0.2s; }
+        .nav-link-custom.active { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid #222; padding: 10px 0; z-index: 1000; display: flex; justify-content: space-around; }
+        
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     </style>
 </head>
 <body>
 
-    <audio id="sfx-boot" src="https://assets.mixkit.co/active_storage/sfx/1364/1364-preview.mp3" preload="auto"></audio>
-    <audio id="sfx-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sfx-boot" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <audio id="sfx-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
-    <div id="view-boot" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex flex-column align-items-center justify-content-center p-4">
-        <div class="mb-5 text-center">
-            <i data-lucide="aperture" class="text-primary mb-3" size="48"></i>
-            <h1 class="h3 fw-bold ls-2">COMMANDER V10.1</h1>
-            <p class="text-secondary small font-monospace">SYSTEM READY</p>
+    <div id="view-boot">
+        <div class="text-center fade-in">
+            <div class="mb-4 text-primary"><i data-lucide="power" size="64"></i></div>
+            <h1 class="fw-bold tracking-wider mb-2">TASK FORCE</h1>
+            <p class="text-secondary small mb-5">SECURE COMMAND ENVIRONMENT</p>
+            <button onclick="bootSystem()" class="btn btn-outline-primary px-5 rounded-pill fw-bold">INITIALIZE SYSTEM</button>
         </div>
-        <button onclick="bootSystem()" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg">INITIALIZE</button>
     </div>
 
-    <div id="view-auth" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black z-2 d-flex align-items-center justify-content-center p-3">
-        <div class="card-box p-4 w-100" style="max-width: 400px;">
-            <div class="text-center mb-4">
-                <h4 class="fw-bold">IDENTITY</h4>
-                <p class="text-secondary text-xs">SELECT OPERATOR</p>
-            </div>
-            <div id="auth-list" class="row g-2"></div>
+    <div id="view-auth" class="d-none">
+        <div class="container text-center" style="max-width: 400px;">
+            <div id="auth-list" class="row g-3 fade-in"></div>
             
-            <div id="auth-pin" class="d-none">
-                <div class="bg-dark p-3 rounded-3 mb-4 d-flex align-items-center gap-3 border border-secondary border-opacity-25">
-                    <div id="l-av" class="fs-4"></div>
-                    <div><div id="l-name" class="fw-bold text-white"></div><div class="text-xs text-secondary">Security Check</div></div>
-                </div>
-                <input type="password" id="inp-pin" class="form-control bg-black text-white text-center fs-3 mb-3 py-3 font-monospace border-secondary" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">ACCESS</button>
-                <button onclick="resetAuth()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
+            <div id="auth-pin" class="d-none fade-in">
+                <div id="l-av" class="display-1 mb-3"></div>
+                <h3 id="l-name" class="fw-bold mb-4"></h3>
+                <input type="password" id="inp-pin" class="form-control bg-dark text-white border-secondary text-center fs-3 mb-4 py-2" maxlength="11" placeholder="ENTER PIN">
+                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill mb-3">ACCESS DASHBOARD</button>
+                <button onclick="resetAuth()" class="btn btn-link text-secondary text-decoration-none small">Switch User</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
-        
-        <header class="mobile-head glass-panel mobile-only">
-            <div class="d-flex align-items-center gap-2">
-                <i data-lucide="grid" class="text-primary" size="20"></i>
-                <span id="m-tit" class="fw-bold">DASHBOARD</span>
-            </div>
-            <div class="d-flex gap-3 align-items-center">
-                <div class="position-relative" onclick="checkNoti(true)">
-                    <i data-lucide="bell" class="text-white" size="22"></i>
-                    <span id="bad-m" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none border border-black">0</span>
+        <div class="fixed-top bg-black border-bottom border-secondary border-opacity-25" style="height:60px; z-index:1001;">
+            <div class="container-fluid h-100 d-flex align-items-center justify-content-between px-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div id="d-av" class="bg-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width:36px; height:36px;"></div>
+                    <div class="d-none d-md-block">
+                        <div id="d-name" class="fw-bold text-sm lh-1"></div>
+                        <div class="text-xs text-secondary">OPERATIVE</div>
+                    </div>
                 </div>
-                <i onclick="openCreate('task')" data-lucide="plus-circle" class="text-primary" size="24"></i>
-            </div>
-        </header>
-
-        <nav class="sidebar">
-            <div class="d-flex align-items-center gap-3 mb-5">
-                <div class="bg-primary bg-opacity-10 p-2 rounded"><i data-lucide="command" class="text-primary"></i></div>
-                <div><div class="fw-bold">SLBDMIS</div><div class="text-xs text-secondary">COMMANDER</div></div>
-            </div>
-            <div id="nav-d" class="d-flex flex-column gap-2 flex-grow-1"></div>
-            <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div id="d-av" class="fs-5"></div>
-                    <div><div id="d-name" class="fw-bold text-sm"></div><div class="text-xs text-success">● Online</div></div>
+                <div class="d-flex align-items-center gap-3">
+                    <div id="silent-ind-d" class="silence-badge d-none cursor-pointer" onclick="toggleSilence()"></div>
+                    <button onclick="checkNoti(true)" class="btn btn-icon position-relative text-secondary">
+                        <i data-lucide="bell"></i>
+                        <span id="bad-d" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark d-none">0</span>
+                    </button>
+                    <button onclick="openCreate('task')" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill d-none d-md-block">+ NEW ENTRY</button>
+                    <button onclick="doLogout()" class="btn btn-sm text-secondary"><i data-lucide="log-out" size="18"></i></button>
                 </div>
-                <button onclick="doLogout()" class="btn btn-outline-danger btn-sm w-100">Disconnect</button>
             </div>
-        </nav>
+        </div>
 
-        <main class="main-content">
-            <div class="desktop-only d-flex justify-content-between align-items-center mb-5">
-                <h2 id="d-tit" class="fw-bold m-0">Dashboard</h2>
-                <div class="d-flex gap-3 align-items-center">
-                    <div id="silent-ind-d" class="silent-badge d-none">
-                        <i data-lucide="bell-off" size="12"></i> <span>SILENCED (67m)</span>
+        <div class="container-fluid" style="margin-top: 60px; padding-bottom: 80px;">
+            <div class="row">
+                <div class="col-md-3 col-lg-2 d-none d-md-block position-fixed h-100 bg-black border-end border-secondary border-opacity-25 pt-3">
+                    <div id="nav-d" class="d-flex flex-column gap-2"></div>
+                </div>
+
+                <div class="col-12 col-md-9 offset-md-3 col-lg-10 offset-lg-2 p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 id="d-tit" class="fw-bold m-0 text-uppercase tracking-wide">DASHBOARD</h4>
+                        <button onclick="openCreate('task')" class="btn btn-primary rounded-circle shadow d-md-none" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><i data-lucide="plus"></i></button>
                     </div>
                     
-                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 px-3 rounded-pill position-relative">
-                        <i data-lucide="bell" size="18" class="me-2"></i> Alerts
-                        <span id="bad-d" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
-                    </button>
-                    <button onclick="openCreate('task')" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg">New Entry</button>
+                    <div id="content-box" class="fade-in"></div>
                 </div>
             </div>
+        </div>
 
-            <div class="mobile-only mb-3">
-                <div id="silent-ind-m" class="silent-badge d-none w-100 justify-content-center">
-                    <i data-lucide="bell-off" size="12"></i> <span>STRICT SILENCE ACTIVE (67m)</span>
-                </div>
-            </div>
-
-            <div id="content-box"></div>
-        </main>
-
-        <nav class="mobile-nav mobile-only" id="nav-m"></nav>
+        <div class="d-md-none bottom-nav px-2">
+            <div id="nav-m" class="d-flex w-100 justify-content-between"></div>
+        </div>
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
-        <div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold">New Record</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
                 <div class="modal-body p-4">
-                    <div class="d-flex gap-2 mb-3 bg-dark p-1 rounded-3">
-                        <button onclick="setMode('task')" id="bm-task" class="btn flex-fill btn-sm fw-bold">Task</button>
-                        <button onclick="setMode('future')" id="bm-future" class="btn flex-fill btn-sm text-secondary">Not Yet</button>
-                        <button onclick="setMode('dec')" id="bm-dec" class="btn flex-fill btn-sm text-secondary">Decision</button>
+                    <div class="bg-dark p-1 rounded-3 d-flex mb-3">
+                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white fw-bold">TASK</button>
+                        <button onclick="setMode('future')" id="bm-future" class="flex-fill btn btn-sm text-secondary">PLAN</button>
+                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary">LOG</button>
                     </div>
-
-                    <input id="inp-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Title / Subject">
+                    
+                    <input type="text" id="inp-t" class="form-control bg-dark text-white border-secondary mb-2 fw-bold" placeholder="Subject / Title">
                     <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Details..."></textarea>
                     
                     <div id="sec-task">
-                        <label class="text-xs fw-bold text-secondary mb-2">DUE DATE</label>
+                        <label class="text-xs text-secondary fw-bold mb-1">DUE DATE</label>
                         <input type="date" id="inp-date" class="form-control bg-dark text-white border-secondary mb-3">
+                        
                         <div id="sec-assign">
-                            <label class="text-xs fw-bold text-secondary mb-2">ASSIGN TEAM</label>
-                            <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
+                            <label class="text-xs text-secondary fw-bold mb-1">ASSIGN TO</label>
+                            <div id="div-mems" class="d-flex flex-wrap gap-2 mb-3"></div>
                         </div>
                     </div>
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">Save Record</button>
+
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">SAVE RECORD</button>
                 </div>
             </div>
         </div>
@@ -292,15 +166,16 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="text-center mb-3">
-                        <p class="text-secondary small">Select where the intel was uploaded:</p>
+                        <p class="text-secondary small fw-bold">1. Click a Sector to Open Drive & Upload:</p>
                         <div class="row g-2 mb-3">
-                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="shield" class="text-warning mb-2"></i><div class="text-xs fw-bold">ADMIN</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="cpu" class="text-info mb-2"></i><div class="text-xs fw-bold">MACHINE</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="image" class="text-success mb-2"></i><div class="text-xs fw-bold">PICTURES</div></div></div>
-                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="presentation" class="text-danger mb-2"></i><div class="text-xs fw-bold">PROPOSALS</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="shield" class="text-warning mb-2"></i><div class="text-xs fw-bold">ADMIN DRIVE</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="cpu" class="text-info mb-2"></i><div class="text-xs fw-bold">MACHINE DRIVE</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="image" class="text-success mb-2"></i><div class="text-xs fw-bold">PICS DRIVE</div></div></div>
+                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="presentation" class="text-danger mb-2"></i><div class="text-xs fw-bold">PPT DRIVE</div></div></div>
                         </div>
                     </div>
-                    <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Add mission notes (optional)..."></textarea>
+                    <p class="text-secondary small fw-bold">2. Confirm Submission:</p>
+                    <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Any notes? (e.g., 'Uploaded the receipts')"></textarea>
                     <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-lg">CONFIRM UPLOAD</button>
                 </div>
             </div>
@@ -312,17 +187,13 @@
             <div class="modal-content card-box border-0">
                 <div class="modal-body p-4">
                     <h5 class="fw-bold mb-3">Add Event</h5>
-                    <input id="cal-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Event Name">
-                    <div class="row g-2 mb-3">
-                        <div class="col-6"><input type="date" id="cal-d" class="form-control bg-dark text-white border-secondary"></div>
-                        <div class="col-6">
-                            <select id="cal-y" class="form-select bg-dark text-white border-secondary">
-                                <option value="meeting">Meeting</option>
-                                <option value="deadline">Deadline</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold">Confirm</button>
+                    <input type="text" id="cal-t" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Event Name">
+                    <input type="date" id="cal-d" class="form-control bg-dark text-white border-secondary mb-2">
+                    <select id="cal-y" class="form-select bg-dark text-white border-secondary mb-3">
+                        <option value="meeting">Meeting (Blue)</option>
+                        <option value="deadline">Deadline (Orange)</option>
+                    </select>
+                    <button onclick="saveCal()" class="btn btn-primary w-100 rounded-pill">Save Event</button>
                 </div>
             </div>
         </div>
@@ -330,26 +201,25 @@
 
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25 bg-black">
-                    <h5 class="modal-title fw-bold">Alerts</h5>
+            <div class="modal-content card-box border-0" style="max-height:60vh">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 py-2">
+                    <h6 class="fw-bold m-0">Alerts</h6>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleSilence()">Silence 1h</button>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
-                    <div id="noti-list" class="list-group list-group-flush bg-transparent"></div>
+                    <div id="silent-ind-m" class="bg-danger text-white text-center text-xs py-1 d-none"></div>
+                    <div id="noti-list" class="list-group list-group-flush"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
-        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4">
-            <div class="d-flex">
-                <div class="toast-body d-flex gap-3 align-items-center">
-                    <i id="t-ico" data-lucide="check" class="text-success"></i>
-                    <div><strong id="t-tit" class="d-block text-white">System</strong><small id="t-msg" class="text-secondary">Action Completed</small></div>
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000">
+        <div id="sysToast" class="toast bg-dark text-white border-secondary" role="alert">
+            <div class="d-flex p-3 align-items-center">
+                <div class="me-3"><i id="t-ico" data-lucide="info"></i></div>
+                <div><strong id="t-tit" class="d-block">System</strong><small id="t-msg" class="text-secondary">Message</small></div>
             </div>
         </div>
     </div>
@@ -357,6 +227,7 @@
     <script>
         // --- 1. CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
+        // (Using the Key provided in previous prompts)
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
         
@@ -367,10 +238,33 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
+        // DRIVE LINKS MAP
+        const DRIVE_LINKS = {
+            'Admin': 'https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing',
+            'Machine': 'https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing',
+            'Pics': 'https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing',
+            'PPT': 'https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing'
+        };
+
         let STATE = { user: null, page: 'home', mode: 'task', subTab: 'live', lastNotiTime: 0, subCat: null, subTid: null, subTit: null };
         const MODALS = {};
 
-        // --- 2. SILENCE ENGINE (STRICT) ---
+        // --- 2. SILENCE ENGINE ---
+        function toggleSilence() {
+            const now = Date.now();
+            const currentMute = parseInt(localStorage.getItem('slbd_mute_until') || '0');
+            if(now < currentMute) {
+                // Unmute
+                localStorage.setItem('slbd_mute_until', '0');
+                toast('Sound', 'Audio Enabled', 'volume-2', 'text-success');
+            } else {
+                // Mute for 60 mins
+                localStorage.setItem('slbd_mute_until', (now + 3600000).toString());
+                toast('Silent Mode', 'Muted for 1h', 'volume-x', 'text-danger');
+            }
+            checkSilence();
+        }
+
         function checkSilence() {
             const now = Date.now();
             const muteUntil = parseInt(localStorage.getItem('slbd_mute_until') || '0');
@@ -378,34 +272,31 @@
             
             const indD = document.getElementById('silent-ind-d');
             const indM = document.getElementById('silent-ind-m');
-            if(isMuted) {
-                const minLeft = Math.ceil((muteUntil - now) / 60000);
-                indD.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>SILENCED (${minLeft}m)</span>`;
-                indD.classList.remove('d-none'); indD.classList.add('active');
-                if(indM) {
-                    indM.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>STRICT SILENCE (${minLeft}m)</span>`;
-                    indM.classList.remove('d-none'); indM.classList.add('active');
+            
+            if(indD) {
+                if(isMuted) {
+                    const minLeft = Math.ceil((muteUntil - now) / 60000);
+                    indD.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>SILENCED (${minLeft}m)</span>`;
+                    indD.classList.remove('d-none'); indD.classList.add('active');
+                    if(indM) {
+                        indM.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>SILENCE (${minLeft}m)</span>`;
+                        indM.classList.remove('d-none'); indM.classList.add('active');
+                    }
+                } else {
+                    indD.classList.add('d-none'); indD.classList.remove('active');
+                    if(indM) { indM.classList.add('d-none'); indM.classList.remove('active'); }
                 }
-            } else {
-                indD.classList.add('d-none'); indD.classList.remove('active');
-                if(indM) { indM.classList.add('d-none'); indM.classList.remove('active'); }
             }
             lucide.createIcons();
             return isMuted;
         }
 
         function triggerSound(type) {
-            const isMuted = checkSilence();
-            if(isMuted) { console.log('Silenced'); return; }
-
+            if(checkSilence()) return;
             if(type === 'boot') document.getElementById('sfx-boot').play().catch(()=>{});
             if(type === 'ping') {
                 document.getElementById('sfx-ping').play().catch(()=>{});
                 if(navigator.vibrate) navigator.vibrate([200,50,200]);
-                
-                const lockTime = Date.now() + (67 * 60 * 1000);
-                localStorage.setItem('slbd_mute_until', lockTime);
-                checkSilence(); 
             }
         }
 
@@ -419,9 +310,7 @@
 
         function bootSystem() {
             triggerSound('boot');
-            if (Notification.permission !== "granted") Notification.requestPermission();
             document.getElementById('view-boot').classList.add('d-none');
-            
             const uid = localStorage.getItem('slbd_uid');
             if(uid) login(TEAM.find(x => x.id == uid));
             else initAuth();
@@ -447,6 +336,7 @@
         function resetAuth() {
             document.getElementById('auth-pin').classList.add('d-none');
             document.getElementById('auth-list').classList.remove('d-none');
+            document.getElementById('inp-pin').value = '';
         }
 
         function tryLogin() {
@@ -476,10 +366,6 @@
             document.getElementById('nav-d').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary" style="transition:0.2s"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join('');
             document.getElementById('nav-m').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
 
-            const today = new Date().toISOString().split('T')[0];
-            const {data} = await sbClient.from('attendance').select('*').eq('user_id',u.id).eq('date',today);
-            if(!data || !data.length) await sbClient.from('attendance').insert({user_id:u.id, date:today});
-
             nav('home');
             setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
             checkNoti(false);
@@ -500,8 +386,6 @@
             render(false);
         }
 
-        function switchTab(t) { STATE.subTab = t; render(true); }
-
         async function render(silent) {
             const c = document.getElementById('content-box');
             if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
@@ -512,111 +396,53 @@
                     sbClient.from('calendar_events').select('*')
                 ]);
                 
-                const activeT = tasks ? tasks.filter(t => t.status !== 'Done' && t.status !== 'Planned') : [];
-                const futureT = tasks ? tasks.filter(t => t.status === 'Planned') : [];
+                const activeT = tasks ? tasks.filter(t => t.status !== 'Done') : [];
 
+                // --- PAGE: HOME ---
                 if(STATE.page === 'home') {
                     const quickLinks = `
                         <div class="row g-3 mb-4">
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="quick-link"><i data-lucide="shield" size="24" class="text-warning"></i><span class="text-xs fw-bold">ADMIN & FIN</span></a></div>
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="quick-link"><i data-lucide="cpu" size="24" class="text-info"></i><span class="text-xs fw-bold">MACHINE UNIT</span></a></div>
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="quick-link"><i data-lucide="image" size="24" class="text-success"></i><span class="text-xs fw-bold">PICTURES</span></a></div>
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="quick-link"><i data-lucide="presentation" size="24" class="text-danger"></i><span class="text-xs fw-bold">PROPOSALS & PPT</span></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="shield" size="24" class="text-warning mb-2"></i><div class="text-xs fw-bold text-white">ADMIN & FIN</div></div></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="cpu" size="24" class="text-info mb-2"></i><div class="text-xs fw-bold text-white">MACHINE UNIT</div></div></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="image" size="24" class="text-success mb-2"></i><div class="text-xs fw-bold text-white">PICTURES</div></div></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="presentation" size="24" class="text-danger mb-2"></i><div class="text-xs fw-bold text-white">PROPOSALS</div></div></a></div>
                         </div>`;
 
-                    const tabSwitch = `
-                        <div class="nav-tabs-custom">
-                            <div onclick="switchTab('live')" class="nav-tab-item ${STATE.subTab==='live'?'active':''}">LIVE OPS</div>
-                            <div onclick="switchTab('notyet')" class="nav-tab-item ${STATE.subTab==='notyet'?'active':''}">NOT YET</div>
-                        </div>`;
-
-                    let viewContent = '';
-
-                    if(STATE.subTab === 'notyet') {
-                        viewContent = futureT.length 
-                            ? `<div class="row g-3">${futureT.map(t => {
-                                const mems = (t.tagged_members||[]).map(id=>TEAM.find(x=>x.id===id)).filter(x=>x);
-                                const assignStr = mems.length ? `<div class="mt-2 text-xs text-secondary">Team: ${mems.map(m=>m.av).join(' ')}</div>` : '';
-                                return `<div class="col-12"><div class="card-box p-3 d-flex justify-content-between align-items-center"><div class="d-flex align-items-center gap-3"><div class="bg-secondary bg-opacity-25 p-2 rounded"><i data-lucide="clock" class="text-secondary"></i></div><div><div class="fw-bold">${t.task_title}</div><div class="text-xs text-secondary">${t.description}</div>${assignStr}</div></div><button onclick="setStatus(${t.id},'${STATE.user.role==='LEADER'?'Pending':'ApprovalReq'}',${t.creator_id},'${t.task_title}')" class="btn btn-sm btn-outline-primary rounded-pill">Activate</button></div></div>`
-                            }).join('')}</div>`
-                            : `<div class="text-center py-5 text-secondary card-box"><i data-lucide="coffee" size="32" class="mb-3 opacity-50"></i><p class="m-0 fw-bold">PLANNED / NOT YET</p><p class="small opacity-75">No future logs pending.</p></div>`;
+                    if(STATE.user.role === 'LEADER') {
+                        const rows = TEAM.map(u => {
+                            const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id) && t.status !== 'Done');
+                            if(!uts.length) return '';
+                            return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:20px">${u.av}</span> <span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
+                        }).join('');
+                        c.innerHTML = quickLinks + `<div class="card-box h-100"><div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill border-info">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">All quiet.</div>'}</div></div>`;
                     } else {
-                        if(STATE.user.role === 'LEADER') {
-                            const days = 7;
-                            const graphData = new Array(days).fill(0);
-                            const now = new Date();
-                            tasks.forEach(t => {
-                                if(t.status === 'Done') {
-                                    const diff = Math.floor((now - new Date(t.updated_at || t.created_at)) / (1000 * 60 * 60 * 24));
-                                    if(diff < days && diff >= 0) graphData[days - 1 - diff]++;
-                                }
-                            });
-
-                            const totalTasks = tasks.length;
-                            const approved = tasks.filter(t=>t.status==='Done').length;
-                            const pending = tasks.filter(t=>t.status==='Pending' || t.status==='Review').length;
-                            const searchApp = TEAM.length * 3 + approved; 
-
-                            const analyticsSection = `
-                                <div class="row g-3 mb-4">
-                                    <div class="col-lg-8">
-                                        <div class="card-box p-3 h-100">
-                                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                                <h6 class="fw-bold m-0 text-white"><i data-lucide="activity" size="16" class="text-primary me-2"></i> MOMENTUM (7d)</h6>
-                                                <span class="badge bg-primary bg-opacity-25 text-primary">+${Math.floor(Math.random()*20)}%</span>
-                                            </div>
-                                            <canvas id="momentumGraph"></canvas>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4">
-                                        <div class="card-box p-0 h-100 d-flex flex-column">
-                                            <div class="p-3 border-bottom border-secondary border-opacity-25 bg-dark">
-                                                <h6 class="fw-bold m-0 text-white">Impact Stats</h6>
-                                            </div>
-                                            <div class="p-3 flex-grow-1 d-flex flex-column justify-content-center">
-                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">COMPLETIONS</span> <span class="stat-value text-success">${approved}</span></div>
-                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">PENDING</span> <span class="stat-value text-warning">${pending}</span></div>
-                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">SEARCHES</span> <span class="stat-value text-info">${searchApp}</span></div>
-                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">TOTAL LOGS</span> <span class="stat-value text-white">${totalTasks}</span></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>`;
-
-                            const rows = TEAM.map(u => {
-                                const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
-                                if(!uts.length) return '';
-                                return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:20px">${u.av}</span> <span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
-                            }).join('');
-
-                            viewContent = analyticsSection + `<div class="card-box h-100"><div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill border-info">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">All quiet.</div>'}</div></div>`;
-
-                            setTimeout(() => drawMomentumGraph('momentumGraph', graphData), 100);
-
-                        } else {
-                            const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                            viewContent = `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4">My Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
-                        }
+                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id) && t.status !== 'Done');
+                        c.innerHTML = quickLinks + `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4">My Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
                     }
-                    c.innerHTML = quickLinks + tabSwitch + viewContent;
                 }
 
+                // --- PAGE: TASK ---
                 if(STATE.page === 'task') {
-                    if(!activeT.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
-                    else c.innerHTML = `<div class="row g-3">${activeT.map(t => {
+                    const visibleTasks = activeT; 
+                    if(!visibleTasks.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
+                    else c.innerHTML = `<div class="row g-3">${visibleTasks.map(t => {
                         let btn = '';
                         const mems = (t.tagged_members||[]).map(id => TEAM.find(x=>x.id===id)).filter(x=>x);
+                        
                         const assignedHtml = mems.length 
                             ? `<div class="mt-3 pt-3 border-top border-secondary border-opacity-25"><div class="text-xs text-secondary fw-bold mb-1">ASSIGNED TEAM</div><div class="d-flex gap-1">${mems.map(m=>`<div class="bg-dark border border-secondary border-opacity-50 px-2 py-1 rounded text-sm" title="${m.name}">${m.av}</div>`).join('')}</div></div>` 
                             : `<div class="mt-3 pt-3 border-top border-secondary border-opacity-25"><div class="text-xs text-secondary fw-bold mb-1">ASSIGNED TEAM</div><div class="text-xs text-secondary fst-italic">Unassigned</div></div>`;
 
-                        if(STATE.user.role==='LEADER') {
-                            if(t.status==='ApprovalReq') btn=`<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold text-black">Approve</button>`;
-                            else if(t.status==='Review') btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finalize</button>`;
+                        if(STATE.user.role === 'LEADER') {
+                            if(t.status === 'ApprovalReq') btn=`<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold text-black">Approve Task</button>`;
+                            else if(t.status === 'Review') btn=`<div class="d-flex gap-2 mt-3"><button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-danger btn-sm flex-fill">Reject</button><button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success btn-sm flex-fill fw-bold">Finalize</button></div>`;
                             else btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
-                        } else if(t.status==='Pending' || t.status==='Ongoing') {
-                            // MEMBER SUBMIT BUTTON triggers new modal
-                            btn=`<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit for Review</button>`;
+                        } else {
+                            if(t.status === 'Review') {
+                                btn = `<button disabled class="btn btn-dark w-100 btn-sm mt-3 text-secondary border border-secondary">Under Review</button>`;
+                            } else if (t.status !== 'Done') {
+                                btn = `<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3 shadow-sm fw-bold">Submit Work</button>`;
+                            }
                         }
                         
                         return `<div class="col-12 col-md-6 col-lg-4"><div class="card-box p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small text-secondary fw-bold">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-black" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${assignedHtml}${btn}</div></div>`;
@@ -651,52 +477,7 @@
             lucide.createIcons();
         }
 
-        // --- 6. GRAPHICS ENGINE ---
-        function drawMomentumGraph(id, data) {
-            const cvs = document.getElementById(id);
-            if(!cvs) return;
-            const ctx = cvs.getContext('2d');
-            const w = cvs.width = cvs.parentElement.offsetWidth;
-            const h = cvs.height = 180;
-            const max = Math.max(...data, 4);
-            const stepX = w / (data.length - 1);
-            
-            ctx.clearRect(0,0,w,h);
-            const grad = ctx.createLinearGradient(0,0,0,h);
-            grad.addColorStop(0, "rgba(59, 130, 246, 0.4)");
-            grad.addColorStop(1, "rgba(59, 130, 246, 0.0)");
-            
-            ctx.beginPath();
-            ctx.moveTo(0, h);
-            data.forEach((v,i) => ctx.lineTo(i * stepX, h - (v/max * (h-30)) - 10));
-            ctx.lineTo(w, h);
-            ctx.fillStyle = grad;
-            ctx.fill();
-
-            ctx.beginPath();
-            data.forEach((v,i) => {
-                const x = i * stepX;
-                const y = h - (v/max * (h-30)) - 10;
-                if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-            });
-            ctx.strokeStyle = '#3B82F6';
-            ctx.lineWidth = 3;
-            ctx.shadowColor = '#3B82F6';
-            ctx.shadowBlur = 10;
-            ctx.stroke();
-            ctx.shadowBlur = 0; 
-            
-            data.forEach((v,i) => {
-                const x = i * stepX;
-                const y = h - (v/max * (h-30)) - 10;
-                ctx.beginPath();
-                ctx.arc(x,y,4,0,Math.PI*2);
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fill();
-            });
-        }
-
-        // --- 7. INTERACTIONS ---
+        // --- 6. INTERACTIONS ---
         function setMode(m) { 
             STATE.mode = m; 
             ['task','future','dec'].forEach(k => {
@@ -725,7 +506,7 @@
             MODALS.modCreate.hide(); toast('Success','Record Saved','check-circle','text-success'); render(false); btn.innerText = 'Save Record';
         }
 
-        // NEW: SUBMISSION LOGIC
+        // --- SUBMISSION LOGIC ---
         function openSubmit(id, title) {
             STATE.subTid = id;
             STATE.subTit = title;
@@ -737,12 +518,16 @@
 
         function selSub(cat) {
             STATE.subCat = cat;
+            // 1. Highlight UI
             document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
             document.getElementById('sub-'+cat).classList.add('active');
+            
+            // 2. Open Drive Link
+            if(DRIVE_LINKS[cat]) window.open(DRIVE_LINKS[cat], '_blank');
         }
 
         async function confirmSubmit() {
-            if(!STATE.subCat) { toast('Error','Select Upload Sector','alert-circle','text-danger'); return; }
+            if(!STATE.subCat) { toast('Error','Please Click a Drive Sector first','alert-circle','text-danger'); return; }
             const note = document.getElementById('sub-note').value;
             const fullMsg = `Review: ${STATE.subTit} - Uploaded to ${STATE.subCat}${note ? ' ('+note+')' : ''}`;
             
@@ -759,7 +544,7 @@
         function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
         async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success'); render(false); }
         
-        // --- 8. NOTIFICATIONS & UTILS ---
+        // --- 7. NOTIFICATIONS & UTILS ---
         async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
         function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Team Pinged','radio','text-info'); }
         
@@ -773,7 +558,6 @@
                 const newestTime = new Date(data[0].created_at).getTime();
                 if(newestTime > STATE.lastNotiTime) {
                     triggerSound('ping'); 
-                    if(Notification.permission === "granted" && !checkSilence()) new Notification("SLBDMIS", {body: `${count} New Alerts`});
                 }
                 STATE.lastNotiTime = newestTime; 
             } else { bM.classList.add('d-none'); bD.classList.add('d-none'); }
@@ -792,5 +576,6 @@
             lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
