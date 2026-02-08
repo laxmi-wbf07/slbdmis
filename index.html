@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>SLBDMIS | Commander</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,98 +14,96 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === THEME === */
+        /* === THEME & BASICS === */
         :root { 
-            --bg-body: #0d1117; 
-            --bg-card: #161b22; 
-            --bg-subtle: #21262d;
-            --border: #30363d;
-            --primary: #2f81f7; 
-            --success: #238636;
-            --warning: #d29922;
-            --danger: #da3633;
-            --text-main: #f0f6fc;
-            --text-sub: #8b949e;
-            --sidebar-w: 260px;
+            --bg-body: #000000; 
+            --bg-card: #111111; 
+            --bg-subtle: #1c1c1e;
+            --border: #2c2c2e;
+            --primary: #0a84ff; 
+            --success: #30d158;
+            --warning: #ffd60a;
+            --danger: #ff453a;
+            --text-main: #f2f2f7;
+            --text-sub: #aeaeb2;
+            --sidebar-w: 280px;
         }
 
         body { 
             background-color: var(--bg-body); 
             color: var(--text-main); 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
             overflow-x: hidden;
-            padding-bottom: 90px; /* Space for mobile nav */
+            padding-bottom: 90px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* UTILS */
-        .glass { background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(10px); }
+        .glass { background: rgba(17, 17, 17, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .card-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .hover-bg:hover { background: var(--bg-subtle); cursor: pointer; }
-        .fw-bold { font-weight: 600 !important; }
-        .text-xs { font-size: 0.75rem; }
-
+        .btn-primary { background: var(--primary); border: none; }
+        .btn-outline-secondary { border-color: var(--border); color: var(--text-sub); }
+        
         /* CALENDAR */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .cal-day { 
-            min-height: 100px; background: var(--bg-subtle); 
-            border-radius: 6px; padding: 4px; border: 1px solid transparent;
+            min-height: 80px; background: var(--bg-subtle); 
+            border-radius: 8px; padding: 4px; border: 1px solid transparent;
         }
-        .cal-day:hover { border-color: var(--primary); }
         .cal-evt { 
-            font-size: 10px; padding: 2px 4px; border-radius: 4px; 
-            margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+            font-size: 9px; padding: 3px 6px; border-radius: 4px; font-weight: 600;
+            margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-        .cal-evt.meeting { background: rgba(47, 129, 247, 0.2); color: #58a6ff; border-left: 2px solid #58a6ff; }
-        .cal-evt.deadline { background: rgba(210, 153, 34, 0.2); color: #d29922; border-left: 2px solid #d29922; }
-        .cal-evt.suggested { border: 1px dashed var(--text-sub); opacity: 0.6; }
-
-        /* PROGRESS BAR */
-        input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: #30363d; border-radius: 5px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); cursor: pointer; transition: .2s; }
-        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); background: #fff; }
+        .cal-evt.meeting { background: rgba(10, 132, 255, 0.2); color: #64d2ff; }
+        .cal-evt.deadline { background: rgba(255, 214, 10, 0.2); color: #ffd60a; }
 
         /* AVATARS */
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-subtle); display: grid; place-items: center; font-size: 18px; border: 2px solid var(--bg-card); }
-        .avatar-sm { width: 24px; height: 24px; font-size: 12px; margin-right: -8px; border: 1px solid var(--bg-card); }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--bg-subtle); display: grid; place-items: center; font-size: 20px; border: 2px solid var(--bg-card); }
+        .avatar-sm { width: 26px; height: 26px; font-size: 14px; margin-right: -10px; border: 2px solid var(--bg-card); }
 
-        /* RESPONSIVE LAYOUT */
+        /* MOBILE OPTIMIZATIONS */
         @media (min-width: 992px) {
-            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: #010409; border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; z-index: 1000; }
+            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: #050505; border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; z-index: 1000; }
             .mobile-nav, .mobile-header { display: none !important; }
             body { padding-bottom: 0; }
-            .main-wrapper { margin-left: var(--sidebar-w); padding: 40px; max-width: 1400px; }
+            .main-wrapper { margin-left: var(--sidebar-w); padding: 40px; max-width: 1200px; }
         }
         @media (max-width: 991px) {
             .sidebar { display: none; }
-            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(13, 17, 23, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 10px; }
-            .main-wrapper { padding: 90px 20px 20px 20px; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 15px; }
+            .main-wrapper { padding: 80px 16px 20px 16px; }
+            h3 { font-size: 1.5rem; }
+            .card-box { border-radius: 12px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="view-auth" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex align-items-center justify-content-center p-4">
-        <div class="card-box p-4 w-100 border-secondary" style="max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+    <audio id="notisound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <div id="view-auth" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex align-items-center justify-content-center p-3">
+        <div class="card-box p-4 w-100" style="max-width: 400px; border: 1px solid #333;">
             <div class="text-center mb-5">
-                <i data-lucide="shield-check" size="48" class="text-primary mb-3"></i>
-                <h3 class="fw-bold text-white">SLBDMIS Commander</h3>
-                <p class="text-secondary small">Secure Team Portal</p>
+                <div class="bg-primary bg-opacity-10 d-inline-block p-3 rounded-circle mb-3">
+                    <i data-lucide="shield" size="32" class="text-primary"></i>
+                </div>
+                <h3 class="fw-bold text-white">SLBDMIS</h3>
+                <p class="text-secondary small">Command Center V5</p>
             </div>
-            <div id="auth-list" class="row g-3"></div>
+            <div id="auth-list" class="row g-2"></div>
             <div id="auth-pin" class="d-none">
                 <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded bg-dark border border-secondary border-opacity-25">
                     <div id="l-av" class="avatar fs-4"></div>
                     <div class="fw-bold text-white fs-5" id="l-name"></div>
                 </div>
-                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3" placeholder="ENTER PIN" maxlength="11" inputmode="numeric">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Authenticate</button>
-                <button onclick="location.reload()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
+                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3 py-3" placeholder="ENTER PIN" maxlength="11" inputmode="numeric">
+                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-6">Unlock System</button>
+                <button onclick="location.reload()" class="btn btn-link w-100 text-secondary mt-3 text-decoration-none">Change User</button>
             </div>
         </div>
     </div>
@@ -111,23 +111,30 @@
     <div id="view-app" class="d-none">
         
         <div class="mobile-header fixed-top glass border-bottom border-secondary border-opacity-25 px-3 py-3 d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-white" id="m-tit">Dashboard</span>
+            <div class="d-flex align-items-center gap-2">
+                <i data-lucide="layout-grid" class="text-primary" size="20"></i>
+                <span class="fw-bold text-white" id="m-tit">Dashboard</span>
+            </div>
             <div class="d-flex gap-2">
-                <button onclick="checkNoti(true)" class="btn btn-dark btn-sm border border-secondary border-opacity-25 position-relative">
-                    <i data-lucide="bell" size="18"></i>
-                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
+                <button onclick="checkNoti(true)" class="btn btn-dark btn-sm border border-secondary border-opacity-25 position-relative rounded-circle p-2">
+                    <i data-lucide="bell" size="20"></i>
+                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none border border-black"></span>
                 </button>
-                <button onclick="openCreate()" class="btn btn-primary btn-sm shadow"><i data-lucide="plus" size="18"></i></button>
+                <button onclick="openCreate()" class="btn btn-primary btn-sm rounded-circle p-2 shadow-lg"><i data-lucide="plus" size="20"></i></button>
             </div>
         </div>
 
         <nav class="sidebar">
             <div class="mb-5 d-flex align-items-center gap-3 text-primary px-2">
-                <div class="p-1 bg-primary bg-opacity-10 rounded"><i data-lucide="layout-grid" size="24"></i></div>
+                <div class="p-2 bg-primary bg-opacity-10 rounded-3"><i data-lucide="hexagon" size="24"></i></div>
                 <span class="fw-bold fs-5 text-white">SLBDMIS</span>
             </div>
             <div id="nav-d" class="d-flex flex-column gap-2 flex-grow-1"></div>
-            <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
+            
+            <div class="mt-auto border-top border-secondary border-opacity-25 pt-4">
+                <button onclick="enableMobileNoti()" id="btn-perm" class="btn btn-dark w-100 mb-3 text-xs d-flex align-items-center justify-content-center gap-2 border-secondary">
+                    <i data-lucide="bell-ring" size="14"></i> Enable Alerts
+                </button>
                 <div class="d-flex align-items-center gap-3 px-2 mb-3">
                     <div id="d-av" class="avatar"></div>
                     <div><div id="d-name" class="fw-bold text-white small"></div><div class="text-success text-xs">● Online</div></div>
@@ -140,11 +147,11 @@
             <div class="d-none d-lg-flex justify-content-between align-items-center mb-4">
                 <h3 id="d-tit" class="fw-bold m-0 text-white">Dashboard</h3>
                 <div class="d-flex gap-3">
-                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 position-relative px-3">
+                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 position-relative px-3 rounded-pill">
                         <i data-lucide="bell" size="20"></i>
                         <span id="bad-d" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
                     </button>
-                    <button onclick="openCreate()" class="btn btn-primary px-4 fw-bold shadow"><i data-lucide="plus" size="18" class="me-2"></i>New Item</button>
+                    <button onclick="openCreate()" class="btn btn-primary px-4 fw-bold shadow-lg rounded-pill"><i data-lucide="plus" size="18" class="me-2"></i>New Item</button>
                 </div>
             </div>
             
@@ -156,25 +163,28 @@
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content card-box border-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="fw-bold text-white">Create New</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold mb-3 text-white">Create New</h5>
-                    <div class="d-flex bg-dark p-1 rounded mb-3 border border-secondary border-opacity-25">
-                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white bg-secondary bg-opacity-25">Task</button>
-                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary">Decision</button>
+                    <div class="d-flex bg-dark p-1 rounded-3 mb-4 border border-secondary border-opacity-25">
+                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm py-2 text-white bg-secondary bg-opacity-25 rounded-2">Task</button>
+                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm py-2 text-secondary rounded-2">Decision</button>
                     </div>
-                    <input id="inp-t" class="form-control bg-black text-white border-secondary mb-3 p-3" placeholder="Title">
-                    <textarea id="inp-d" class="form-control bg-black text-white border-secondary mb-3 p-3" rows="3" placeholder="Details..."></textarea>
+                    <input id="inp-t" class="form-control bg-black text-white border-secondary mb-3 p-3 rounded-3" placeholder="Title">
+                    <textarea id="inp-d" class="form-control bg-black text-white border-secondary mb-3 p-3 rounded-3" rows="3" placeholder="Details..."></textarea>
                     
                     <div id="sec-task-opt">
-                        <label class="text-xs fw-bold text-secondary mb-1">DUE DATE</label>
-                        <input type="date" id="inp-date" class="form-control bg-black text-white border-secondary mb-3">
+                        <label class="text-xs fw-bold text-secondary mb-2">DUE DATE</label>
+                        <input type="date" id="inp-date" class="form-control bg-black text-white border-secondary mb-4 p-3 rounded-3">
                         <label class="text-xs fw-bold text-secondary mb-2">ASSIGN TO</label>
                         <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
                     </div>
 
-                    <button onclick="saveItem()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">Create Record</button>
+                    <button onclick="saveItem()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Create Record</button>
                 </div>
             </div>
         </div>
@@ -184,23 +194,22 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold mb-3 text-white">Schedule</h5>
-                    <input id="cal-t" class="form-control bg-black text-white border-secondary mb-3" placeholder="Meeting / Deadline Title">
+                    <h5 class="fw-bold mb-3 text-white">Schedule Event</h5>
+                    <input id="cal-t" class="form-control bg-black text-white border-secondary mb-3 p-3" placeholder="Title">
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="text-xs text-secondary">DATE</label>
-                            <input type="date" id="cal-d" class="form-control bg-black text-white border-secondary">
+                            <input type="date" id="cal-d" class="form-control bg-black text-white border-secondary p-2">
                         </div>
                         <div class="col-6">
                             <label class="text-xs text-secondary">TYPE</label>
-                            <select id="cal-y" class="form-select bg-black text-white border-secondary">
+                            <select id="cal-y" class="form-select bg-black text-white border-secondary p-2">
                                 <option value="meeting">Meeting</option>
                                 <option value="deadline">Major Deadline</option>
                             </select>
                         </div>
                     </div>
-                    <p class="text-xs text-secondary fst-italic border-top border-secondary border-opacity-25 pt-2">* Leaders approve all schedule changes.</p>
-                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold">Save Event</button>
+                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold py-3">Save to Calendar</button>
                 </div>
             </div>
         </div>
@@ -210,8 +219,11 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold text-white">Notifications</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold text-white">Alerts</h5>
+                    <div class="d-flex gap-2">
+                        <button onclick="enableMobileNoti()" class="btn btn-sm btn-outline-warning text-xs">Unmute</button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
                 <div class="modal-body p-0">
                     <div id="noti-list" class="list-group list-group-flush bg-transparent"></div>
@@ -221,10 +233,10 @@
     </div>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1100;">
-        <div id="sysToast" class="toast align-items-center text-bg-dark border-0 shadow-lg">
+        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4" style="backdrop-filter: blur(10px);">
             <div class="d-flex">
                 <div class="toast-body d-flex gap-3 align-items-center">
-                    <i id="t-ico" data-lucide="check" class="text-success"></i>
+                    <div id="t-ico-box" class="p-2 rounded-circle bg-success bg-opacity-25"><i id="t-ico" data-lucide="check" class="text-success" size="18"></i></div>
                     <div><strong id="t-tit" class="d-block text-white"></strong><small id="t-msg" class="text-secondary"></small></div>
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -233,12 +245,11 @@
     </div>
 
     <script>
-        // --- SUPABASE CONFIG ---
+        // --- CONFIG ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
 
-        // --- TEAM DATA ---
         const TEAM = [
             { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel",    av: "👨‍💻", pin: "11302003634", role: "MEMBER" },
@@ -246,29 +257,25 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task' };
+        let STATE = { user: null, page: 'home', mode: 'task', audioReady: false };
         const MODALS = {};
+        const AUDIO = document.getElementById('notisound');
 
-        // --- INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
-            // Init Modals
             ['modCreate','modCal','modNoti'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
-            
-            // Check Login
             const uid = localStorage.getItem('slbd_uid');
             if(uid) login(TEAM.find(x => x.id == uid));
             else initAuth();
         };
 
-        // --- AUTHENTICATION ---
+        // --- AUTH ---
         function initAuth() {
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center hover-bg h-100 d-flex flex-column align-items-center justify-content-center">
-                    <div class="fs-1 mb-2">${u.av}</div><div class="fw-bold text-white small">${u.name.split(' ')[0]}</div>
+                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-4 text-center hover-bg h-100 d-flex flex-column align-items-center justify-content-center">
+                    <div class="display-6 mb-2">${u.av}</div><div class="fw-bold text-white small text-uppercase">${u.name.split(' ')[0]}</div>
                 </div></div>`).join('');
         }
-
         function preLogin(id) {
             STATE.sel = TEAM.find(u=>u.id===id);
             document.getElementById('auth-list').classList.add('d-none');
@@ -276,16 +283,12 @@
             document.getElementById('l-av').innerText = STATE.sel.av;
             document.getElementById('l-name').innerText = STATE.sel.name;
         }
-
         function tryLogin() {
             if(document.getElementById('inp-pin').value === STATE.sel.pin) {
                 localStorage.setItem('slbd_uid', STATE.sel.id);
                 login(STATE.sel);
-            } else toast('Auth Failed', 'Incorrect PIN', 'shield-alert', 'text-danger');
+            } else toast('Locked', 'Access Denied', 'lock', 'text-danger', 'bg-danger');
         }
-
-        function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
-
         async function login(u) {
             STATE.user = u;
             document.getElementById('view-auth').classList.add('d-none');
@@ -293,19 +296,18 @@
             document.getElementById('d-av').innerText = u.av;
             document.getElementById('d-name').innerText = u.name;
             
-            // Setup Nav
             const pages = [
-                {id:'home', t:'Dashboard', i:'layout-grid'},
-                {id:'cal', t:'Calendar', i:'calendar'},
-                {id:'task', t:'Tasks', i:'layers'},
-                {id:'dec', t:'Decisions', i:'scroll-text'},
-                {id:'rec', t:'Archive', i:'archive'}
+                {id:'home', t:'Dash', i:'layout-grid'},
+                {id:'cal', t:'Plan', i:'calendar'},
+                {id:'task', t:'Task', i:'check-square'},
+                {id:'dec', t:'Decide', i:'file-signature'},
+                {id:'rec', t:'Files', i:'folder-archive'}
             ];
 
             const navHTML = (cls) => pages.map(p => `
-                <a href="#" onclick="nav('${p.id}')" id="${cls}-${p.id}" class="${cls==='nd'?'nav-item-d text-decoration-none p-3 rounded d-flex gap-3 text-secondary hover-bg transition':'d-flex flex-column align-items-center text-decoration-none text-secondary small'}">
+                <a href="#" onclick="nav('${p.id}')" id="${cls}-${p.id}" class="${cls==='nd'?'nav-item-d text-decoration-none p-3 rounded-3 d-flex gap-3 text-secondary hover-bg transition':'d-flex flex-column align-items-center text-decoration-none text-secondary small py-2 flex-fill'}">
                     <i data-lucide="${p.i}" size="${cls==='nd'?20:24}"></i>
-                    <span>${p.t}</span>
+                    <span style="font-size: ${cls==='nd'?'1rem':'0.7rem'}">${p.t}</span>
                 </a>
             `).join('');
 
@@ -313,20 +315,19 @@
             document.getElementById('nav-m').innerHTML = navHTML('nm');
             nav('home');
 
-            // Request Browser Notification Permission
-            if (Notification.permission !== "granted") Notification.requestPermission();
-
-            // Realtime Logic
-            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
-            checkNoti(false);
-            
-            // Auto-Attendance
+            // Auto Attendance
             const today = new Date().toISOString().split('T')[0];
             const { data } = await sbClient.from('attendance').select('*').eq('user_id', u.id).eq('date', today);
             if(!data.length) await sbClient.from('attendance').insert({user_id: u.id, date: today});
+
+            // Start Realtime Polling (Simulated Push)
+            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 4000);
+            checkNoti(false);
         }
 
-        // --- NAVIGATION ---
+        function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
+
+        // --- CORE FEATURES ---
         function nav(p) {
             STATE.page = p;
             document.querySelectorAll('.text-white.bg-subtle').forEach(e => e.classList.remove('text-white','bg-subtle'));
@@ -338,296 +339,249 @@
             if(nm) nm.classList.add('text-primary');
 
             document.getElementById('m-tit').innerText = document.getElementById('d-tit').innerText = 
-                p==='home'?'Command Center': p==='cal'?'Team Calendar': p==='task'?'Active Tasks': p==='rec'?'Archives':'Decisions';
+                p==='home'?'Command Center': p==='cal'?'Team Schedule': p==='task'?'Missions': p==='rec'?'Archives':'Decisions';
             render(false);
         }
 
-        // --- RENDER ENGINE ---
         async function render(silent) {
             const c = document.getElementById('content-box');
             if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
             
             try {
-                // Fetch Data
                 const [ {data:tasks}, {data:evts} ] = await Promise.all([
                     sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
                     sbClient.from('calendar_events').select('*')
                 ]);
-
                 const activeT = tasks.filter(t => t.status !== 'Done');
-                
-                // === HOME ===
+
+                // DASHBOARD
                 if(STATE.page === 'home') {
-                    // Leader View
                     if(STATE.user.role === 'LEADER') {
-                        const progHTML = TEAM.map(u => {
-                            const uTasks = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
-                            if(uTasks.length === 0) return '';
+                        // LEADER VIEW
+                        const rows = TEAM.map(u => {
+                            const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
+                            if(!uts.length) return '';
                             return `
                                 <div class="p-3 border-bottom border-secondary border-opacity-25">
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <span class="avatar avatar-sm">${u.av}</span><span class="fw-bold text-white small">${u.name}</span>
                                     </div>
-                                    ${uTasks.map(t => `
+                                    ${uts.map(t => `
                                         <div class="mb-2">
                                             <div class="d-flex justify-content-between text-xs mb-1">
                                                 <span class="text-truncate" style="max-width:150px">${t.task_title}</span>
-                                                <span class="${t.progress<100?'text-warning':'text-success'}">${t.progress||0}%</span>
+                                                <span class="${t.progress<100?'text-warning':'text-success'}">${t.progress}%</span>
                                             </div>
-                                            <div class="progress" style="height:4px; background:#21262d;"><div class="progress-bar bg-${t.progress<50?'danger':t.progress<90?'warning':'success'}" style="width:${t.progress||0}%"></div></div>
+                                            <div class="progress bg-dark" style="height:4px;"><div class="progress-bar bg-${t.progress<90?'warning':'success'}" style="width:${t.progress}%"></div></div>
                                         </div>
                                     `).join('')}
-                                </div>
-                            `;
+                                </div>`;
                         }).join('');
 
                         c.innerHTML = `
-                        <div class="row g-3">
-                            <div class="col-12 col-lg-8">
-                                <div class="card-box h-100">
-                                    <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                                        <h6 class="fw-bold m-0 text-white">Live Operations</h6>
-                                        <button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 text-xs">🔔 Ping Update</button>
-                                    </div>
-                                    <div style="max-height:400px; overflow-y:auto;">${progHTML || '<div class="p-4 text-center text-secondary">No ongoing operations.</div>'}</div>
+                            <div class="card-box mb-3">
+                                <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold m-0 text-white">Live Operations</h6>
+                                    <button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill">📢 Ping All</button>
                                 </div>
+                                <div style="max-height:400px; overflow-y:auto;">${rows || '<div class="p-4 text-center text-secondary small">No active operations.</div>'}</div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="card-box p-3 mb-3">
-                                    <h6 class="text-secondary text-xs fw-bold">QUICK LINKS</h6>
-                                    <div class="d-grid gap-2">
-                                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="folder" class="text-warning me-2" size="14"></i>Admin & Finance</a>
-                                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="cpu" class="text-info me-2" size="14"></i>Machine Unit</a>
-                                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="image" class="text-danger me-2" size="14"></i>Pictures</a>
-                                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="file-text" class="text-primary me-2" size="14"></i>Proposals</a>
-                                    </div>
+                            <div class="card-box p-3">
+                                <h6 class="text-secondary text-xs fw-bold mb-2">DRIVE LINKS</h6>
+                                <div class="d-grid gap-2">
+                                    <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary py-2"><i data-lucide="folder" class="text-warning me-2" size="14"></i>Admin & Finance</a>
+                                    <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary py-2"><i data-lucide="cpu" class="text-info me-2" size="14"></i>Machine Unit</a>
                                 </div>
-                                <div class="card-box p-3 text-center">
-                                    <div class="display-6 fw-bold text-white">${activeT.length}</div>
-                                    <div class="text-secondary text-xs">ACTIVE TASKS</div>
-                                </div>
-                            </div>
-                        </div>`;
-                    } else {
-                        // Member View
-                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                        c.innerHTML = `
-                        <div class="row g-3">
-                             <div class="col-12">
-                                <div class="card-box p-4">
-                                    <h5 class="fw-bold text-white mb-3">My Workspace</h5>
-                                    ${myT.length === 0 ? '<p class="text-secondary">You have no active assignments.</p>' : myT.map(t => `
-                                        <div class="bg-black p-3 rounded mb-3 border border-secondary border-opacity-25">
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <span class="fw-bold text-white">${t.task_title}</span>
-                                                <span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span>
-                                            </div>
-                                            <label class="text-xs text-secondary">Update Progress: ${t.progress}%</label>
-                                            <input type="range" class="mt-1" value="${t.progress}" onchange="updateProg(${t.id}, this.value, '${t.task_title}')">
-                                        </div>
-                                    `).join('')}
-                                </div>
-                             </div>
-                        </div>`;
-                    }
-                }
-
-                // === CALENDAR ===
-                if(STATE.page === 'cal') {
-                    const today = new Date();
-                    const year = today.getFullYear();
-                    const month = today.getMonth();
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-                    const firstDay = new Date(year, month, 1).getDay();
-                    
-                    let grid = '';
-                    for(let i=0; i<firstDay; i++) grid += `<div></div>`;
-                    for(let d=1; d<=daysInMonth; d++) {
-                        const str = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                        const dayEvts = evts.filter(e => e.date === str);
-                        grid += `
-                            <div class="cal-day" onclick="openCal('${str}')">
-                                <div class="text-end text-secondary text-xs mb-1">${d}</div>
-                                ${dayEvts.map(e => `<div class="cal-evt ${e.type} ${e.status}">${e.status==='suggested'?'? ':''}${e.title}</div>`).join('')}
                             </div>
                         `;
-                    }
-
-                    const suggs = evts.filter(e => e.status === 'suggested');
-                    const approvalBox = (STATE.user.role === 'LEADER' && suggs.length > 0) ? `
-                        <div class="alert alert-dark border-warning d-flex align-items-center gap-3 mb-3">
-                            <i data-lucide="alert-circle" class="text-warning"></i>
-                            <div class="flex-grow-1">
-                                <strong class="text-warning">Pending Approvals</strong>
-                                ${suggs.map(e => `<div class="d-flex justify-content-between mt-1 text-white small"><span>${e.date}: ${e.title}</span><div><button onclick="calApprove(${e.id},true)" class="btn btn-sm btn-success py-0 px-2 me-1">✓</button><button onclick="calApprove(${e.id},false)" class="btn btn-sm btn-danger py-0 px-2">✗</button></div></div>`).join('')}
+                    } else {
+                        // MEMBER VIEW
+                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
+                        c.innerHTML = `
+                            <div class="card-box p-4 mb-3">
+                                <h5 class="fw-bold text-white mb-3">My Workspace</h5>
+                                ${myT.length ? myT.map(t => `
+                                    <div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="fw-bold text-white">${t.task_title}</span>
+                                            <span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updateProg(${t.id},this.value,'${t.task_title}')">
+                                            <span class="text-white small fw-bold" style="width:30px">${t.progress}%</span>
+                                        </div>
+                                    </div>
+                                `).join('') : '<p class="text-secondary small">No active assignments.</p>'}
                             </div>
-                        </div>` : '';
-
-                    c.innerHTML = `
-                        ${approvalBox}
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="fw-bold text-white m-0">${today.toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
-                            <button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm"><i data-lucide="plus" size="16"></i> Add Event</button>
-                        </div>
-                        <div class="cal-grid text-white">
-                            ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(x=>`<div class="text-center text-secondary small py-2">${x}</div>`).join('')}
-                            ${grid}
-                        </div>
-                    `;
+                            <button onclick="enableMobileNoti()" class="btn btn-dark w-100 py-3 rounded-pill border-secondary mb-3"><i data-lucide="bell" class="me-2"></i>Test Notification Sound</button>
+                        `;
+                    }
                 }
 
-                // === TASKS ===
+                // TASKS
                 if(STATE.page === 'task') {
-                    if(activeT.length === 0) {
-                        c.innerHTML = '<div class="text-center text-secondary py-5">No active tasks.</div>';
-                    } else {
+                    if(!activeT.length) c.innerHTML = '<div class="text-center text-secondary py-5">No active tasks.</div>';
+                    else {
                         c.innerHTML = `<div class="row g-3">${activeT.map(t => {
-                            const assignees = (t.tagged_members||[]).map(mid => `<span class="avatar avatar-sm">${TEAM.find(x=>x.id==mid)?.av}</span>`).join('');
+                            const mems = (t.tagged_members||[]).map(id=>`<span class="avatar avatar-sm">${TEAM.find(u=>u.id==id)?.av||'?'}</span>`).join('');
                             let btn = '';
                             if(STATE.user.role === 'LEADER') {
-                                if(t.status==='ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-warning w-100 btn-sm mt-3">Approve Assignment</button>`;
-                                else if(t.status==='Review') btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3">Approve Completion</button>`;
-                                else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Mark Done</button>`;
-                            } else {
-                                if(t.status==='Pending' || t.status==='Ongoing') btn = `<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit for Review</button>`;
+                                if(t.status === 'ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 text-black fw-bold">Approve</button>`;
+                                else if(t.status === 'Review') btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finish</button>`;
+                                else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-dark border-secondary w-100 btn-sm mt-3">Mark Done</button>`;
+                            } else if(t.status==='Pending' || t.status==='Ongoing') {
+                                btn = `<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit Review</button>`;
                             }
                             return `
-                            <div class="col-12 col-md-6 col-lg-4">
-                                <div class="card-box p-3 h-100 d-flex flex-column">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="badge bg-secondary bg-opacity-10 text-${t.status==='ApprovalReq'?'warning':'info'}">${t.status}</span>
-                                        <div class="d-flex ps-2">${assignees}</div>
+                                <div class="col-12 col-md-6">
+                                    <div class="card-box p-3 h-100 d-flex flex-column">
+                                        <div class="d-flex justify-content-between mb-2"><span class="badge bg-secondary bg-opacity-10 text-white border border-secondary border-opacity-25">${t.status}</span><div class="d-flex ps-2">${mems}</div></div>
+                                        <h6 class="fw-bold text-white">${t.task_title}</h6>
+                                        <p class="small text-secondary flex-grow-1 mb-2 text-truncate">${t.description}</p>
+                                        <div class="progress" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>
+                                        ${btn}
                                     </div>
-                                    <h5 class="fw-bold text-white">${t.task_title}</h5>
-                                    <p class="small text-secondary flex-grow-1">${t.description}</p>
-                                    <div class="mt-2">
-                                        <div class="d-flex justify-content-between text-xs text-secondary mb-1"><span>Progress</span><span>${t.progress}%</span></div>
-                                        <div class="progress" style="height:4px;"><div class="progress-bar" style="width:${t.progress}%"></div></div>
-                                    </div>
-                                    ${btn}
-                                </div>
-                            </div>`;
+                                </div>`;
                         }).join('')}</div>`;
                     }
                 }
 
-                // === RECORDS ===
-                if(STATE.page === 'rec') {
-                    const {data:doneT} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                    c.innerHTML = doneT.length ? `<div class="table-responsive card-box p-0"><table class="table table-dark table-hover mb-0"><thead><tr><th class="p-3">Task</th><th class="p-3">Completed</th></tr></thead><tbody>${doneT.map(t=>`<tr><td class="p-3"><div>${t.task_title}</div></td><td class="p-3 text-secondary small">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>` : '<div class="text-center py-5 text-secondary">No archives found.</div>';
+                // CALENDAR
+                if(STATE.page === 'cal') {
+                    const today = new Date();
+                    const dim = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
+                    const off = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                    let cells = '';
+                    for(let i=0;i<off;i++) cells+=`<div></div>`;
+                    for(let d=1;d<=dim;d++) {
+                        const str = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                        const es = evts.filter(e=>e.date===str);
+                        cells+=`<div class="cal-day" onclick="openCal('${str}')"><div class="text-end text-secondary text-xs mb-1">${d}</div>${es.map(e=>`<div class="cal-evt ${e.type}">${e.status==='suggested'?'?':''} ${e.title}</div>`).join('')}</div>`;
+                    }
+                    // Approval Box
+                    const suggs = evts.filter(e=>e.status==='suggested');
+                    const appBox = (STATE.user.role==='LEADER' && suggs.length) ? `
+                        <div class="alert alert-dark border-warning mb-3">
+                            <strong class="text-warning text-xs">PENDING REQUESTS</strong>
+                            ${suggs.map(e=>`<div class="d-flex justify-content-between mt-2 small"><span>${e.date}: ${e.title}</span><div><button onclick="appCal(${e.id},1)" class="btn btn-sm btn-success py-0 px-2 me-1">✓</button><button onclick="appCal(${e.id},0)" class="btn btn-sm btn-danger py-0 px-2">✗</button></div></div>`).join('')}
+                        </div>`:'';
+                    
+                    c.innerHTML = `${appBox}<div class="d-flex justify-content-between mb-3 align-items-center"><h5 class="fw-bold text-white m-0">${today.toLocaleString('default',{month:'long'})}</h5><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3">Add Event</button></div>
+                    <div class="cal-grid text-white">${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="text-center text-secondary text-xs py-1">${d}</div>`).join('')}${cells}</div>`;
                 }
-                
-                // === DECISIONS ===
+
+                // DECISIONS & FILES
                 if(STATE.page === 'dec') {
-                    const {data:decs} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                    c.innerHTML = decs.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold text-white">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
+                    const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
+                    c.innerHTML = data.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold text-white">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
+                }
+                if(STATE.page === 'rec') {
+                    const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
+                    c.innerHTML = `<div class="card-box p-0 overflow-hidden"><table class="table table-dark mb-0"><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold text-white small">${t.task_title}</div><div class="text-secondary text-xs">${new Date(t.updated_at).toLocaleDateString()}</div></td></tr>`).join('')}</tbody></table></div>`;
                 }
 
             } catch(e) { console.error(e); }
             lucide.createIcons();
         }
 
-        // --- ACTIONS & NOTIFICATIONS ---
-        function setMode(m) {
-            STATE.mode = m;
-            document.getElementById('bm-task').className = m==='task'?'flex-fill btn btn-sm text-white bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary';
-            document.getElementById('bm-dec').className = m==='dec'?'flex-fill btn btn-sm text-white bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary';
-            document.getElementById('sec-task-opt').classList.toggle('d-none', m!=='task');
-            if(m==='task') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<label class="btn btn-dark border-secondary btn-sm d-flex align-items-center gap-2"><input type="checkbox" class="chk-mem form-check-input m-0" value="${u.id}"> ${u.av} ${u.name.split(' ')[0]}</label>`).join('');
-        }
+        // --- ACTIONS ---
+        function setMode(m) { STATE.mode = m; document.getElementById('bm-task').className=m==='task'?'flex-fill btn btn-sm py-2 text-white bg-secondary bg-opacity-25 rounded-2':'flex-fill btn btn-sm py-2 text-secondary rounded-2'; document.getElementById('bm-dec').className=m==='dec'?'flex-fill btn btn-sm py-2 text-white bg-secondary bg-opacity-25 rounded-2':'flex-fill btn btn-sm py-2 text-secondary rounded-2'; document.getElementById('sec-task-opt').classList.toggle('d-none',m!=='task'); if(m==='task') document.getElementById('div-mems').innerHTML=TEAM.map(u=>`<label class="btn btn-dark border-secondary btn-sm d-flex align-items-center gap-2"><input type="checkbox" class="chk-mem form-check-input m-0" value="${u.id}"> ${u.av}</label>`).join(''); }
         function openCreate() { setMode('task'); MODALS.modCreate.show(); }
-
+        
         async function saveItem() {
             const t = document.getElementById('inp-t').value;
             const d = document.getElementById('inp-d').value;
-            if(!t) return toast('Error','Title Missing','alert-circle','text-danger');
-            
-            if(STATE.mode === 'dec') {
-                await sbClient.from('decisions').insert({subject:t, details:d});
-                toast('Saved','Decision Logged','check','text-success');
-            } else {
+            if(!t) return toast('Error','Title Required','alert-circle','text-danger','bg-danger');
+            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t,details:d});
+            else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                const st = STATE.user.role === 'LEADER' ? 'Pending' : 'ApprovalReq';
-                await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:st, progress:0});
-                
-                // Notify Leader if Member created
-                if(STATE.user.role !== 'LEADER') sendNoti(1, `${STATE.user.name} requested approval for task: ${t}`);
-                else tags.forEach(uid => sendNoti(uid, `New task assigned: ${t}`));
-
-                toast('Success','Task Created','check','text-success');
+                const st = STATE.user.role==='LEADER'?'Pending':'ApprovalReq';
+                await sbClient.from('tasks').insert({task_title:t,description:d,due_date:document.getElementById('inp-date').value||null,creator_id:STATE.user.id,tagged_members:tags,status:st,progress:0});
+                if(STATE.user.role!=='LEADER') sendNoti(1, `${STATE.user.name} asks approval: ${t}`);
+                else tags.forEach(uid=>sendNoti(uid, `New Assignment: ${t}`));
             }
-            MODALS.modCreate.hide(); render(false);
+            MODALS.modCreate.hide(); toast('Saved','Record Created','check','text-success','bg-success'); render(false);
         }
 
-        async function setStatus(id, st, targetUid, title) {
-            await sbClient.from('tasks').update({status:st, updated_at:new Date()}).eq('id',id);
+        async function setStatus(id, st, tuid, tit) {
+            await sbClient.from('tasks').update({status:st,updated_at:new Date()}).eq('id',id);
             render(true);
-            
-            // Smart Notifications
-            if(st === 'Pending') sendNoti(targetUid, `Your task "${title}" is Approved & Active.`);
-            if(st === 'Review') sendNoti(1, `${STATE.user.name} finished "${title}". Review needed.`);
-            if(st === 'Done') sendNoti(targetUid, `Task "${title}" marked as Complete! Great job.`);
+            if(st==='Pending') sendNoti(tuid, `Task Approved: ${tit}`);
+            if(st==='Review') sendNoti(1, `${STATE.user.name} finished: ${tit}`);
+            if(st==='Done') sendNoti(tuid, `Task Complete: ${tit}`);
         }
+        async function updateProg(id,v,t) { await sbClient.from('tasks').update({progress:v}).eq('id',id); if(v==100) toast('Done','Ready for Review','star','text-warning','bg-warning'); }
 
-        async function updateProg(id, val, title) {
-            await sbClient.from('tasks').update({progress:val}).eq('id',id);
-            if(val == 100) toast('Great Job','100% Progress! Submit for review.','star','text-warning');
-        }
-
-        // --- CALENDAR LOGIC ---
-        function openCal(date) { document.getElementById('cal-d').value = date; MODALS.modCal.show(); }
+        // --- CALENDAR ---
+        function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
         async function saveCal() {
             const t = document.getElementById('cal-t').value;
             const d = document.getElementById('cal-d').value;
             const y = document.getElementById('cal-y').value;
-            const st = STATE.user.role === 'LEADER' ? 'confirmed' : 'suggested';
-            
-            await sbClient.from('calendar_events').insert({title:t, date:d, type:y, status:st, creator_id:STATE.user.id});
-            if(st === 'suggested') sendNoti(1, `${STATE.user.name} suggested event: ${t}`);
-            MODALS.modCal.hide(); toast('Saved', st==='confirmed'?'Event Added':'Suggestion Sent','calendar','text-success'); render(false);
+            const st = STATE.user.role==='LEADER'?'confirmed':'suggested';
+            await sbClient.from('calendar_events').insert({title:t,date:d,type:y,status:st,creator_id:STATE.user.id});
+            if(st==='suggested') sendNoti(1, `${STATE.user.name} suggests event: ${t}`);
+            MODALS.modCal.hide(); toast('Saved',st==='confirmed'?'Event Added':'Suggestion Sent','calendar','text-success','bg-success'); render(false);
         }
-        async function calApprove(id, isYes) {
-            if(isYes) await sbClient.from('calendar_events').update({status:'confirmed'}).eq('id',id);
-            else await sbClient.from('calendar_events').delete().eq('id',id);
-            render(true);
-        }
+        async function appCal(id,ok) { if(ok) await sbClient.from('calendar_events').update({status:'confirmed'}).eq('id',id); else await sbClient.from('calendar_events').delete().eq('id',id); render(true); }
 
-        // --- NOTIFICATION ENGINE ---
-        async function sendNoti(uid, msg) {
-            await sbClient.from('notifications').insert({user_id:uid, message:msg});
+        // --- NOTIFICATIONS & MOBILE FEATURES ---
+        async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid,message:msg}); }
+        function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "LEADER PING: UPDATE STATUS NOW"); }); toast('Pinged','Alert sent to team','send','text-info','bg-info'); }
+
+        // IMPORTANT: Mobile Notification Logic
+        function enableMobileNoti() {
+            STATE.audioReady = true;
+            AUDIO.play().then(() => { AUDIO.pause(); AUDIO.currentTime = 0; }).catch(e=>console.log(e)); // "Unlock" audio on mobile
+            if(Notification.permission !== "granted") Notification.requestPermission();
+            toast('Audio On', 'Notifications Active', 'volume-2', 'text-success', 'bg-success');
+            if(navigator.vibrate) navigator.vibrate(200);
         }
 
         async function checkNoti(open) {
             const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
-            const count = data ? data.length : 0;
-            document.getElementById('bad-m').classList.toggle('d-none', count===0);
-            document.getElementById('bad-d').classList.toggle('d-none', count===0);
-
-            // Browser Push
-            if(count > 0 && Notification.permission === "granted" && !open) {
-                new Notification("SLBDMIS Update", { body: `You have ${count} new notifications.` });
+            const count = data?.length || 0;
+            const badM = document.getElementById('bad-m');
+            const badD = document.getElementById('bad-d');
+            
+            if(count > 0 && (badM.classList.contains('d-none') || open===false)) {
+                // New Notification Detected!
+                if(STATE.audioReady) {
+                    try { AUDIO.play(); } catch(e){}
+                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                }
+                
+                // Push Notification (If supported/allowed)
+                if(Notification.permission === "granted" && !open) {
+                    new Notification("SLBDMIS Alert", { body: `You have ${count} new messages`, icon: 'https://cdn-icons-png.flaticon.com/512/3602/3602145.png' });
+                }
             }
 
+            badM.classList.toggle('d-none', count===0);
+            badM.innerText = count;
+            badD.classList.toggle('d-none', count===0);
+            badD.innerText = count;
+
             if(open) {
-                const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
-                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold text-white small">${n.message}</div><div class="text-xs text-secondary mt-1">${new Date(n.created_at).toLocaleString()}</div></div>`).join('') : '<div class="p-4 text-center text-secondary">No alerts.</div>';
-                await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
+                const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(15);
+                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `
+                    <div class="list-group-item bg-dark border-secondary border-opacity-25 p-3">
+                        <div class="fw-bold text-white small">${n.message}</div>
+                        <div class="text-xs text-secondary mt-1">${new Date(n.created_at).toLocaleString()}</div>
+                    </div>`).join('') : '<div class="p-5 text-center text-secondary">No alerts.</div>';
+                
+                if(count > 0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
                 MODALS.modNoti.show();
             }
         }
 
-        async function pingAll() {
-            // Leader feature: Pings all members
-            TEAM.forEach(u => {
-                if(u.role !== 'LEADER') sendNoti(u.id, "LEADER PING: Please update your task progress immediately.");
-            });
-            toast('Ping Sent','All members notified.','send','text-info');
-        }
-
-        function toast(t, m, i, c) {
+        function toast(t, m, i, c, bg) {
             document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
-            const ico = document.getElementById('t-ico'); ico.setAttribute('data-lucide', i); ico.className = c;
-            lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
+            document.getElementById('t-ico').setAttribute('data-lucide', i); 
+            document.getElementById('t-ico').className = c;
+            document.getElementById('t-ico-box').className = `p-2 rounded-circle bg-opacity-25 ${bg}`;
+            lucide.createIcons(); 
+            bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
         }
     </script>
 </body>
