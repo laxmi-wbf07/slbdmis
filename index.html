@@ -11,16 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --primary: #3b82f6;
-            --bg: #050505;
-            --card: #121212;
-            --text: #e5e5e5;
-            --accent: #f59e0b;
-        }
+        :root { --primary: #3b82f6; --bg: #050505; --card: #121212; --text: #e5e5e5; }
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* UI UTILITIES */
+        /* UTILS */
         .card-box { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
         .btn-primary { background: var(--primary); border: none; }
         .text-xs { font-size: 0.75rem; }
@@ -31,29 +25,20 @@
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-        /* SILENCE INDICATOR */
-        .silence-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #333; color: #888; display: flex; align-items: center; gap: 4px; }
-        .silence-badge.active { background: #dc3545; color: white; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.7;} 100% {opacity:1;} }
-
-        /* SUBMISSION ICONS */
+        /* UPLOAD ICONS */
         .sub-opt { border: 1px solid rgba(255,255,255,0.1); background: #000; transition: 0.2s; }
         .sub-opt:hover { background: #1a1a1a; border-color: var(--primary); transform: translateY(-2px); }
-        .sub-opt:active { transform: scale(0.98); }
-        .sub-opt.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .sub-opt.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
 
-        /* FULL SCREEN VIEWS */
+        /* SCREENS */
         #view-boot, #view-auth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* NAVIGATION */
-        .nav-link-custom { color: #666; transition: 0.2s; }
-        .nav-link-custom.active { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+        /* NAV */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid #222; padding: 10px 0; z-index: 1000; display: flex; justify-content: space-around; }
         
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        /* BADGE PULSE */
+        @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }
+        .silence-active { color: #dc3545; animation: pulse 2s infinite; }
     </style>
 </head>
 <body>
@@ -67,13 +52,13 @@
             <h1 class="fw-bold tracking-wider mb-2">TASK FORCE</h1>
             <p class="text-secondary small mb-5">SECURE COMMAND ENVIRONMENT</p>
             <button onclick="bootSystem()" class="btn btn-outline-primary px-5 rounded-pill fw-bold">INITIALIZE SYSTEM</button>
+            <div id="boot-err" class="text-danger mt-3 text-xs fw-bold"></div>
         </div>
     </div>
 
     <div id="view-auth" class="d-none">
         <div class="container text-center" style="max-width: 400px;">
             <div id="auth-list" class="row g-3 fade-in"></div>
-            
             <div id="auth-pin" class="d-none fade-in">
                 <div id="l-av" class="display-1 mb-3"></div>
                 <h3 id="l-name" class="fw-bold mb-4"></h3>
@@ -95,12 +80,12 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <div id="silent-ind-d" class="silence-badge d-none cursor-pointer" onclick="toggleSilence()"></div>
+                    <button onclick="toggleSilence()" id="btn-silence" class="btn btn-sm text-secondary"><i data-lucide="bell"></i></button>
                     <button onclick="checkNoti(true)" class="btn btn-icon position-relative text-secondary">
-                        <i data-lucide="bell"></i>
+                        <i data-lucide="inbox"></i>
                         <span id="bad-d" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark d-none">0</span>
                     </button>
-                    <button onclick="openCreate('task')" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill d-none d-md-block">+ NEW ENTRY</button>
+                    <button onclick="openCreate('task')" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill d-none d-md-block">+ NEW</button>
                     <button onclick="doLogout()" class="btn btn-sm text-secondary"><i data-lucide="log-out" size="18"></i></button>
                 </div>
             </div>
@@ -117,13 +102,13 @@
                         <h4 id="d-tit" class="fw-bold m-0 text-uppercase tracking-wide">DASHBOARD</h4>
                         <button onclick="openCreate('task')" class="btn btn-primary rounded-circle shadow d-md-none" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><i data-lucide="plus"></i></button>
                     </div>
-                    
                     <div id="content-box" class="fade-in"></div>
                 </div>
             </div>
         </div>
 
-        <div class="d-md-none bottom-nav px-2">
+        <div class="d-md-none bottom-nav px-2 position-relative">
+            <span id="bad-m" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none" style="margin-left: 20px; margin-top: 5px; z-index: 1002;">0</span>
             <div id="nav-m" class="d-flex w-100 justify-content-between"></div>
         </div>
     </div>
@@ -137,8 +122,7 @@
                         <button onclick="setMode('future')" id="bm-future" class="flex-fill btn btn-sm text-secondary">PLAN</button>
                         <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary">LOG</button>
                     </div>
-                    
-                    <input type="text" id="inp-t" class="form-control bg-dark text-white border-secondary mb-2 fw-bold" placeholder="Subject / Title">
+                    <input type="text" id="inp-t" class="form-control bg-dark text-white border-secondary mb-2 fw-bold" placeholder="Title">
                     <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Details..."></textarea>
                     
                     <div id="sec-task">
@@ -149,8 +133,7 @@
                             <div id="div-mems" class="d-flex flex-wrap gap-2 mb-3"></div>
                         </div>
                     </div>
-
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">SAVE RECORD</button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">SAVE</button>
                 </div>
             </div>
         </div>
@@ -160,24 +143,38 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold">Mission Debrief</h5>
+                    <h5 class="fw-bold">Upload Mission</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <div class="text-center mb-4">
-                        <p class="text-primary small fw-bold mb-3">1. TAP ICON TO UPLOAD FILES</p>
+                        <p class="text-primary small fw-bold mb-3">1. TAP ICON TO UPLOAD</p>
                         <div class="row g-3">
-                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="shield" class="text-warning mb-2" size="28"></i><div class="text-xs fw-bold">ADMIN / FINANCE</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="cpu" class="text-info mb-2" size="28"></i><div class="text-xs fw-bold">MACHINE UNIT</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="image" class="text-success mb-2" size="28"></i><div class="text-xs fw-bold">PICTURES</div></div></div>
-                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="presentation" class="text-danger mb-2" size="28"></i><div class="text-xs fw-bold">PROPOSALS / PPT</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="shield" class="text-warning mb-2" size="28"></i><div class="text-xs fw-bold">ADMIN</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="cpu" class="text-info mb-2" size="28"></i><div class="text-xs fw-bold">MACHINE</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="image" class="text-success mb-2" size="28"></i><div class="text-xs fw-bold">PICS</div></div></div>
+                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="presentation" class="text-danger mb-2" size="28"></i><div class="text-xs fw-bold">PPT</div></div></div>
                         </div>
                     </div>
                     <div class="border-top border-secondary border-opacity-25 pt-3">
                         <p class="text-secondary small fw-bold mb-2">2. Notify Leader</p>
-                        <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="2" placeholder="Optional note..."></textarea>
-                        <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-lg"><i data-lucide="send" size="18" class="me-2"></i> CONFIRM & NOTIFY</button>
+                        <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="2" placeholder="Note (Optional)"></textarea>
+                        <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3"><i data-lucide="send" size="18" class="me-2"></i> NOTIFY LEADER</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modNoti" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content card-box border-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h6 class="fw-bold m-0">Alerts</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="noti-list" class="list-group list-group-flush"></div>
                 </div>
             </div>
         </div>
@@ -191,26 +188,10 @@
                     <input type="text" id="cal-t" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Event Name">
                     <input type="date" id="cal-d" class="form-control bg-dark text-white border-secondary mb-2">
                     <select id="cal-y" class="form-select bg-dark text-white border-secondary mb-3">
-                        <option value="meeting">Meeting (Blue)</option>
-                        <option value="deadline">Deadline (Orange)</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="deadline">Deadline</option>
                     </select>
                     <button onclick="saveCal()" class="btn btn-primary w-100 rounded-pill">Save Event</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modNoti" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content card-box border-0" style="max-height:60vh">
-                <div class="modal-header border-bottom border-secondary border-opacity-25 py-2">
-                    <h6 class="fw-bold m-0">Alerts</h6>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleSilence()">Silence 1h</button>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div id="silent-ind-m" class="bg-danger text-white text-center text-xs py-1 d-none"></div>
-                    <div id="noti-list" class="list-group list-group-flush"></div>
                 </div>
             </div>
         </div>
@@ -226,361 +207,300 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION & DATABASE ---
-        const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
-        const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
-        
-        const TEAM = [
-            { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
-            { id: 2, name: "Jamphel",    av: "👨‍💻", pin: "11302003634", role: "MEMBER" },
-            { id: 3, name: "Laxmi",      av: "👨‍🔬", pin: "11103002151", role: "MEMBER" },
-            { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
-        ];
+    // 1. SAFE INIT
+    const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
+    let sbClient = null;
 
-        // DRIVE FOLDERS
-        const DRIVE_LINKS = {
-            'Admin': 'https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing',
-            'Machine': 'https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing',
-            'Pics': 'https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing',
-            'PPT': 'https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing'
-        };
+    const TEAM = [
+        { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
+        { id: 2, name: "Jamphel",    av: "👨‍💻", pin: "11302003634", role: "MEMBER" },
+        { id: 3, name: "Laxmi",      av: "👨‍🔬", pin: "11103002151", role: "MEMBER" },
+        { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
+    ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', subTab: 'live', lastNotiTime: 0, subCat: null, subTid: null, subTit: null };
-        const MODALS = {};
+    const DRIVE = {
+        'Admin': 'https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing',
+        'Machine': 'https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing',
+        'Pics': 'https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing',
+        'PPT': 'https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing'
+    };
 
-        // --- 2. SILENCE & AUDIO ENGINE ---
-        function toggleSilence() {
-            const now = Date.now();
-            const currentMute = parseInt(localStorage.getItem('slbd_mute_until') || '0');
-            if(now < currentMute) {
-                // Unmute
-                localStorage.setItem('slbd_mute_until', '0');
-                toast('Sound', 'Audio Enabled', 'volume-2', 'text-success');
-            } else {
-                // Mute for 60 mins
-                localStorage.setItem('slbd_mute_until', (now + 3600000).toString());
-                toast('Silent Mode', 'Muted for 1h', 'volume-x', 'text-danger');
-            }
-            checkSilence();
-        }
+    let STATE = { user: null, page: 'home', mode: 'task', lastNoti: 0, subCat: null, subTid: null };
+    const MODALS = {};
 
-        function checkSilence() {
-            const now = Date.now();
-            const muteUntil = parseInt(localStorage.getItem('slbd_mute_until') || '0');
-            const isMuted = now < muteUntil;
-            
-            const indD = document.getElementById('silent-ind-d');
-            const indM = document.getElementById('silent-ind-m');
-            
-            if(indD) {
-                if(isMuted) {
-                    const minLeft = Math.ceil((muteUntil - now) / 60000);
-                    indD.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>SILENCED (${minLeft}m)</span>`;
-                    indD.classList.remove('d-none'); indD.classList.add('active');
-                    if(indM) {
-                        indM.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>SILENCE (${minLeft}m)</span>`;
-                        indM.classList.remove('d-none'); indM.classList.add('active');
-                    }
-                } else {
-                    indD.classList.add('d-none'); indD.classList.remove('active');
-                    if(indM) { indM.classList.add('d-none'); indM.classList.remove('active'); }
-                }
-            }
+    window.onload = function() {
+        try {
             lucide.createIcons();
-            return isMuted;
-        }
-
-        function triggerSound(type) {
-            if(checkSilence()) return;
-            if(type === 'boot') document.getElementById('sfx-boot').play().catch(()=>{});
-            if(type === 'ping') {
-                document.getElementById('sfx-ping').play().catch(()=>{});
-                if(navigator.vibrate) navigator.vibrate([200,50,200]);
-            }
-        }
-
-        // --- 3. SYSTEM INITIALIZATION ---
-        window.onload = () => {
-            lucide.createIcons();
-            ['modCreate','modCal','modNoti','modSubmit'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
-            checkSilence();
-            document.getElementById('view-boot').classList.remove('d-none');
-        };
-
-        function bootSystem() {
-            triggerSound('boot');
-            document.getElementById('view-boot').classList.add('d-none');
-            const uid = localStorage.getItem('slbd_uid');
-            if(uid) login(TEAM.find(x => x.id == uid));
-            else initAuth();
-        }
-
-        // --- 4. AUTHENTICATION ---
-        function initAuth() {
-            document.getElementById('view-auth').classList.remove('d-none');
-            document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="col-6"><div onclick="preLogin(${u.id})" class="quick-link cursor-pointer">
-                    <div class="fs-1 mb-1">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
-                </div></div>`).join('');
-        }
-
-        function preLogin(id) {
-            STATE.sel = TEAM.find(u=>u.id===id);
-            document.getElementById('auth-list').classList.add('d-none');
-            document.getElementById('auth-pin').classList.remove('d-none');
-            document.getElementById('l-av').innerText = STATE.sel.av;
-            document.getElementById('l-name').innerText = STATE.sel.name;
-        }
-
-        function resetAuth() {
-            document.getElementById('auth-pin').classList.add('d-none');
-            document.getElementById('auth-list').classList.remove('d-none');
-            document.getElementById('inp-pin').value = '';
-        }
-
-        function tryLogin() {
-            if(document.getElementById('inp-pin').value === STATE.sel.pin) {
-                localStorage.setItem('slbd_uid', STATE.sel.id);
-                document.getElementById('view-auth').classList.add('d-none');
-                login(STATE.sel);
-            } else {
-                toast('Error', 'Invalid PIN', 'lock', 'text-danger');
-            }
-        }
-
-        async function login(u) {
-            STATE.user = u;
-            document.getElementById('view-app').classList.remove('d-none');
-            document.getElementById('d-av').innerText = u.av;
-            document.getElementById('d-name').innerText = u.name;
-            
-            // Generate Nav Items
-            const navs = [
-                {id:'home', t:'Dash', i:'layout-grid'},
-                {id:'cal', t:'Schedule', i:'calendar'},
-                {id:'task', t:'Tasks', i:'check-square'},
-                {id:'dec', t:'Decisions', i:'file-signature'},
-                {id:'rec', t:'Files', i:'folder'}
-            ];
-            
-            document.getElementById('nav-d').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary" style="transition:0.2s"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join('');
-            document.getElementById('nav-m').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
-
-            nav('home');
-            // Polling for updates
-            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
-            checkNoti(false);
-        }
-
-        function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
-
-        // --- 5. NAVIGATION & RENDER LOGIC ---
-        function nav(p) {
-            STATE.page = p;
-            document.querySelectorAll('[id^="nd-"]').forEach(e => e.classList.remove('bg-primary','bg-opacity-10','text-white'));
-            document.querySelectorAll('[id^="nm-"]').forEach(e => {e.classList.remove('text-primary','opacity-100'); e.classList.add('opacity-50');});
-            const nd = document.getElementById(`nd-${p}`); if(nd) { nd.classList.add('bg-primary','bg-opacity-10','text-white'); nd.classList.remove('text-secondary'); }
-            const nm = document.getElementById(`nm-${p}`); if(nm) { nm.classList.add('text-primary','opacity-100'); nm.classList.remove('opacity-50'); }
-            
-            const titles = {home:'Command Center', cal:'Schedule', task:'Mission Logs', dec:'Decisions', rec:'Archives'};
-            document.getElementById('m-tit').innerText = document.getElementById('d-tit').innerText = titles[p];
-            render(false);
-        }
-
-        async function render(silent) {
-            const c = document.getElementById('content-box');
-            if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-
-            try {
-                const [{data:tasks}, {data:evts}] = await Promise.all([
-                    sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
-                    sbClient.from('calendar_events').select('*')
-                ]);
-                
-                const activeT = tasks ? tasks.filter(t => t.status !== 'Done') : [];
-
-                // --- PAGE: HOME ---
-                if(STATE.page === 'home') {
-                    const quickLinks = `
-                        <div class="row g-3 mb-4">
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="shield" size="24" class="text-warning mb-2"></i><div class="text-xs fw-bold text-white">ADMIN & FIN</div></div></a></div>
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="cpu" size="24" class="text-info mb-2"></i><div class="text-xs fw-bold text-white">MACHINE UNIT</div></div></a></div>
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="image" size="24" class="text-success mb-2"></i><div class="text-xs fw-bold text-white">PICTURES</div></div></a></div>
-                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="quick-link text-decoration-none"><div class="card-box p-3 text-center h-100 hover-border-primary"><i data-lucide="presentation" size="24" class="text-danger mb-2"></i><div class="text-xs fw-bold text-white">PROPOSALS</div></div></a></div>
-                        </div>`;
-
-                    if(STATE.user.role === 'LEADER') {
-                        const rows = TEAM.map(u => {
-                            const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id) && t.status !== 'Done');
-                            if(!uts.length) return '';
-                            return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:20px">${u.av}</span> <span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
-                        }).join('');
-                        c.innerHTML = quickLinks + `<div class="card-box h-100"><div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill border-info">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">All quiet.</div>'}</div></div>`;
-                    } else {
-                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id) && t.status !== 'Done');
-                        c.innerHTML = quickLinks + `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4">My Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
-                    }
-                }
-
-                // --- PAGE: TASK ---
-                if(STATE.page === 'task') {
-                    const visibleTasks = activeT; 
-                    if(!visibleTasks.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
-                    else c.innerHTML = `<div class="row g-3">${visibleTasks.map(t => {
-                        let btn = '';
-                        const mems = (t.tagged_members||[]).map(id => TEAM.find(x=>x.id===id)).filter(x=>x);
-                        
-                        const assignedHtml = mems.length 
-                            ? `<div class="mt-3 pt-3 border-top border-secondary border-opacity-25"><div class="text-xs text-secondary fw-bold mb-1">ASSIGNED TEAM</div><div class="d-flex gap-1">${mems.map(m=>`<div class="bg-dark border border-secondary border-opacity-50 px-2 py-1 rounded text-sm" title="${m.name}">${m.av}</div>`).join('')}</div></div>` 
-                            : `<div class="mt-3 pt-3 border-top border-secondary border-opacity-25"><div class="text-xs text-secondary fw-bold mb-1">ASSIGNED TEAM</div><div class="text-xs text-secondary fst-italic">Unassigned</div></div>`;
-
-                        if(STATE.user.role === 'LEADER') {
-                            if(t.status === 'ApprovalReq') btn=`<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold text-black">Approve Task</button>`;
-                            else if(t.status === 'Review') btn=`<div class="d-flex gap-2 mt-3"><button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-danger btn-sm flex-fill">Reject</button><button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success btn-sm flex-fill fw-bold">Finalize</button></div>`;
-                            else btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
-                        } else {
-                            if(t.status === 'Review') {
-                                btn = `<button disabled class="btn btn-dark w-100 btn-sm mt-3 text-secondary border border-secondary">Under Review</button>`;
-                            } else if (t.status !== 'Done') {
-                                btn = `<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3 shadow-sm fw-bold">Submit Work</button>`;
-                            }
-                        }
-                        
-                        return `<div class="col-12 col-md-6 col-lg-4"><div class="card-box p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small text-secondary fw-bold">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-black" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${assignedHtml}${btn}</div></div>`;
-                    }).join('')}</div>`;
-                }
-
-                // --- PAGE: CALENDAR ---
-                if(STATE.page === 'cal') {
-                    const d = new Date();
-                    const dim = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
-                    let cells = '';
-                    for(let i=1;i<=dim;i++) {
-                        const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
-                        const es = evts ? evts.filter(e=>e.date===str) : [];
-                        cells += `<div onclick="openCal('${str}')" class="p-2 rounded border border-transparent hover-border-primary bg-dark text-white d-flex flex-column" style="min-height:80px; cursor:pointer; ${i===d.getDate()?'border-color:var(--primary); background:#111':''}"><span class="text-end text-xs opacity-50 fw-bold">${i}</span>${es.map(e=>`<div class="text-xs text-truncate px-1 rounded mt-1 fw-bold" style="background:${e.type==='meeting'?'rgba(59,130,246,0.2)':'rgba(245,158,11,0.2)'};color:${e.type==='meeting'?'#93C5FD':'#FCD34D'}">${e.title}</div>`).join('')}</div>`;
-                    }
-                    c.innerHTML = `<div class="d-flex justify-content-between mb-4 align-items-center"><h4 class="fw-bold m-0 text-uppercase">${d.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow">Add Event</button></div><div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px;">${['S','M','T','W','T','F','S'].map(x=>`<div class="text-center text-xs text-secondary py-2 fw-bold">${x}</div>`).join('')}${cells}</div>`;
-                }
-                
-                // --- PAGE: LOGS ---
-                if(STATE.page === 'dec') {
-                    const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                    c.innerHTML = data && data.length ? data.map(d=>`<div class="card-box p-4 mb-2"><div class="fw-bold text-white">${d.subject}</div><p class="text-secondary small m-0">${d.details}</p></div>`).join('') : '<div class="text-center text-secondary py-5">No logs.</div>';
-                }
-
-                // --- PAGE: ARCHIVES ---
-                if(STATE.page === 'rec') {
-                    const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                    c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark mb-0"><thead><tr><th class="p-3 text-secondary text-xs">TASK</th><th class="p-3 text-secondary text-xs text-end">DATE</th></tr></thead><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
-                }
-                
-                checkSilence();
-
-            } catch(e) { console.error(e); }
-            lucide.createIcons();
-        }
-
-        // --- 6. USER INTERACTIONS ---
-        function setMode(m) { 
-            STATE.mode = m; 
-            ['task','future','dec'].forEach(k => {
-                const el = document.getElementById('bm-'+k);
-                if(el) el.className = (k === m) ? 'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25' : 'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2';
+            sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+            ['modCreate','modCal','modNoti','modSubmit'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) MODALS[id] = new bootstrap.Modal(el);
             });
-            document.getElementById('sec-task').classList.toggle('d-none', m==='dec');
-            document.getElementById('sec-assign').classList.toggle('d-none', m!=='task');
-            if(m==='task') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join('');
-        }
-        function openCreate(m) { setMode(m); MODALS.modCreate.show(); }
-        
-        async function saveItem() {
-            const btn = document.getElementById('btn-save'); btn.innerText = 'Saving...';
-            const t = document.getElementById('inp-t').value; const d = document.getElementById('inp-d').value;
-            if(!t) { toast('Error','Title Required','alert-circle','text-danger'); btn.innerText='Save Record'; return; }
+            updateSilenceUI();
             
-            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:d});
-            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:d, status:'Planned', creator_id:STATE.user.id, progress:0});
+            // Auto Login if saved
+            const savedUid = localStorage.getItem('slbd_uid');
+            if(savedUid) {
+                // Skip boot screen if logged in
+                document.getElementById('view-boot').classList.add('d-none');
+                login(TEAM.find(x => x.id == savedUid));
+            }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('boot-err').innerText = "System Init Failed: " + e.message;
+        }
+    };
+
+    function bootSystem() {
+        try {
+            document.getElementById('sfx-boot').play().catch(e=>console.log("Audio blocked"));
+            document.getElementById('view-boot').classList.add('d-none');
+            initAuth();
+        } catch(e) { alert("Boot Error: " + e.message); }
+    }
+
+    // 2. AUTH
+    function initAuth() {
+        document.getElementById('view-auth').classList.remove('d-none');
+        document.getElementById('auth-list').innerHTML = TEAM.map(u => `
+            <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 cursor-pointer">
+                <div class="fs-1 mb-1">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
+            </div></div>`).join('');
+    }
+
+    function preLogin(id) {
+        STATE.sel = TEAM.find(u=>u.id===id);
+        document.getElementById('auth-list').classList.add('d-none');
+        document.getElementById('auth-pin').classList.remove('d-none');
+        document.getElementById('l-av').innerText = STATE.sel.av;
+        document.getElementById('l-name').innerText = STATE.sel.name;
+    }
+
+    function resetAuth() {
+        document.getElementById('auth-pin').classList.add('d-none');
+        document.getElementById('auth-list').classList.remove('d-none');
+        document.getElementById('inp-pin').value = '';
+    }
+
+    function tryLogin() {
+        if(document.getElementById('inp-pin').value === STATE.sel.pin) {
+            localStorage.setItem('slbd_uid', STATE.sel.id);
+            document.getElementById('view-auth').classList.add('d-none');
+            login(STATE.sel);
+        } else {
+            toast('Error', 'Invalid PIN', 'lock', 'text-danger');
+        }
+    }
+
+    function login(u) {
+        if(!u) return initAuth();
+        STATE.user = u;
+        document.getElementById('view-app').classList.remove('d-none');
+        document.getElementById('d-av').innerText = u.av;
+        document.getElementById('d-name').innerText = u.name;
+        
+        const navs = [
+            {id:'home', t:'Dash', i:'layout-grid'},
+            {id:'cal', t:'Schedule', i:'calendar'},
+            {id:'task', t:'Tasks', i:'check-square'},
+            {id:'dec', t:'Decisions', i:'file-signature'},
+            {id:'rec', t:'Files', i:'folder'}
+        ];
+        
+        document.getElementById('nav-d').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join('');
+        document.getElementById('nav-m').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
+        
+        nav('home');
+        setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
+        checkNoti(false);
+    }
+
+    function doLogout() {
+        localStorage.removeItem('slbd_uid');
+        location.reload();
+    }
+
+    // 3. NAVIGATION & RENDER
+    function nav(p) {
+        STATE.page = p;
+        document.querySelectorAll('[id^="nd-"]').forEach(e => e.classList.remove('bg-primary','bg-opacity-10','text-white'));
+        document.querySelectorAll('[id^="nm-"]').forEach(e => {e.classList.remove('text-primary','opacity-100'); e.classList.add('opacity-50');});
+        
+        const nd = document.getElementById(`nd-${p}`); if(nd) { nd.classList.add('bg-primary','bg-opacity-10','text-white'); nd.classList.remove('text-secondary'); }
+        const nm = document.getElementById(`nm-${p}`); if(nm) { nm.classList.add('text-primary','opacity-100'); nm.classList.remove('opacity-50'); }
+        
+        document.getElementById('d-tit').innerText = p === 'home' ? 'COMMAND CENTER' : p.toUpperCase();
+        render(false);
+    }
+
+    async function render(silent) {
+        const c = document.getElementById('content-box');
+        if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+
+        try {
+            const { data: tasks, error } = await sbClient.from('tasks').select('*').order('created_at',{ascending:false});
+            if(error) throw error;
+            
+            const activeT = tasks.filter(t => t.status !== 'Done');
+
+            if(STATE.page === 'home') {
+                const quick = `<div class="row g-3 mb-4">
+                    ${Object.keys(DRIVE).map(k=>`<div class="col-6 col-md-3"><a href="${DRIVE[k]}" target="_blank" class="text-decoration-none"><div class="card-box p-3 text-center"><i data-lucide="folder" class="mb-2 text-primary"></i><div class="text-white text-xs fw-bold">${k}</div></div></a></div>`).join('')}
+                </div>`;
+
+                if(STATE.user.role === 'LEADER') {
+                     c.innerHTML = quick + `<div class="card-box p-3"><h6 class="fw-bold mb-3 text-white">Team Status</h6>${TEAM.map(u => {
+                        const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
+                        return `<div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1"><small class="fw-bold">${u.name}</small></div>${uts.map(t=>`<div class="progress bg-dark mb-1" style="height:6px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div>`).join('') || '<div class="text-secondary text-xs">Idle</div>'}</div>`;
+                     }).join('')}</div><button onclick="pingAll()" class="btn btn-outline-info w-100 btn-sm mt-3">PING ALL</button>`;
+                } else {
+                    const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
+                    c.innerHTML = quick + `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-3">My Tasks</h5>${myT.map(t => `<div class="bg-black p-3 rounded mb-2"><div class="d-flex justify-content-between"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary">${t.status}</span></div><input type="range" class="form-range mt-2" value="${t.progress}" onchange="updProg(${t.id},this.value)"></div>`).join('') || '<div class="text-secondary">No active tasks.</div>'}</div>`;
+                }
+            }
+
+            if(STATE.page === 'task') {
+                c.innerHTML = `<div class="row g-3">${activeT.map(t => {
+                    let btn = '';
+                    if(STATE.user.role==='LEADER') {
+                        if(t.status==='ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-2 fw-bold text-dark">Approve</button>`;
+                        else if(t.status==='Review') btn = `<div class="d-flex gap-2 mt-2"><button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-danger btn-sm flex-fill">Reject</button><button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success btn-sm flex-fill">Finalize</button></div>`;
+                        else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-2">Mark Done</button>`;
+                    } else {
+                        if(t.status!=='Done' && t.status!=='Review') btn = `<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-2">Submit Work</button>`;
+                        else if(t.status==='Review') btn = `<div class="btn btn-dark w-100 btn-sm mt-2 text-secondary">In Review</div>`;
+                    }
+                    return `<div class="col-12 col-md-6"><div class="card-box p-3 h-100"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small fw-bold text-secondary">${t.progress}%</span></div><h5 class="fw-bold">${t.task_title}</h5><p class="small text-secondary text-truncate">${t.description}</p>${btn}</div></div>`;
+                }).join('')}</div>`;
+            }
+
+            if(STATE.page === 'cal') {
+                const {data:evts} = await sbClient.from('calendar_events').select('*');
+                c.innerHTML = `<button onclick="MODALS.modCal.show()" class="btn btn-primary w-100 mb-3">Add Event</button><div class="card-box p-3">${evts.map(e=>`<div class="d-flex justify-content-between mb-2 border-bottom border-secondary border-opacity-25 pb-2"><span class="fw-bold">${e.title}</span><span class="text-secondary small">${e.date}</span></div>`).join('')}</div>`;
+            }
+
+            if(STATE.page === 'dec') {
+                 const {data:decs} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
+                 c.innerHTML = decs.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
+            }
+            
+            if(STATE.page === 'rec') {
+                const {data:dones} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
+                c.innerHTML = `<div class="card-box"><table class="table table-dark mb-0"><tbody>${dones.map(t=>`<tr><td class="p-3 fw-bold">${t.task_title}</td><td class="p-3 text-end text-secondary small">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
+            }
+
+        } catch(e) { 
+            console.error(e);
+            if(!silent) c.innerHTML = `<div class="alert alert-danger">Connection Error: ${e.message}</div>`;
+        }
+        lucide.createIcons();
+    }
+
+    // 4. ACTIONS
+    function setMode(m) { 
+        STATE.mode = m; 
+        ['task','future','dec'].forEach(k => {
+            const el = document.getElementById('bm-'+k);
+            if(el) el.className = (k === m) ? 'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25' : 'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2';
+        });
+        document.getElementById('sec-task').classList.toggle('d-none', m==='dec');
+        if(m==='task') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join('');
+    }
+    function openCreate(m) { setMode(m); MODALS.modCreate.show(); }
+
+    async function saveItem() {
+        const btn = document.getElementById('btn-save'); btn.innerText = 'Saving...';
+        try {
+            const t = document.getElementById('inp-t').value;
+            if(!t) throw new Error("Title needed");
+            
+            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:document.getElementById('inp-d').value});
+            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:document.getElementById('inp-d').value, status:'Planned', creator_id:STATE.user.id, progress:0});
             else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
+                await sbClient.from('tasks').insert({task_title:t, description:document.getElementById('inp-d').value, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
                 tags.forEach(id => sendNoti(id, `New Task: ${t}`));
                 if(STATE.user.role!=='LEADER') sendNoti(1, `Approval Req: ${t}`);
             }
-            MODALS.modCreate.hide(); toast('Success','Record Saved','check-circle','text-success'); render(false); btn.innerText = 'Save Record';
-        }
+            MODALS.modCreate.hide(); toast('Saved','Done','check','text-success'); render(false);
+        } catch(e) { toast('Error',e.message,'alert-circle','text-danger'); }
+        btn.innerText = 'SAVE';
+    }
 
-        // --- SUBMISSION FLOW (THE FIX) ---
-        function openSubmit(id, title) {
-            STATE.subTid = id;
-            STATE.subTit = title;
-            STATE.subCat = null;
-            document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
-            document.getElementById('sub-note').value = '';
-            MODALS.modSubmit.show();
-        }
+    // SUBMIT
+    function openSubmit(id, title) {
+        STATE.subTid = id; STATE.subTit = title; STATE.subCat = null;
+        document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
+        MODALS.modSubmit.show();
+    }
+    function selSub(cat) {
+        STATE.subCat = cat;
+        document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
+        document.getElementById('sub-'+cat).classList.add('active');
+        if(DRIVE[cat]) window.open(DRIVE[cat], '_blank');
+    }
+    async function confirmSubmit() {
+        if(!STATE.subCat) return toast('Error','Click a Drive Icon first','x','text-danger');
+        await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.subTid);
+        const note = document.getElementById('sub-note').value;
+        await sendNoti(1, `Review: ${STATE.subTit} in ${STATE.subCat} ${note}`);
+        MODALS.modSubmit.hide(); render(false); toast('Sent','Submitted','send','text-success');
+    }
 
-        function selSub(cat) {
-            STATE.subCat = cat;
-            // 1. Highlight UI to show selection
-            document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
-            document.getElementById('sub-'+cat).classList.add('active');
-            
-            // 2. OPEN DRIVE IMMEDIATELY (Upload Step)
-            if(DRIVE_LINKS[cat]) window.open(DRIVE_LINKS[cat], '_blank');
-        }
+    // UTILS
+    async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); }
+    async function updProg(id,v) { await sbClient.from('tasks').update({progress:v}).eq('id',id); }
+    async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
+    function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info'); }
+    async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); render(false); }
 
-        async function confirmSubmit() {
-            if(!STATE.subCat) { toast('Error','Tap a Drive Icon first','alert-circle','text-danger'); return; }
-            const note = document.getElementById('sub-note').value;
-            const fullMsg = `Review: ${STATE.subTit} - Uploaded to ${STATE.subCat}${note ? ' ('+note+')' : ''}`;
-            
-            // Update Status and Notify Leader
-            await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.subTid);
-            await sendNoti(1, fullMsg); 
-            
-            MODALS.modSubmit.hide();
-            toast('Sent','Mission Submitted','send','text-success');
-            render(false);
-        }
+    // NOTIFICATIONS & SOUND
+    function toggleSilence() {
+        const isMuted = localStorage.getItem('mute') === '1';
+        localStorage.setItem('mute', isMuted ? '0' : '1');
+        updateSilenceUI();
+    }
+    function updateSilenceUI() {
+        const isMuted = localStorage.getItem('mute') === '1';
+        const btn = document.getElementById('btn-silence');
+        if(btn) btn.innerHTML = isMuted ? '<i data-lucide="bell-off" class="text-danger"></i>' : '<i data-lucide="bell"></i>';
+        lucide.createIcons();
+    }
+    async function checkNoti(open) {
+        if(!STATE.user) return;
+        const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false).order('created_at',{ascending:false});
+        const count = data?.length || 0;
         
-        async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); if(s==='Done') sendNoti(uid,`Complete: ${tit}`); if(s==='Review') sendNoti(1,`Review: ${tit}`); }
-        async function updProg(id,v) { await sbClient.from('tasks').update({progress:v}).eq('id',id); }
-        function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
-        async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success'); render(false); }
-        
-        // --- 7. NOTIFICATIONS & UTILS ---
-        async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
-        function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Team Pinged','radio','text-info'); }
-        
-        async function checkNoti(open) {
-            const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false).order('created_at',{ascending:false});
-            const count = data?.length || 0;
-            const bM = document.getElementById('bad-m'); const bD = document.getElementById('bad-d');
-            
-            if(count > 0) {
-                bM.classList.remove('d-none'); bM.innerText = count; bD.classList.remove('d-none'); bD.innerText = count;
-                const newestTime = new Date(data[0].created_at).getTime();
-                if(newestTime > STATE.lastNotiTime) {
-                    triggerSound('ping'); 
-                }
-                STATE.lastNotiTime = newestTime; 
-            } else { bM.classList.add('d-none'); bD.classList.add('d-none'); }
-
-            if(open) {
-                const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
-                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div><div class="text-secondary text-xs mt-1">${new Date(n.created_at).toLocaleTimeString()}</div></div>`).join('') : '<div class="p-4 text-center text-secondary small">No alerts.</div>';
-                if(count>0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
-                MODALS.modNoti.show();
+        // SAFE BADGE UPDATE
+        ['bad-d','bad-m'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                if(count>0) { el.innerText = count; el.classList.remove('d-none'); }
+                else el.classList.add('d-none');
             }
+        });
+
+        if(count > 0 && new Date(data[0].created_at).getTime() > STATE.lastNoti) {
+            if(localStorage.getItem('mute') !== '1') document.getElementById('sfx-ping').play().catch(()=>{});
+            STATE.lastNoti = new Date(data[0].created_at).getTime();
         }
 
-        function toast(t,m,i,c) {
-            document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
-            document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
-            lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
+        if(open) {
+            const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
+            document.getElementById('noti-list').innerHTML = msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div></div>`).join('');
+            if(count>0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
+            MODALS.modNoti.show();
         }
+    }
+
+    function toast(t,m,i,c) {
+        document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
+        document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
+        lucide.createIcons();
+        const el = document.getElementById('sysToast');
+        if(el) bootstrap.Toast.getOrCreateInstance(el).show();
+    }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
