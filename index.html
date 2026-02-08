@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SLBDMIS | Team Portal</title>
+    <title>SLBDMIS | Commander</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* === THEME === */
@@ -22,10 +21,10 @@
             --primary: #2f81f7; 
             --success: #238636;
             --warning: #d29922;
+            --danger: #da3633;
             --text-main: #f0f6fc;
             --text-sub: #8b949e;
             --sidebar-w: 260px;
-            --nav-h: 70px;
         }
 
         body { 
@@ -33,235 +32,175 @@
             color: var(--text-main); 
             font-family: 'Inter', sans-serif; 
             overflow-x: hidden;
-            padding-bottom: 90px;
+            padding-bottom: 90px; /* Space for mobile nav */
         }
 
-        .glass { background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(8px); }
+        /* UTILS */
+        .glass { background: rgba(22, 27, 34, 0.95); backdrop-filter: blur(10px); }
         .card-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             transition: transform 0.2s;
         }
-        .card-box:active { transform: scale(0.99); }
-        .hover-bg:hover { background: var(--bg-subtle); }
-        
+        .hover-bg:hover { background: var(--bg-subtle); cursor: pointer; }
         .fw-bold { font-weight: 600 !important; }
         .text-xs { font-size: 0.75rem; }
-        .cursor-pointer { cursor: pointer; }
-        .d-none-imp { display: none !important; }
 
-        /* DRIVE BUTTONS */
-        .drive-btn {
-            display: flex; align-items: center; gap: 10px;
-            padding: 12px; border-radius: 8px;
-            background: var(--bg-subtle); border: 1px solid var(--border);
-            color: var(--text-sub); text-decoration: none;
-            transition: 0.2s;
+        /* CALENDAR */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .cal-day { 
+            min-height: 100px; background: var(--bg-subtle); 
+            border-radius: 6px; padding: 4px; border: 1px solid transparent;
         }
-        .drive-btn:hover { background: #262c36; color: white; border-color: var(--primary); }
-
-        /* LAYOUT */
-        #view-auth {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--bg-body); z-index: 99999;
-            display: flex; align-items: center; justify-content: center; padding: 20px;
+        .cal-day:hover { border-color: var(--primary); }
+        .cal-evt { 
+            font-size: 10px; padding: 2px 4px; border-radius: 4px; 
+            margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
         }
+        .cal-evt.meeting { background: rgba(47, 129, 247, 0.2); color: #58a6ff; border-left: 2px solid #58a6ff; }
+        .cal-evt.deadline { background: rgba(210, 153, 34, 0.2); color: #d29922; border-left: 2px solid #d29922; }
+        .cal-evt.suggested { border: 1px dashed var(--text-sub); opacity: 0.6; }
 
-        .sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w);
-            background: #010409; border-right: 1px solid var(--border);
-            padding: 24px; display: none; flex-direction: column; z-index: 1000;
-        }
+        /* PROGRESS BAR */
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: #30363d; border-radius: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); cursor: pointer; transition: .2s; }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); background: #fff; }
 
-        .mobile-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h);
-            background: rgba(13, 17, 23, 0.98); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
-        }
+        /* AVATARS */
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-subtle); display: grid; place-items: center; font-size: 18px; border: 2px solid var(--bg-card); }
+        .avatar-sm { width: 24px; height: 24px; font-size: 12px; margin-right: -8px; border: 1px solid var(--bg-card); }
 
-        .main-wrapper { padding: 20px; max-width: 100%; }
-
+        /* RESPONSIVE LAYOUT */
         @media (min-width: 992px) {
-            .sidebar { display: flex; }
-            .mobile-nav { display: none !important; }
-            .mobile-header { display: none !important; }
+            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: #010409; border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; z-index: 1000; }
+            .mobile-nav, .mobile-header { display: none !important; }
             body { padding-bottom: 0; }
-            .main-wrapper { margin-left: var(--sidebar-w); padding: 40px; max-width: 1200px; }
+            .main-wrapper { margin-left: var(--sidebar-w); padding: 40px; max-width: 1400px; }
         }
-
-        /* NAV ITEMS */
-        .nav-item-d {
-            display: flex; align-items: center; gap: 12px; padding: 12px;
-            border-radius: 6px; color: var(--text-sub); text-decoration: none;
-            margin-bottom: 2px; transition: 0.2s;
+        @media (max-width: 991px) {
+            .sidebar { display: none; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: rgba(13, 17, 23, 0.98); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: 10px; }
+            .main-wrapper { padding: 90px 20px 20px 20px; }
         }
-        .nav-item-d:hover, .nav-item-d.active { background: var(--bg-subtle); color: white; }
-        .nav-item-d.active { border-left: 3px solid var(--primary); }
-
-        .nav-item-m {
-            display: flex; flex-direction: column; align-items: center;
-            color: var(--text-sub); font-size: 10px; text-decoration: none; width: 100%;
-        }
-        .nav-item-m.active { color: var(--primary); }
-        
-        .avatar {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: var(--bg-subtle); display: grid; place-items: center; font-size: 20px;
-        }
-
-        /* BADGES */
-        .badge-st { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
-        .st-done { background: rgba(35, 134, 54, 0.2); color: #3fb950; }
-        .st-wait { background: rgba(210, 153, 34, 0.2); color: #d29922; }
-        .st-rev { background: rgba(56, 139, 253, 0.2); color: #58a6ff; }
-        .st-fut { background: rgba(139, 148, 158, 0.2); color: #8b949e; }
-        .st-req { background: rgba(248, 81, 73, 0.2); color: #f85149; }
     </style>
 </head>
 <body>
 
-    <div id="view-auth">
-        <div class="card-box p-4 w-100" style="max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.6);">
-            <div class="text-center mb-4">
-                <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-3">
-                    <i data-lucide="shield-check" size="32"></i>
-                </div>
-                <h3 class="fw-bold text-white">SLBDMIS Portal</h3>
-                <p class="text-sub small">Secure Team Workspace</p>
+    <div id="view-auth" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex align-items-center justify-content-center p-4">
+        <div class="card-box p-4 w-100 border-secondary" style="max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div class="text-center mb-5">
+                <i data-lucide="shield-check" size="48" class="text-primary mb-3"></i>
+                <h3 class="fw-bold text-white">SLBDMIS Commander</h3>
+                <p class="text-secondary small">Secure Team Portal</p>
             </div>
-            
-            <div id="auth-step-1" class="row g-2"></div>
-            
-            <div id="auth-step-2" class="d-none">
-                <div class="d-flex align-items-center gap-3 p-3 rounded bg-dark border border-secondary border-opacity-25 mb-4">
-                    <div id="auth-av" class="avatar fs-4"></div>
-                    <div>
-                        <div id="auth-name" class="fw-bold text-white"></div>
-                        <div class="text-sub text-xs">Enter ID/PIN</div>
-                    </div>
+            <div id="auth-list" class="row g-3"></div>
+            <div id="auth-pin" class="d-none">
+                <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded bg-dark border border-secondary border-opacity-25">
+                    <div id="l-av" class="avatar fs-4"></div>
+                    <div class="fw-bold text-white fs-5" id="l-name"></div>
                 </div>
-                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Login Access</button>
-                <button onclick="authReset()" class="btn btn-link text-secondary w-100 text-decoration-none mt-2">Go Back</button>
+                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3" placeholder="ENTER PIN" maxlength="11" inputmode="numeric">
+                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Authenticate</button>
+                <button onclick="location.reload()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
         
-        <div class="mobile-header fixed-top glass border-bottom border-secondary border-opacity-25 px-3 py-3 d-flex justify-content-between align-items-center" style="z-index: 900;">
-            <div class="d-flex align-items-center gap-2">
-                <div id="mob-u-av" class="avatar" style="width:32px; height:32px; font-size:16px;"></div>
-                <span id="mob-pg-title" class="fw-bold">Dashboard</span>
-            </div>
+        <div class="mobile-header fixed-top glass border-bottom border-secondary border-opacity-25 px-3 py-3 d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-white" id="m-tit">Dashboard</span>
             <div class="d-flex gap-2">
                 <button onclick="checkNoti(true)" class="btn btn-dark btn-sm border border-secondary border-opacity-25 position-relative">
                     <i data-lucide="bell" size="18"></i>
-                    <span id="badge-bell-m" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
+                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
                 </button>
-                <button onclick="openCreate()" class="btn btn-primary btn-sm shadow-sm"><i data-lucide="plus" size="18"></i></button>
+                <button onclick="openCreate()" class="btn btn-primary btn-sm shadow"><i data-lucide="plus" size="18"></i></button>
             </div>
         </div>
 
         <nav class="sidebar">
-            <div class="d-flex align-items-center gap-3 mb-5 px-2 text-white">
-                <div class="bg-primary rounded p-1"><i data-lucide="layout-grid" size="24"></i></div>
-                <span class="fw-bold fs-5">SLBDMIS</span>
+            <div class="mb-5 d-flex align-items-center gap-3 text-primary px-2">
+                <div class="p-1 bg-primary bg-opacity-10 rounded"><i data-lucide="layout-grid" size="24"></i></div>
+                <span class="fw-bold fs-5 text-white">SLBDMIS</span>
             </div>
-            <div id="nav-d-links" class="flex-grow-1"></div>
+            <div id="nav-d" class="d-flex flex-column gap-2 flex-grow-1"></div>
             <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
                 <div class="d-flex align-items-center gap-3 px-2 mb-3">
-                    <div id="desk-u-av" class="avatar"></div>
-                    <div>
-                        <div id="desk-u-name" class="fw-bold text-white small"></div>
-                        <div class="text-success text-xs">● Online</div>
-                    </div>
+                    <div id="d-av" class="avatar"></div>
+                    <div><div id="d-name" class="fw-bold text-white small"></div><div class="text-success text-xs">● Online</div></div>
                 </div>
                 <button onclick="doLogout()" class="btn btn-outline-danger btn-sm w-100">Sign Out</button>
             </div>
         </nav>
 
-        <main class="main-wrapper" style="padding-top: 80px;">
-            <div class="d-none d-lg-flex justify-content-between align-items-center mb-4 mt-n4">
-                <h3 id="desk-pg-title" class="fw-bold m-0">Dashboard</h3>
-                <div class="d-flex gap-2">
-                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 position-relative">
+        <main class="main-wrapper">
+            <div class="d-none d-lg-flex justify-content-between align-items-center mb-4">
+                <h3 id="d-tit" class="fw-bold m-0 text-white">Dashboard</h3>
+                <div class="d-flex gap-3">
+                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 position-relative px-3">
                         <i data-lucide="bell" size="20"></i>
-                        <span id="badge-bell-d" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
+                        <span id="bad-d" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
                     </button>
                     <button onclick="openCreate()" class="btn btn-primary px-4 fw-bold shadow"><i data-lucide="plus" size="18" class="me-2"></i>New Item</button>
                 </div>
             </div>
+            
             <div id="content-box"></div>
         </main>
 
-        <nav class="mobile-nav" id="nav-m-links"></nav>
+        <nav class="mobile-nav" id="nav-m"></nav>
+
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold">Create New</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
                 <div class="modal-body p-4">
-                    <div class="d-flex bg-dark p-1 rounded mb-4 border border-secondary border-opacity-25">
-                        <button onclick="setMode('task')" id="bm-task" class="btn btn-sm text-white flex-fill bg-secondary bg-opacity-25">Task</button>
-                        <button onclick="setMode('future')" id="bm-future" class="btn btn-sm text-secondary flex-fill">Not Yet</button>
-                        <button onclick="setMode('dec')" id="bm-dec" class="btn btn-sm text-secondary flex-fill">Decision</button>
+                    <h5 class="fw-bold mb-3 text-white">Create New</h5>
+                    <div class="d-flex bg-dark p-1 rounded mb-3 border border-secondary border-opacity-25">
+                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white bg-secondary bg-opacity-25">Task</button>
+                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary">Decision</button>
                     </div>
-                    
-                    <input type="text" id="inp-t" class="form-control form-control-lg bg-black text-white border-secondary mb-3" placeholder="Title">
-                    <textarea id="inp-d" class="form-control bg-black text-white border-secondary mb-3" rows="3" placeholder="Task Description & Details..."></textarea>
+                    <input id="inp-t" class="form-control bg-black text-white border-secondary mb-3 p-3" placeholder="Title">
+                    <textarea id="inp-d" class="form-control bg-black text-white border-secondary mb-3 p-3" rows="3" placeholder="Details..."></textarea>
                     
                     <div id="sec-task-opt">
-                        <label class="text-sub text-xs fw-bold mb-2">DUE DATE</label>
+                        <label class="text-xs fw-bold text-secondary mb-1">DUE DATE</label>
                         <input type="date" id="inp-date" class="form-control bg-black text-white border-secondary mb-3">
-                        <label class="text-sub text-xs fw-bold mb-2">ASSIGN TO</label>
-                        <div id="div-mems" class="d-flex flex-column gap-2 mb-4"></div>
+                        <label class="text-xs fw-bold text-secondary mb-2">ASSIGN TO</label>
+                        <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
                     </div>
-                    
-                    <button onclick="saveItem()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">Save Record</button>
+
+                    <button onclick="saveItem()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">Create Record</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="modProof" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal fade" id="modCal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold">Upload Proof of Work</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
                 <div class="modal-body p-4">
-                    <p class="text-secondary small mb-3">Please upload your files to the relevant folder below. You must check the box to confirm upload before submitting for review.</p>
-                    
-                    <div class="d-grid gap-2 mb-4">
-                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-btn">
-                            <i data-lucide="folder" class="text-warning"></i> <span>Admin & Finance</span>
-                        </a>
-                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-btn">
-                            <i data-lucide="cpu" class="text-info"></i> <span>Machine Unit</span>
-                        </a>
-                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-btn">
-                            <i data-lucide="image" class="text-danger"></i> <span>Pictures</span>
-                        </a>
-                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-btn">
-                            <i data-lucide="file-text" class="text-primary"></i> <span>Proposals & PPT</span>
-                        </a>
+                    <h5 class="fw-bold mb-3 text-white">Schedule</h5>
+                    <input id="cal-t" class="form-control bg-black text-white border-secondary mb-3" placeholder="Meeting / Deadline Title">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="text-xs text-secondary">DATE</label>
+                            <input type="date" id="cal-d" class="form-control bg-black text-white border-secondary">
+                        </div>
+                        <div class="col-6">
+                            <label class="text-xs text-secondary">TYPE</label>
+                            <select id="cal-y" class="form-select bg-black text-white border-secondary">
+                                <option value="meeting">Meeting</option>
+                                <option value="deadline">Major Deadline</option>
+                            </select>
+                        </div>
                     </div>
-
-                    <div class="form-check bg-black p-3 rounded border border-secondary border-opacity-25">
-                        <input class="form-check-input" type="checkbox" id="chk-done" onchange="toggleFin()">
-                        <label class="form-check-label text-white small">I verify that I have uploaded the required files.</label>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 p-3">
-                    <button id="btn-fin" onclick="finishTask()" class="btn btn-success w-100 py-3 rounded-pill fw-bold disabled">Submit for Review</button>
+                    <p class="text-xs text-secondary fst-italic border-top border-secondary border-opacity-25 pt-2">* Leaders approve all schedule changes.</p>
+                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold">Save Event</button>
                 </div>
             </div>
         </div>
@@ -271,30 +210,11 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold">Alerts</h5>
+                    <h5 class="modal-title fw-bold text-white">Notifications</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
                     <div id="noti-list" class="list-group list-group-flush bg-transparent"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modArc" tabindex="-1">
-        <div class="modal-dialog modal-fullscreen">
-            <div class="modal-content bg-dark">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="modal-title fw-bold" id="arc-t">Archive</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0">
-                    <div class="d-flex border-bottom border-secondary border-opacity-25">
-                        <button onclick="loadArcTab('t')" class="btn btn-dark flex-fill rounded-0 py-3 active border-bottom border-primary border-2" id="at-t">Tasks</button>
-                        <button onclick="loadArcTab('d')" class="btn btn-dark flex-fill rounded-0 py-3 text-secondary" id="at-d">Decisions</button>
-                        <button onclick="loadArcTab('a')" class="btn btn-dark flex-fill rounded-0 py-3 text-secondary" id="at-a">Logs</button>
-                    </div>
-                    <div id="arc-b" class="p-3"></div>
                 </div>
             </div>
         </div>
@@ -305,7 +225,7 @@
             <div class="d-flex">
                 <div class="toast-body d-flex gap-3 align-items-center">
                     <i id="t-ico" data-lucide="check" class="text-success"></i>
-                    <div><strong id="t-tit" class="d-block"></strong><small id="t-msg" class="text-secondary"></small></div>
+                    <div><strong id="t-tit" class="d-block text-white"></strong><small id="t-msg" class="text-secondary"></small></div>
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
@@ -313,11 +233,12 @@
     </div>
 
     <script>
+        // --- SUPABASE CONFIG ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
-        let CHART_INST = null;
 
+        // --- TEAM DATA ---
         const TEAM = [
             { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel",    av: "👨‍💻", pin: "11302003634", role: "MEMBER" },
@@ -325,387 +246,297 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', tempId: null, arcData: null };
+        let STATE = { user: null, page: 'home', mode: 'task' };
         const MODALS = {};
 
+        // --- INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
-            MODALS.create = new bootstrap.Modal('#modCreate');
-            MODALS.proof = new bootstrap.Modal('#modProof');
-            MODALS.noti = new bootstrap.Modal('#modNoti');
-            MODALS.arc = new bootstrap.Modal('#modArc');
+            // Init Modals
+            ['modCreate','modCal','modNoti'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
             
+            // Check Login
             const uid = localStorage.getItem('slbd_uid');
-            if(uid) {
-                const u = TEAM.find(x => x.id == uid);
-                if(u) { login(u); return; }
-            }
-            initAuth();
+            if(uid) login(TEAM.find(x => x.id == uid));
+            else initAuth();
         };
 
-        // AUTH
+        // --- AUTHENTICATION ---
         function initAuth() {
-            document.getElementById('auth-step-1').innerHTML = TEAM.map(u => `
-                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center cursor-pointer">
+            document.getElementById('auth-list').innerHTML = TEAM.map(u => `
+                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center hover-bg h-100 d-flex flex-column align-items-center justify-content-center">
                     <div class="fs-1 mb-2">${u.av}</div><div class="fw-bold text-white small">${u.name.split(' ')[0]}</div>
                 </div></div>`).join('');
         }
+
         function preLogin(id) {
             STATE.sel = TEAM.find(u=>u.id===id);
-            document.getElementById('auth-step-1').classList.add('d-none');
-            document.getElementById('auth-step-2').classList.remove('d-none');
-            document.getElementById('auth-av').innerText = STATE.sel.av;
-            document.getElementById('auth-name').innerText = STATE.sel.name;
+            document.getElementById('auth-list').classList.add('d-none');
+            document.getElementById('auth-pin').classList.remove('d-none');
+            document.getElementById('l-av').innerText = STATE.sel.av;
+            document.getElementById('l-name').innerText = STATE.sel.name;
         }
-        function authReset() {
-            document.getElementById('auth-step-2').classList.add('d-none');
-            document.getElementById('auth-step-1').classList.remove('d-none');
-            document.getElementById('inp-pin').value = '';
-        }
+
         function tryLogin() {
             if(document.getElementById('inp-pin').value === STATE.sel.pin) {
                 localStorage.setItem('slbd_uid', STATE.sel.id);
                 login(STATE.sel);
-            } else {
-                toast('Error','Wrong PIN','shield-alert','text-danger');
-            }
+            } else toast('Auth Failed', 'Incorrect PIN', 'shield-alert', 'text-danger');
         }
-        function login(u) {
-            STATE.user = u;
-            document.getElementById('view-auth').classList.add('d-none-imp'); 
-            document.getElementById('view-app').classList.remove('d-none');
-            document.getElementById('mob-u-av').innerText = u.av;
-            document.getElementById('desk-u-av').innerText = u.av;
-            document.getElementById('desk-u-name').innerText = u.name;
-            setupNav();
-            nav('home');
-            setInterval(() => { if(STATE.page!=='arc' && STATE.page!=='ana' && STATE.page!=='mom') render(true); checkNoti(false); }, 5000);
-            checkNoti(false);
-        }
+
         function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
 
-        // NAV
-        function setupNav() {
+        async function login(u) {
+            STATE.user = u;
+            document.getElementById('view-auth').classList.add('d-none');
+            document.getElementById('view-app').classList.remove('d-none');
+            document.getElementById('d-av').innerText = u.av;
+            document.getElementById('d-name').innerText = u.name;
+            
+            // Setup Nav
             const pages = [
                 {id:'home', t:'Dashboard', i:'layout-grid'},
-                {id:'mom', t:'Momentum', i:'activity'},
+                {id:'cal', t:'Calendar', i:'calendar'},
                 {id:'task', t:'Tasks', i:'layers'},
-                {id:'future', t:'Not Yet', i:'hourglass'},
                 {id:'dec', t:'Decisions', i:'scroll-text'},
-                {id:'arc', t:'Records', i:'archive'}
+                {id:'rec', t:'Archive', i:'archive'}
             ];
-            // Add Analytics for Leader
-            if(STATE.user.role === 'LEADER') {
-                pages.splice(2, 0, {id:'ana', t:'Analytics', i:'bar-chart-2'});
-            }
 
-            document.getElementById('nav-d-links').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="nav-item-d"><i data-lucide="${p.i}" size="18"></i> ${p.t}</a>`).join('');
-            document.getElementById('nav-m-links').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="nav-item-m"><i data-lucide="${p.i}" size="22"></i> <span>${p.t}</span></a>`).join('');
+            const navHTML = (cls) => pages.map(p => `
+                <a href="#" onclick="nav('${p.id}')" id="${cls}-${p.id}" class="${cls==='nd'?'nav-item-d text-decoration-none p-3 rounded d-flex gap-3 text-secondary hover-bg transition':'d-flex flex-column align-items-center text-decoration-none text-secondary small'}">
+                    <i data-lucide="${p.i}" size="${cls==='nd'?20:24}"></i>
+                    <span>${p.t}</span>
+                </a>
+            `).join('');
+
+            document.getElementById('nav-d').innerHTML = navHTML('nd');
+            document.getElementById('nav-m').innerHTML = navHTML('nm');
+            nav('home');
+
+            // Request Browser Notification Permission
+            if (Notification.permission !== "granted") Notification.requestPermission();
+
+            // Realtime Logic
+            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
+            checkNoti(false);
+            
+            // Auto-Attendance
+            const today = new Date().toISOString().split('T')[0];
+            const { data } = await sbClient.from('attendance').select('*').eq('user_id', u.id).eq('date', today);
+            if(!data.length) await sbClient.from('attendance').insert({user_id: u.id, date: today});
         }
+
+        // --- NAVIGATION ---
         function nav(p) {
             STATE.page = p;
-            document.querySelectorAll('.nav-item-d').forEach(e=>e.classList.remove('active'));
-            document.querySelectorAll('.nav-item-m').forEach(e=>e.classList.remove('active'));
-            if(document.getElementById(`nd-${p}`)) document.getElementById(`nd-${p}`).classList.add('active');
-            if(document.getElementById(`nm-${p}`)) document.getElementById(`nm-${p}`).classList.add('active');
+            document.querySelectorAll('.text-white.bg-subtle').forEach(e => e.classList.remove('text-white','bg-subtle'));
+            document.querySelectorAll('.text-primary').forEach(e => { if(e.tagName==='A') e.classList.remove('text-primary'); });
             
-            const titles = {home: STATE.user.role==='LEADER'?'Leader Overview':'My Workspace', ana:'Team Analytics', mom:'Momentum Rate', task:'Tasks', future:'Future Ideas', dec:'Decision Log', arc:'Archives'};
-            document.getElementById('mob-pg-title').innerText = titles[p];
-            document.getElementById('desk-pg-title').innerText = titles[p];
+            const nd = document.getElementById(`nd-${p}`);
+            const nm = document.getElementById(`nm-${p}`);
+            if(nd) nd.classList.add('text-white','bg-subtle');
+            if(nm) nm.classList.add('text-primary');
+
+            document.getElementById('m-tit').innerText = document.getElementById('d-tit').innerText = 
+                p==='home'?'Command Center': p==='cal'?'Team Calendar': p==='task'?'Active Tasks': p==='rec'?'Archives':'Decisions';
             render(false);
         }
 
-        // RENDER LOGIC
+        // --- RENDER ENGINE ---
         async function render(silent) {
             const c = document.getElementById('content-box');
             if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
-            const now = new Date();
-            const today = now.toISOString().split('T')[0];
-
+            
             try {
-                // === DASHBOARD ===
+                // Fetch Data
+                const [ {data:tasks}, {data:evts} ] = await Promise.all([
+                    sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
+                    sbClient.from('calendar_events').select('*')
+                ]);
+
+                const activeT = tasks.filter(t => t.status !== 'Done');
+                
+                // === HOME ===
                 if(STATE.page === 'home') {
-                    const [ {data:t}, {data:a} ] = await Promise.all([
-                        sbClient.from('tasks').select('*').neq('status','Future'),
-                        sbClient.from('attendance').select('*').eq('date', today)
-                    ]);
-                    const myCheckIn = a.find(x => x.user_id === STATE.user.id);
-                    
-                    // Quick Drive Links
-                    const quickDrive = `
-                        <div class="col-12 mb-3">
-                            <h6 class="text-secondary text-xs fw-bold mb-2">QUICK DRIVE ACCESS</h6>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="folder" class="text-warning"></i> Admin</a>
-                                <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="cpu" class="text-info"></i> Machine</a>
-                                <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="image" class="text-danger"></i> Pics</a>
-                                <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="drive-btn flex-fill"><i data-lucide="file-text" class="text-primary"></i> PPT</a>
-                            </div>
-                        </div>
-                    `;
-
+                    // Leader View
                     if(STATE.user.role === 'LEADER') {
-                        // Leader Home
-                        const reqs = t.filter(x => x.status === 'ApprovalReq');
-                        const revs = t.filter(x => x.status === 'Review');
-                        const attList = TEAM.map(member => {
-                            const isHere = a.find(x => x.user_id === member.id);
-                            return `<div class="d-flex align-items-center justify-content-between p-2 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2"><span class="text-xs">${member.av}</span><span class="small ${isHere?'text-white':'text-secondary'}">${member.name.split(' ')[0]}</span></div>${isHere?'<span class="badge bg-success bg-opacity-25 text-success">Present</span>':'<span class="badge bg-secondary bg-opacity-10 text-secondary">Absent</span>'}</div>`;
+                        const progHTML = TEAM.map(u => {
+                            const uTasks = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
+                            if(uTasks.length === 0) return '';
+                            return `
+                                <div class="p-3 border-bottom border-secondary border-opacity-25">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="avatar avatar-sm">${u.av}</span><span class="fw-bold text-white small">${u.name}</span>
+                                    </div>
+                                    ${uTasks.map(t => `
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between text-xs mb-1">
+                                                <span class="text-truncate" style="max-width:150px">${t.task_title}</span>
+                                                <span class="${t.progress<100?'text-warning':'text-success'}">${t.progress||0}%</span>
+                                            </div>
+                                            <div class="progress" style="height:4px; background:#21262d;"><div class="progress-bar bg-${t.progress<50?'danger':t.progress<90?'warning':'success'}" style="width:${t.progress||0}%"></div></div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
                         }).join('');
-
-                        let alertsHtml = '';
-                        if(reqs.length > 0) alertsHtml += `<div class="alert alert-dark border-warning d-flex justify-content-between align-items-center mb-2"><div><strong class="text-warning">${reqs.length} Task(s)</strong> waiting for assignment approval.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-warning">View</button></div>`;
-                        if(revs.length > 0) alertsHtml += `<div class="alert alert-dark border-info d-flex justify-content-between align-items-center mb-3"><div><strong class="text-info">${revs.length} Task(s)</strong> waiting for completion review.</div><button onclick="nav('task')" class="btn btn-sm btn-outline-info">Review</button></div>`;
 
                         c.innerHTML = `
                         <div class="row g-3">
-                            <div class="col-12">${alertsHtml}</div>
-                            ${quickDrive}
-                            <div class="col-12 col-md-4">
-                                <div class="card-box p-4 text-center h-100 d-flex flex-column justify-content-center">
-                                    <h3 class="fw-bold text-white mb-0">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h3>
-                                    <div class="text-secondary small mb-3">${now.toDateString()}</div>
-                                    ${myCheckIn ? '<button class="btn btn-success w-100 rounded-pill" disabled>Checked In ✅</button>' : '<button onclick="doCheckIn()" class="btn btn-primary w-100 rounded-pill shadow">Check In Now</button>'}
+                            <div class="col-12 col-lg-8">
+                                <div class="card-box h-100">
+                                    <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold m-0 text-white">Live Operations</h6>
+                                        <button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 text-xs">🔔 Ping Update</button>
+                                    </div>
+                                    <div style="max-height:400px; overflow-y:auto;">${progHTML || '<div class="p-4 text-center text-secondary">No ongoing operations.</div>'}</div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-8">
-                                <div class="card-box h-100 p-3">
-                                    <h6 class="text-secondary text-xs fw-bold mb-2">TEAM PULSE (${a.length}/${TEAM.length})</h6>
-                                    ${attList}
+                            <div class="col-12 col-lg-4">
+                                <div class="card-box p-3 mb-3">
+                                    <h6 class="text-secondary text-xs fw-bold">QUICK LINKS</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="folder" class="text-warning me-2" size="14"></i>Admin & Finance</a>
+                                        <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="cpu" class="text-info me-2" size="14"></i>Machine Unit</a>
+                                        <a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="image" class="text-danger me-2" size="14"></i>Pictures</a>
+                                        <a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary"><i data-lucide="file-text" class="text-primary me-2" size="14"></i>Proposals</a>
+                                    </div>
+                                </div>
+                                <div class="card-box p-3 text-center">
+                                    <div class="display-6 fw-bold text-white">${activeT.length}</div>
+                                    <div class="text-secondary text-xs">ACTIVE TASKS</div>
                                 </div>
                             </div>
                         </div>`;
                     } else {
-                        // Member Home
-                        const myT = t.filter(x => (x.tagged_members||[]).includes(STATE.user.id) && x.status !== 'Done');
-                        const pend = myT.filter(x => x.status === 'ApprovalReq').length;
-                        
+                        // Member View
+                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
                         c.innerHTML = `
                         <div class="row g-3">
-                            ${pend>0 ? `<div class="col-12"><div class="alert alert-dark border-secondary">You have <b>${pend}</b> tasks waiting for Leader approval.</div></div>`:''}
-                            ${quickDrive}
-                            <div class="col-12 col-md-4">
-                                <div class="card-box p-4 text-center h-100 d-flex flex-column justify-content-center">
-                                    <h1 class="fw-bold text-white mb-0">${now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</h1>
-                                    <div class="text-secondary small mb-3">${now.toDateString()}</div>
-                                    ${myCheckIn ? '<button class="btn btn-success w-100 rounded-pill" disabled>Checked In ✅</button>' : '<button onclick="doCheckIn()" class="btn btn-primary w-100 rounded-pill shadow">Check In Now</button>'}
+                             <div class="col-12">
+                                <div class="card-box p-4">
+                                    <h5 class="fw-bold text-white mb-3">My Workspace</h5>
+                                    ${myT.length === 0 ? '<p class="text-secondary">You have no active assignments.</p>' : myT.map(t => `
+                                        <div class="bg-black p-3 rounded mb-3 border border-secondary border-opacity-25">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="fw-bold text-white">${t.task_title}</span>
+                                                <span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span>
+                                            </div>
+                                            <label class="text-xs text-secondary">Update Progress: ${t.progress}%</label>
+                                            <input type="range" class="mt-1" value="${t.progress}" onchange="updateProg(${t.id}, this.value, '${t.task_title}')">
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            </div>
-                            <div class="col-12 col-md-8">
-                                <div class="card-box h-100 p-3">
-                                    <h6 class="text-secondary small fw-bold mb-3 border-bottom border-secondary border-opacity-25 pb-2">MY ASSIGNED TASKS</h6>
-                                    ${myT.length ? myT.map(x => `<div class="p-3 border border-secondary border-opacity-25 rounded mb-2 bg-dark hover-bg" onclick="nav('task')" style="cursor:pointer"><div class="d-flex justify-content-between mb-1"><span class="badge-st ${x.status==='ApprovalReq'?'st-req':'st-wait'}">${x.status==='ApprovalReq'?'Waiting Approval':x.status}</span><small class="text-secondary">${x.due_date||''}</small></div><div class="fw-bold text-white">${x.task_title}</div></div>`).join('') : '<div class="text-center text-muted py-5">No active tasks assigned to you.</div>'}
-                                </div>
-                            </div>
+                             </div>
                         </div>`;
                     }
                 }
 
-                // === MOMENTUM (GRAPH) ===
-                if(STATE.page === 'mom') {
-                    c.innerHTML = `
-                    <div class="card-box p-4 h-100">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h6 class="fw-bold text-white m-0">Performance Trend (Last 7 Days)</h6>
-                            <span class="badge bg-primary bg-opacity-10 text-primary">Live</span>
-                        </div>
-                        <div style="height: 300px;">
-                            <canvas id="momChart"></canvas>
-                        </div>
-                        <div class="row mt-4 text-center">
-                            <div class="col-6 border-end border-secondary border-opacity-25">
-                                <small class="text-secondary d-block">Finished this week</small>
-                                <strong class="fs-4 text-success" id="mom-done-count">...</strong>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-secondary d-block">New Tasks this week</small>
-                                <strong class="fs-4 text-primary" id="mom-new-count">...</strong>
-                            </div>
-                        </div>
-                    </div>`;
-
-                    // Graph Logic
-                    const { data: allT } = await sbClient.from('tasks').select('created_at, updated_at, status');
+                // === CALENDAR ===
+                if(STATE.page === 'cal') {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = today.getMonth();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+                    const firstDay = new Date(year, month, 1).getDay();
                     
-                    const labels = [];
-                    const dataDone = [];
-                    const dataNew = [];
-                    let totalDone = 0;
-                    let totalNew = 0;
-
-                    for(let i=6; i>=0; i--) {
-                        const d = new Date();
-                        d.setDate(d.getDate() - i);
-                        const strDate = d.toISOString().split('T')[0];
-                        labels.push(d.toLocaleDateString([],{weekday:'short'}));
-
-                        const countDone = allT.filter(x => x.status === 'Done' && x.updated_at && x.updated_at.startsWith(strDate)).length;
-                        const countNew = allT.filter(x => x.created_at.startsWith(strDate)).length;
-
-                        dataDone.push(countDone);
-                        dataNew.push(countNew);
-                        totalDone += countDone;
-                        totalNew += countNew;
+                    let grid = '';
+                    for(let i=0; i<firstDay; i++) grid += `<div></div>`;
+                    for(let d=1; d<=daysInMonth; d++) {
+                        const str = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                        const dayEvts = evts.filter(e => e.date === str);
+                        grid += `
+                            <div class="cal-day" onclick="openCal('${str}')">
+                                <div class="text-end text-secondary text-xs mb-1">${d}</div>
+                                ${dayEvts.map(e => `<div class="cal-evt ${e.type} ${e.status}">${e.status==='suggested'?'? ':''}${e.title}</div>`).join('')}
+                            </div>
+                        `;
                     }
 
-                    document.getElementById('mom-done-count').innerText = totalDone;
-                    document.getElementById('mom-new-count').innerText = totalNew;
-
-                    if(CHART_INST) CHART_INST.destroy();
-                    const ctx = document.getElementById('momChart').getContext('2d');
-                    CHART_INST = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                { label: 'Completed', data: dataDone, borderColor: '#238636', backgroundColor: 'rgba(35, 134, 54, 0.1)', tension: 0.4, fill: true },
-                                { label: 'Created', data: dataNew, borderColor: '#2f81f7', backgroundColor: 'rgba(47, 129, 247, 0.0)', tension: 0.4, borderDash: [5, 5] }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { labels: { color: '#8b949e' } } },
-                            scales: {
-                                y: { beginAtZero: true, grid: { color: '#30363d' }, ticks: { color: '#8b949e', stepSize: 1 } },
-                                x: { grid: { display: false }, ticks: { color: '#8b949e' } }
-                            }
-                        }
-                    });
-                }
-
-                // === ANALYTICS (LEADER ONLY) ===
-                if(STATE.page === 'ana') {
-                    // Fetch all data
-                    const [ {data:tasks}, {data:atts} ] = await Promise.all([
-                        sbClient.from('tasks').select('*'),
-                        sbClient.from('attendance').select('*')
-                    ]);
-
-                    const totalTasks = tasks.length;
-                    const doneTasks = tasks.filter(t=>t.status==='Done').length;
-                    const completionRate = totalTasks ? Math.round((doneTasks/totalTasks)*100) : 0;
-
-                    // Leaderboard Logic
-                    const stats = TEAM.map(u => {
-                        const doneCount = tasks.filter(t => t.status==='Done' && (t.tagged_members||[]).includes(u.id)).length;
-                        const presentCount = atts.filter(a => a.user_id === u.id).length;
-                        return { ...u, done: doneCount, att: presentCount };
-                    }).sort((a,b) => b.done - a.done);
+                    const suggs = evts.filter(e => e.status === 'suggested');
+                    const approvalBox = (STATE.user.role === 'LEADER' && suggs.length > 0) ? `
+                        <div class="alert alert-dark border-warning d-flex align-items-center gap-3 mb-3">
+                            <i data-lucide="alert-circle" class="text-warning"></i>
+                            <div class="flex-grow-1">
+                                <strong class="text-warning">Pending Approvals</strong>
+                                ${suggs.map(e => `<div class="d-flex justify-content-between mt-1 text-white small"><span>${e.date}: ${e.title}</span><div><button onclick="calApprove(${e.id},true)" class="btn btn-sm btn-success py-0 px-2 me-1">✓</button><button onclick="calApprove(${e.id},false)" class="btn btn-sm btn-danger py-0 px-2">✗</button></div></div>`).join('')}
+                            </div>
+                        </div>` : '';
 
                     c.innerHTML = `
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="card-box p-3 text-center">
-                                    <div class="text-secondary text-xs fw-bold">TOTAL TASKS</div>
-                                    <div class="display-6 fw-bold text-white">${totalTasks}</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="card-box p-3 text-center">
-                                    <div class="text-secondary text-xs fw-bold">COMPLETION RATE</div>
-                                    <div class="display-6 fw-bold text-success">${completionRate}%</div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="card-box p-4">
-                                    <h6 class="fw-bold mb-3">Member Performance</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-dark table-hover mb-0">
-                                            <thead><tr><th class="text-secondary small">Member</th><th class="text-secondary small text-center">Tasks Done</th><th class="text-secondary small text-center">Days Present</th></tr></thead>
-                                            <tbody>
-                                                ${stats.map(s => `
-                                                    <tr>
-                                                        <td><div class="d-flex align-items-center gap-2"><span>${s.av}</span> <span>${s.name}</span></div></td>
-                                                        <td class="text-center fw-bold text-success">${s.done}</td>
-                                                        <td class="text-center text-secondary">${s.att}</td>
-                                                    </tr>
-                                                `).join('')}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                        ${approvalBox}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="fw-bold text-white m-0">${today.toLocaleString('default', { month: 'long', year: 'numeric' })}</h4>
+                            <button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm"><i data-lucide="plus" size="16"></i> Add Event</button>
+                        </div>
+                        <div class="cal-grid text-white">
+                            ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(x=>`<div class="text-center text-secondary small py-2">${x}</div>`).join('')}
+                            ${grid}
                         </div>
                     `;
                 }
-                
-                // === TASKS PAGE ===
+
+                // === TASKS ===
                 if(STATE.page === 'task') {
-                    const { data } = await sbClient.from('tasks').select('*').neq('status','Future').order('created_at',{ascending:false});
-                    if(!data.length) { c.innerHTML = '<div class="text-center text-muted py-5">No tasks found.</div>'; }
-                    else {
-                        c.innerHTML = `<div class="row g-3">${data.map(t => {
-                            let badgeClass = 'st-wait';
-                            let borderClass = 'border-warning';
-                            let btnHtml = '';
-
-                            if(t.status === 'Done') { badgeClass='st-done'; borderClass='border-success'; }
-                            else if(t.status === 'Review') { badgeClass='st-rev'; borderClass='border-info'; }
-                            else if(t.status === 'ApprovalReq') { badgeClass='st-req'; borderClass='border-danger'; }
-
-                            // Logic for Buttons
+                    if(activeT.length === 0) {
+                        c.innerHTML = '<div class="text-center text-secondary py-5">No active tasks.</div>';
+                    } else {
+                        c.innerHTML = `<div class="row g-3">${activeT.map(t => {
+                            const assignees = (t.tagged_members||[]).map(mid => `<span class="avatar avatar-sm">${TEAM.find(x=>x.id==mid)?.av}</span>`).join('');
+                            let btn = '';
                             if(STATE.user.role === 'LEADER') {
-                                if(t.status === 'ApprovalReq') btnHtml = `<button onclick="doApproveCreate(${t.id})" class="btn btn-sm btn-outline-warning w-100">Approve Assignment</button>`;
-                                else if(t.status === 'Review') btnHtml = `<button onclick="doApproveFinish(${t.id})" class="btn btn-sm btn-success w-100 fw-bold">Approve Completion</button>`;
-                                else if(t.status !== 'Done') btnHtml = `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary w-100">Mark Done</button>`;
+                                if(t.status==='ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-warning w-100 btn-sm mt-3">Approve Assignment</button>`;
+                                else if(t.status==='Review') btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3">Approve Completion</button>`;
+                                else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Mark Done</button>`;
                             } else {
-                                // Member
-                                if(t.status === 'Pending' || t.status === 'Ongoing') btnHtml = `<button onclick="initDone(${t.id})" class="btn btn-sm btn-primary w-100">Mark Done</button>`;
-                                else if(t.status === 'ApprovalReq') btnHtml = `<div class="text-center text-secondary text-xs fst-italic mt-2">Waiting for Leader Approval</div>`;
-                                else if(t.status === 'Review') btnHtml = `<div class="text-center text-info text-xs fst-italic mt-2">Under Review</div>`;
+                                if(t.status==='Pending' || t.status==='Ongoing') btn = `<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit for Review</button>`;
                             }
-
                             return `
-                            <div class="col-12 col-lg-6">
-                                <div class="card-box p-3 border-start border-4 ${borderClass}">
+                            <div class="col-12 col-md-6 col-lg-4">
+                                <div class="card-box p-3 h-100 d-flex flex-column">
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span class="badge-st ${badgeClass}">${t.status==='ApprovalReq'?'Waiting Approval':t.status}</span>
-                                        <span class="text-xs text-secondary">${new Date(t.created_at).toLocaleDateString()}</span>
+                                        <span class="badge bg-secondary bg-opacity-10 text-${t.status==='ApprovalReq'?'warning':'info'}">${t.status}</span>
+                                        <div class="d-flex ps-2">${assignees}</div>
                                     </div>
                                     <h5 class="fw-bold text-white">${t.task_title}</h5>
-                                    <p class="small text-secondary mb-3">${t.description||''}</p>
-                                    ${btnHtml}
+                                    <p class="small text-secondary flex-grow-1">${t.description}</p>
+                                    <div class="mt-2">
+                                        <div class="d-flex justify-content-between text-xs text-secondary mb-1"><span>Progress</span><span>${t.progress}%</span></div>
+                                        <div class="progress" style="height:4px;"><div class="progress-bar" style="width:${t.progress}%"></div></div>
+                                    </div>
+                                    ${btn}
                                 </div>
                             </div>`;
                         }).join('')}</div>`;
                     }
                 }
 
-                if(STATE.page === 'future') {
-                    const { data } = await sbClient.from('tasks').select('*').eq('status','Future');
-                    c.innerHTML = `<div class="row g-3">${data.map(t => `<div class="col-12 col-lg-6"><div class="card-box p-3 opacity-75"><h5 class="fw-bold text-white">${t.task_title}</h5><p class="small text-secondary">${t.description}</p><div class="d-flex justify-content-between border-top border-secondary border-opacity-25 pt-2 mt-2"><span class="badge-st st-fut">Not Yet</span>${STATE.user.role==='LEADER'?`<button onclick="doActivate(${t.id})" class="btn btn-sm btn-outline-success">Activate</button>`:''}</div></div></div>`).join('')}</div>`;
+                // === RECORDS ===
+                if(STATE.page === 'rec') {
+                    const {data:doneT} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
+                    c.innerHTML = doneT.length ? `<div class="table-responsive card-box p-0"><table class="table table-dark table-hover mb-0"><thead><tr><th class="p-3">Task</th><th class="p-3">Completed</th></tr></thead><tbody>${doneT.map(t=>`<tr><td class="p-3"><div>${t.task_title}</div></td><td class="p-3 text-secondary small">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>` : '<div class="text-center py-5 text-secondary">No archives found.</div>';
                 }
-
+                
+                // === DECISIONS ===
                 if(STATE.page === 'dec') {
-                    const { data } = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                    c.innerHTML = data.map(d => `<div class="card-box p-3 mb-2"><div class="d-flex gap-3"><i data-lucide="quote" class="text-warning flex-shrink-0"></i><div><div class="fw-bold text-white">${d.subject}</div><div class="small text-secondary">${d.details}</div></div></div></div>`).join('');
+                    const {data:decs} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
+                    c.innerHTML = decs.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold text-white">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
                 }
 
-                if(STATE.page === 'arc') {
-                    const { data } = await sbClient.from('tasks').select('updated_at').eq('status','Done');
-                    const ms = [...new Set(data.map(x=>x.updated_at ? x.updated_at.slice(0,7) : 'Unknown'))].sort().reverse();
-                    c.innerHTML = ms.length ? `<div class="row g-3">${ms.map(m=>`<div class="col-6 col-md-3"><div onclick="openArc('${m}')" class="card-box p-4 text-center cursor-pointer hover-bg"><i data-lucide="folder-closed" class="text-warning mb-2" size="32"></i><div class="fw-bold text-white">${m}</div></div></div>`).join('')}</div>` : '<div class="text-center text-muted py-5">Archive is empty.</div>';
-                }
             } catch(e) { console.error(e); }
             lucide.createIcons();
         }
 
-        // ACTIONS
+        // --- ACTIONS & NOTIFICATIONS ---
         function setMode(m) {
             STATE.mode = m;
-            ['task','future','dec'].forEach(x => {
-                const b = document.getElementById(`bm-${x}`);
-                if(x===m) { b.classList.add('bg-secondary','bg-opacity-25','text-white'); b.classList.remove('text-secondary'); }
-                else { b.classList.remove('bg-secondary','bg-opacity-25','text-white'); b.classList.add('text-secondary'); }
-            });
-            const isT = m!=='dec';
-            document.getElementById('sec-task-opt').classList.toggle('d-none', !isT);
-            document.getElementById('inp-t').placeholder = m==='dec'?'Subject':'Title';
-            if(isT) document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<label class="d-flex align-items-center p-2 rounded bg-black border border-secondary border-opacity-25"><input type="checkbox" class="chk-mem form-check-input me-3" value="${u.id}"> ${u.av} ${u.name}</label>`).join('');
+            document.getElementById('bm-task').className = m==='task'?'flex-fill btn btn-sm text-white bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary';
+            document.getElementById('bm-dec').className = m==='dec'?'flex-fill btn btn-sm text-white bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary';
+            document.getElementById('sec-task-opt').classList.toggle('d-none', m!=='task');
+            if(m==='task') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<label class="btn btn-dark border-secondary btn-sm d-flex align-items-center gap-2"><input type="checkbox" class="chk-mem form-check-input m-0" value="${u.id}"> ${u.av} ${u.name.split(' ')[0]}</label>`).join('');
         }
-        function openCreate() { setMode('task'); document.getElementById('inp-t').value=''; document.getElementById('inp-d').value=''; MODALS.create.show(); }
-        
+        function openCreate() { setMode('task'); MODALS.modCreate.show(); }
+
         async function saveItem() {
             const t = document.getElementById('inp-t').value;
             const d = document.getElementById('inp-d').value;
@@ -713,72 +544,91 @@
             
             if(STATE.mode === 'dec') {
                 await sbClient.from('decisions').insert({subject:t, details:d});
+                toast('Saved','Decision Logged','check','text-success');
             } else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                // LOGIC: If LEADER -> Pending (Active). If MEMBER -> ApprovalReq
-                const st = STATE.mode==='future' ? 'Future' : (STATE.user.role==='LEADER' ? 'Pending' : 'ApprovalReq');
+                const st = STATE.user.role === 'LEADER' ? 'Pending' : 'ApprovalReq';
+                await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:st, progress:0});
                 
-                await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:st});
+                // Notify Leader if Member created
+                if(STATE.user.role !== 'LEADER') sendNoti(1, `${STATE.user.name} requested approval for task: ${t}`);
+                else tags.forEach(uid => sendNoti(uid, `New task assigned: ${t}`));
+
+                toast('Success','Task Created','check','text-success');
             }
-            MODALS.create.hide(); 
-            toast('Saved', STATE.user.role==='LEADER'?'Task Active':'Sent for Approval', 'check-circle','text-success'); 
-            render(false);
+            MODALS.modCreate.hide(); render(false);
         }
 
-        function initDone(id) { STATE.tempId = id; document.getElementById('chk-done').checked=false; toggleFin(); MODALS.proof.show(); }
-        function toggleFin() { document.getElementById('btn-fin').classList.toggle('disabled', !document.getElementById('chk-done').checked); }
-        async function finishTask() {
-            // Task goes to Review
-            await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.tempId);
-            MODALS.proof.hide(); toast('Submitted','Sent for review','send','text-info'); render(false);
-        }
-        
-        async function doCheckIn() { 
-            await sbClient.from('attendance').insert({user_id:STATE.user.id, date:new Date().toISOString().split('T')[0]}); 
-            render(false); toast('Checked In','Attendance Logged','clock','text-success'); 
+        async function setStatus(id, st, targetUid, title) {
+            await sbClient.from('tasks').update({status:st, updated_at:new Date()}).eq('id',id);
+            render(true);
+            
+            // Smart Notifications
+            if(st === 'Pending') sendNoti(targetUid, `Your task "${title}" is Approved & Active.`);
+            if(st === 'Review') sendNoti(1, `${STATE.user.name} finished "${title}". Review needed.`);
+            if(st === 'Done') sendNoti(targetUid, `Task "${title}" marked as Complete! Great job.`);
         }
 
-        // Leader Specific Actions
-        async function doApproveCreate(id) { await sbClient.from('tasks').update({status:'Pending'}).eq('id',id); render(false); toast('Assigned','Task is now active','thumbs-up','text-success'); }
-        async function doApproveFinish(id) { await sbClient.from('tasks').update({status:'Done'}).eq('id',id); render(false); toast('Approved','Task Completed','check-circle','text-success'); }
-        async function doActivate(id) { await sbClient.from('tasks').update({status:'Pending'}).eq('id',id); render(false); toast('Activated','Idea moved to active','zap','text-warning'); }
-
-        async function openArc(m) {
-            document.getElementById('arc-t').innerText = `Archive: ${m}`;
-            const s=`${m}-01`, e=`${m}-31`;
-            const [t,d,a] = await Promise.all([
-                sbClient.from('tasks').select('*').eq('status','Done').gte('updated_at',s).lte('updated_at',e),
-                sbClient.from('decisions').select('*').gte('created_at',s).lte('created_at',e),
-                sbClient.from('attendance').select('*').gte('date',s).lte('date',e)
-            ]);
-            STATE.arcData = {t:t.data, d:d.data, a:a.data};
-            MODALS.arc.show(); loadArcTab('t');
-        }
-        function loadArcTab(k) {
-            ['t','d','a'].forEach(x => { document.getElementById(`at-${x}`).classList.toggle('active',x===k); document.getElementById(`at-${x}`).classList.toggle('border-bottom',x===k); });
-            const d = STATE.arcData[k];
-            const c = document.getElementById('arc-b');
-            if(!d || !d.length) { c.innerHTML = '<div class="text-center text-muted p-4">No records.</div>'; return; }
-            if(k==='t') c.innerHTML = d.map(x=>`<div class="py-2 border-bottom border-secondary border-opacity-25"><div class="fw-bold text-white">${x.task_title}</div><small class="text-secondary">Finished: ${x.updated_at.slice(0,10)}</small></div>`).join('');
-            if(k==='d') c.innerHTML = d.map(x=>`<div class="py-2 border-bottom border-secondary border-opacity-25"><div class="fw-bold text-white">${x.subject}</div><small class="text-secondary">${x.details}</small></div>`).join('');
-            if(k==='a') c.innerHTML = d.map(x=>`<div class="py-2 border-bottom border-secondary border-opacity-25 d-flex justify-content-between"><span class="text-white">${TEAM.find(u=>u.id==x.user_id)?.name}</span><span class="font-monospace text-secondary">${x.date}</span></div>`).join('');
+        async function updateProg(id, val, title) {
+            await sbClient.from('tasks').update({progress:val}).eq('id',id);
+            if(val == 100) toast('Great Job','100% Progress! Submit for review.','star','text-warning');
         }
 
-        async function checkNoti(showModal) {
-            if(!STATE.user) return;
+        // --- CALENDAR LOGIC ---
+        function openCal(date) { document.getElementById('cal-d').value = date; MODALS.modCal.show(); }
+        async function saveCal() {
+            const t = document.getElementById('cal-t').value;
+            const d = document.getElementById('cal-d').value;
+            const y = document.getElementById('cal-y').value;
+            const st = STATE.user.role === 'LEADER' ? 'confirmed' : 'suggested';
+            
+            await sbClient.from('calendar_events').insert({title:t, date:d, type:y, status:st, creator_id:STATE.user.id});
+            if(st === 'suggested') sendNoti(1, `${STATE.user.name} suggested event: ${t}`);
+            MODALS.modCal.hide(); toast('Saved', st==='confirmed'?'Event Added':'Suggestion Sent','calendar','text-success'); render(false);
+        }
+        async function calApprove(id, isYes) {
+            if(isYes) await sbClient.from('calendar_events').update({status:'confirmed'}).eq('id',id);
+            else await sbClient.from('calendar_events').delete().eq('id',id);
+            render(true);
+        }
+
+        // --- NOTIFICATION ENGINE ---
+        async function sendNoti(uid, msg) {
+            await sbClient.from('notifications').insert({user_id:uid, message:msg});
+        }
+
+        async function checkNoti(open) {
             const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
-            const has = data && data.length > 0;
-            document.getElementById('badge-bell-m').classList.toggle('d-none', !has);
-            document.getElementById('badge-bell-d').classList.toggle('d-none', !has);
-            if(showModal) {
-                const box = document.getElementById('noti-list');
-                const {data: all} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
-                box.innerHTML = !all.length ? '<div class="p-4 text-center text-secondary">No notifications.</div>' : all.map(n=>`<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="${n.is_read?'text-secondary':'fw-bold text-white'}">${n.message}</div></div>`).join('');
+            const count = data ? data.length : 0;
+            document.getElementById('bad-m').classList.toggle('d-none', count===0);
+            document.getElementById('bad-d').classList.toggle('d-none', count===0);
+
+            // Browser Push
+            if(count > 0 && Notification.permission === "granted" && !open) {
+                new Notification("SLBDMIS Update", { body: `You have ${count} new notifications.` });
+            }
+
+            if(open) {
+                const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
+                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold text-white small">${n.message}</div><div class="text-xs text-secondary mt-1">${new Date(n.created_at).toLocaleString()}</div></div>`).join('') : '<div class="p-4 text-center text-secondary">No alerts.</div>';
                 await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
-                MODALS.noti.show();
+                MODALS.modNoti.show();
             }
         }
-        function toast(t, m, i, c) { document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m; const ico=document.getElementById('t-ico'); ico.setAttribute('data-lucide', i); ico.className = c; lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show(); }
+
+        async function pingAll() {
+            // Leader feature: Pings all members
+            TEAM.forEach(u => {
+                if(u.role !== 'LEADER') sendNoti(u.id, "LEADER PING: Please update your task progress immediately.");
+            });
+            toast('Ping Sent','All members notified.','send','text-info');
+        }
+
+        function toast(t, m, i, c) {
+            document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
+            const ico = document.getElementById('t-ico'); ico.setAttribute('data-lucide', i); ico.className = c;
+            lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
+        }
     </script>
 </body>
 </html>
