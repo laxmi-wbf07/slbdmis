@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <title>SLBDMIS | Commander V8</title>
+    <title>SLBDMIS | Commander V9.1</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -15,225 +13,223 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === THEME: DEEP OLED === */
+        /* === THEME: COMMANDER V9 === */
         :root {
-            --bg-core: #000000;
+            --bg-body: #000000;
             --bg-card: #0F0F0F;
-            --bg-sub: #181818;
-            --border: #2A2A2A;
-            --primary: #3B82F6; 
-            --primary-glow: rgba(59, 130, 246, 0.15);
+            --bg-hover: #161616;
+            --border: #222222;
+            --primary: #3B82F6;
+            --primary-dim: rgba(59, 130, 246, 0.15);
             --accent: #F59E0B;
+            --success: #10B981;
             --text-main: #FFFFFF;
-            --text-mute: #888888;
-            --radius: 16px;
+            --text-sub: #888888;
         }
 
         body {
-            background-color: var(--bg-core);
+            background-color: var(--bg-body);
             color: var(--text-main);
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Inter', sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* === UI COMPONENTS === */
-        .glass-header {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+        /* === UI ELEMENTS === */
+        .glass-panel {
+            background: rgba(15, 15, 15, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
         }
 
-        .card-panel {
+        .card-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        
-        .quick-btn {
-            background: var(--bg-sub);
+
+        .quick-link {
+            background: var(--bg-hover);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px;
+            height: 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 10px;
             text-decoration: none;
-            color: var(--text-mute);
-            height: 100px;
+            color: var(--text-sub);
             transition: 0.2s;
-            position: relative;
-            overflow: hidden;
+            text-align: center;
+            padding: 8px;
         }
-        .quick-btn:active { transform: scale(0.96); background: #222; border-color: var(--text-mute); color: white; }
-        .quick-btn::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            opacity: 0.5;
+        .quick-link:active { transform: scale(0.96); border-color: var(--primary); color: white; }
+
+        /* Tabs for "Not Yet" */
+        .nav-tabs-custom {
+            display: flex;
+            background: var(--bg-hover);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .nav-tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-sub);
+            transition: 0.3s;
+        }
+        .nav-tab-item.active {
+            background: var(--bg-card);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
         }
 
-        /* === ANIMATIONS === */
-        @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
-        .boot-scan {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
-            background: linear-gradient(to bottom, transparent 50%, rgba(59, 130, 246, 0.02) 51%);
-            background-size: 100% 4px;
+        /* Analytics Cards */
+        .stat-card {
+            background: linear-gradient(145deg, #111, #0a0a0a);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
         }
-        @keyframes pulse-g { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-        .pulse-btn { animation: pulse-g 2s infinite; }
 
-        /* === LAYOUT === */
-        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #222; display: grid; place-items: center; border: 1px solid var(--border); font-size: 20px; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        /* Animations */
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 100% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } }
+        .boot-btn { animation: pulse-glow 2s infinite; }
 
-        /* Responsive */
+        /* Layout */
         @media (min-width: 992px) {
-            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #050505; border-right: 1px solid var(--border); padding: 30px; z-index: 1000; display: flex; flex-direction: column; }
-            .main-view { margin-left: 280px; padding: 50px; max-width: 1400px; }
-            .mobile-el { display: none !important; }
+            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #050505; border-right: 1px solid var(--border); padding: 30px; z-index: 1000; }
+            .main-content { margin-left: 280px; padding: 40px; max-width: 1400px; }
+            .mobile-only { display: none !important; }
         }
         @media (max-width: 991px) {
-            .sidebar, .desktop-el { display: none !important; }
+            .sidebar, .desktop-only { display: none !important; }
             .mobile-head { position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 1000; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; }
-            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(70px + env(safe-area-inset-bottom)); background: rgba(5,5,5,0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 1000; align-items: center; }
-            .main-view { padding: 80px 16px 120px 16px; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: #000; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: 15px; z-index: 1000; }
+            .main-content { padding: 80px 16px 120px 16px; }
         }
     </style>
 </head>
 <body>
 
-    <audio id="sys-boot" src="https://assets.mixkit.co/active_storage/sfx/1364/1364-preview.mp3" preload="auto"></audio>
-    <audio id="sys-alert" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sfx-boot" src="https://assets.mixkit.co/active_storage/sfx/1364/1364-preview.mp3" preload="auto"></audio>
+    <audio id="sfx-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="view-boot" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex flex-column align-items-center justify-content-center p-4">
-        <div class="text-center mb-5">
-            <div class="mb-4 d-inline-block p-3 rounded-circle border border-primary border-opacity-25 bg-primary bg-opacity-10">
-                <i data-lucide="cpu" class="text-primary" size="48"></i>
-            </div>
-            <h1 class="h3 fw-bold text-white tracking-tight">COMMANDER V8</h1>
-            <p class="text-secondary small font-monospace">SYSTEM INITIALIZATION REQUIRED</p>
+        <div class="mb-5 text-center">
+            <i data-lucide="cpu" class="text-primary mb-3" size="50"></i>
+            <h1 class="h3 fw-bold ls-2">SYSTEM V9.1</h1>
+            <p class="text-secondary small font-monospace">READY FOR INITIALIZATION</p>
         </div>
-        <button onclick="systemInit()" class="btn btn-primary btn-lg rounded-pill fw-bold px-5 py-3 shadow-lg pulse-btn border-0">
+        <button onclick="bootSystem()" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg boot-btn">
             INITIALIZE SYSTEM
         </button>
-        <div class="mt-5 text-secondary text-xs opacity-50 font-monospace">
-            AUDIO: STANDBY<br>NOTIFICATIONS: STANDBY<br>DB: CONNECTED
-        </div>
     </div>
 
     <div id="view-auth" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black z-2 d-flex align-items-center justify-content-center p-3">
-        <div class="card-panel p-4 w-100 position-relative overflow-hidden" style="max-width: 400px;">
+        <div class="card-box p-4 w-100" style="max-width: 400px;">
             <div class="text-center mb-4">
                 <h4 class="fw-bold">IDENTIFICATION</h4>
                 <p class="text-secondary text-xs">SELECT OPERATOR</p>
             </div>
-            <div id="auth-grid" class="row g-2"></div>
+            <div id="auth-list" class="row g-2"></div>
             
-            <div id="auth-pin" class="d-none">
-                <div class="bg-sub p-3 rounded-3 mb-4 border border-secondary border-opacity-10 d-flex align-items-center gap-3">
-                    <div id="l-av" class="avatar"></div>
-                    <div>
-                        <div id="l-name" class="fw-bold text-white"></div>
-                        <div class="text-xs text-secondary">Security Clearance</div>
-                    </div>
+            <div id="auth-pin" class="d-none animate-fade">
+                <div class="bg-dark p-3 rounded-3 mb-4 d-flex align-items-center gap-3 border border-secondary border-opacity-25">
+                    <div id="l-av" class="fs-4"></div>
+                    <div><div id="l-name" class="fw-bold text-white"></div><div class="text-xs text-secondary">Enter PIN</div></div>
                 </div>
-                <input type="password" id="inp-pin" class="form-control bg-dark border-secondary text-center fs-3 mb-3 text-white py-3 font-monospace" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="verifyPin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">ACCESS</button>
-                <button onclick="resetAuth()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none small">Cancel</button>
+                <input type="password" id="inp-pin" class="form-control bg-black text-white text-center fs-3 mb-3 py-3 font-monospace border-secondary" placeholder="••••" maxlength="11" inputmode="numeric">
+                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">AUTHENTICATE</button>
+                <button onclick="resetAuth()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
-        
-        <header class="mobile-head glass-header mobile-el">
+        <header class="mobile-head glass-panel mobile-only">
             <div class="d-flex align-items-center gap-2">
                 <i data-lucide="layout-grid" class="text-primary" size="20"></i>
-                <span id="m-tit" class="fw-bold">Dashboard</span>
+                <span id="m-tit" class="fw-bold">DASHBOARD</span>
             </div>
-            <div class="d-flex gap-2">
-                <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 rounded-circle p-2 position-relative">
-                    <i data-lucide="bell" size="20"></i>
-                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger border border-black rounded-circle d-none"></span>
-                </button>
-                <button onclick="openCreate('task')" class="btn btn-primary rounded-circle p-2 text-white"><i data-lucide="plus" size="20"></i></button>
+            <div class="d-flex gap-3 align-items-center">
+                <div class="position-relative" onclick="checkNoti(true)">
+                    <i data-lucide="bell" class="text-white" size="22"></i>
+                    <span id="bad-m" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none border border-black">0</span>
+                </div>
+                <i onclick="openCreate('task')" data-lucide="plus-circle" class="text-primary" size="24"></i>
             </div>
         </header>
 
         <nav class="sidebar">
             <div class="d-flex align-items-center gap-3 mb-5">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-3"><i data-lucide="command" class="text-primary" size="24"></i></div>
-                <div><div class="fw-bold lh-1">SLBDMIS</div><small class="text-secondary text-xs">V8.0 FINAL</small></div>
+                <div class="bg-primary bg-opacity-10 p-2 rounded"><i data-lucide="command" class="text-primary"></i></div>
+                <div><div class="fw-bold">SLBDMIS</div><div class="text-xs text-secondary">COMMANDER</div></div>
             </div>
             <div id="nav-d" class="d-flex flex-column gap-2 flex-grow-1"></div>
-            <div class="mt-auto border-top border-secondary border-opacity-25 pt-4">
-                <div class="d-flex align-items-center gap-3 p-2 rounded bg-sub border border-secondary border-opacity-10 mb-3">
-                    <div id="d-av" class="avatar" style="width:32px; height:32px; font-size:16px;"></div>
-                    <div class="overflow-hidden">
-                        <div id="d-name" class="fw-bold text-white small text-truncate"></div>
-                        <div class="text-success text-xs">● Active</div>
-                    </div>
+            <div class="mt-auto pt-4 border-top border-secondary border-opacity-25">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div id="d-av" class="fs-5"></div>
+                    <div><div id="d-name" class="fw-bold text-sm"></div><div class="text-xs text-success">● Online</div></div>
                 </div>
-                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Abort Session</button>
+                <button onclick="doLogout()" class="btn btn-outline-danger btn-sm w-100">Disconnect</button>
             </div>
         </nav>
 
-        <main class="main-view">
-            <div class="desktop-el d-flex justify-content-between align-items-center mb-5">
-                <div>
-                    <h2 id="d-tit" class="fw-bold m-0">Command Center</h2>
-                    <p class="text-secondary m-0 small font-monospace">SYSTEM STATUS: OPTIMAL</p>
-                </div>
+        <main class="main-content">
+            <div class="desktop-only d-flex justify-content-between align-items-center mb-5">
+                <h2 id="d-tit" class="fw-bold m-0">Dashboard</h2>
                 <div class="d-flex gap-3">
-                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 px-3 rounded-pill position-relative hover-bg">
-                        <i data-lucide="bell" size="18" class="me-2"></i>Alerts
-                        <span id="bad-d" class="position-absolute top-0 end-0 translate-middle p-1 bg-danger border border-black rounded-circle d-none"></span>
+                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 px-3 rounded-pill position-relative">
+                        <i data-lucide="bell" size="18" class="me-2"></i> Alerts
+                        <span id="bad-d" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
                     </button>
-                    <button onclick="openCreate('task')" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
-                        <i data-lucide="plus-circle" size="18"></i> New Entry
-                    </button>
+                    <button onclick="openCreate('task')" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg">New Entry</button>
                 </div>
             </div>
-
             <div id="content-box"></div>
         </main>
 
-        <nav class="mobile-nav mobile-el" id="nav-m"></nav>
+        <nav class="mobile-nav mobile-only" id="nav-m"></nav>
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered">
-            <div class="modal-content card-panel border-0">
+            <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold">New Log Entry</h5>
+                    <h5 class="fw-bold">New Record</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="d-flex gap-2 mb-4 bg-black p-1 rounded-3 border border-secondary border-opacity-25">
-                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25">Task</button>
-                        <button onclick="setMode('future')" id="bm-future" class="flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2">Future/Plan</button>
-                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2">Decision</button>
+                    <div class="d-flex gap-2 mb-3 bg-dark p-1 rounded-3">
+                        <button onclick="setMode('task')" id="bm-task" class="btn flex-fill btn-sm fw-bold">Task</button>
+                        <button onclick="setMode('future')" id="bm-future" class="btn flex-fill btn-sm text-secondary">Not Yet</button>
+                        <button onclick="setMode('dec')" id="bm-dec" class="btn flex-fill btn-sm text-secondary">Decision</button>
                     </div>
 
-                    <input id="inp-t" class="form-control bg-dark text-white border-secondary mb-3 py-3" placeholder="Subject / Title">
-                    <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Description..."></textarea>
+                    <input id="inp-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Title">
+                    <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Details..."></textarea>
                     
-                    <div id="sec-opts">
-                        <label class="text-xs fw-bold text-secondary mb-2">TARGET DATE</label>
-                        <input type="date" id="inp-date" class="form-control bg-dark text-white border-secondary mb-4">
+                    <div id="sec-task">
+                        <label class="text-xs fw-bold text-secondary mb-2">DUE DATE</label>
+                        <input type="date" id="inp-date" class="form-control bg-dark text-white border-secondary mb-3">
                         <div id="sec-assign">
-                            <label class="text-xs fw-bold text-secondary mb-2">ASSIGN PERSONNEL</label>
+                            <label class="text-xs fw-bold text-secondary mb-2">ASSIGN TEAM</label>
                             <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
                         </div>
                     </div>
 
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Initialize Record</button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg">Save Record</button>
                 </div>
             </div>
         </div>
@@ -241,7 +237,7 @@
 
     <div class="modal fade" id="modCal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content card-panel border-0">
+            <div class="modal-content card-box border-0">
                 <div class="modal-body p-4">
                     <h5 class="fw-bold mb-3">Add Event</h5>
                     <input id="cal-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Event Name">
@@ -254,7 +250,7 @@
                             </select>
                         </div>
                     </div>
-                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold py-3">Confirm Schedule</button>
+                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold">Confirm</button>
                 </div>
             </div>
         </div>
@@ -262,9 +258,9 @@
 
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content card-panel border-0">
+            <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25 bg-black">
-                    <h5 class="modal-title fw-bold">System Logs</h5>
+                    <h5 class="modal-title fw-bold">Alerts</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -275,11 +271,11 @@
     </div>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
-        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4 glass-header">
+        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4">
             <div class="d-flex">
                 <div class="toast-body d-flex gap-3 align-items-center">
                     <i id="t-ico" data-lucide="check" class="text-success"></i>
-                    <div><strong id="t-tit" class="d-block text-white">System</strong><small id="t-msg" class="text-secondary">Done</small></div>
+                    <div><strong id="t-tit" class="d-block text-white">System</strong><small id="t-msg" class="text-secondary">Action Completed</small></div>
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
@@ -287,11 +283,11 @@
     </div>
 
     <script>
-        // CONFIGURATION
+        // CONFIG
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
-
+        
         const TEAM = [
             { id: 1, name: "Pema Ugyen", av: "👨‍💼", pin: "11107008201", role: "LEADER" },
             { id: 2, name: "Jamphel",    av: "👨‍💻", pin: "11302003634", role: "MEMBER" },
@@ -299,70 +295,72 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', lastNoti: 0 };
+        let STATE = { user: null, page: 'home', mode: 'task', subTab: 'live', lastNoti: 0 };
         const MODALS = {};
-        const SOUNDS = { boot: document.getElementById('sys-boot'), alert: document.getElementById('sys-alert') };
 
         // --- 1. BOOT SEQUENCE ---
         window.onload = () => {
             lucide.createIcons();
             ['modCreate','modCal','modNoti'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
-            // Ensure Boot Screen is visible first
+            
+            // If already logged in, we still show boot for Audio Context, but can skip Auth later
             document.getElementById('view-boot').classList.remove('d-none');
         };
 
-        function systemInit() {
-            // Unlocks Audio Context for mobile browsers
-            SOUNDS.boot.play().catch(e => console.log("Audio prevent", e));
+        function bootSystem() {
+            // Unlock Audio
+            document.getElementById('sfx-boot').play().catch(()=>{});
             
-            // Request Notifications
+            // Request Noti
             if (Notification.permission !== "granted") Notification.requestPermission();
-
-            // Proceed
+            
+            // Navigate
             document.getElementById('view-boot').classList.add('d-none');
             const uid = localStorage.getItem('slbd_uid');
             if(uid) login(TEAM.find(x => x.id == uid));
             else initAuth();
         }
 
-        // --- 2. AUTHENTICATION ---
+        // --- 2. AUTH ---
         function initAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
-            document.getElementById('auth-grid').innerHTML = TEAM.map(u => `
-                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-panel p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer border-opacity-25 hover-border-primary">
-                    <div class="display-6 mb-2">${u.av}</div><div class="fw-bold small text-uppercase text-secondary">${u.name.split(' ')[0]}</div>
+            document.getElementById('auth-list').innerHTML = TEAM.map(u => `
+                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center h-100 cursor-pointer quick-link border-opacity-50">
+                    <div class="fs-1 mb-1">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
                 </div></div>`).join('');
         }
 
         function preLogin(id) {
             STATE.sel = TEAM.find(u=>u.id===id);
-            document.getElementById('auth-grid').classList.add('d-none');
+            document.getElementById('auth-list').classList.add('d-none');
             document.getElementById('auth-pin').classList.remove('d-none');
             document.getElementById('l-av').innerText = STATE.sel.av;
             document.getElementById('l-name').innerText = STATE.sel.name;
         }
+
         function resetAuth() {
             document.getElementById('auth-pin').classList.add('d-none');
-            document.getElementById('auth-grid').classList.remove('d-none');
+            document.getElementById('auth-list').classList.remove('d-none');
         }
-        function verifyPin() {
+
+        function tryLogin() {
             if(document.getElementById('inp-pin').value === STATE.sel.pin) {
                 localStorage.setItem('slbd_uid', STATE.sel.id);
                 document.getElementById('view-auth').classList.add('d-none');
                 login(STATE.sel);
             } else {
-                toast('Error', 'Invalid Credentials', 'lock', 'text-danger');
+                toast('Denied', 'Incorrect PIN', 'lock', 'text-danger');
                 document.getElementById('inp-pin').value = '';
             }
         }
+
         async function login(u) {
             STATE.user = u;
             document.getElementById('view-app').classList.remove('d-none');
             document.getElementById('d-av').innerText = u.av;
             document.getElementById('d-name').innerText = u.name;
             
-            // Build Navigation
-            const pgs = [
+            const navs = [
                 {id:'home', t:'Dash', i:'layout-grid'},
                 {id:'cal', t:'Schedule', i:'calendar'},
                 {id:'task', t:'Tasks', i:'check-square'},
@@ -370,34 +368,35 @@
                 {id:'rec', t:'Files', i:'folder'}
             ];
             
-            document.getElementById('nav-d').innerHTML = pgs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary hover-bg"><i data-lucide="${p.i}" size="20"></i><span class="fw-bold small">${p.t}</span></a>`).join('');
-            document.getElementById('nav-m').innerHTML = pgs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 flex-fill h-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i><span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
+            document.getElementById('nav-d').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary" style="transition:0.2s"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join('');
+            document.getElementById('nav-m').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
 
-            // Log Attendance
+            // Attendance
             const today = new Date().toISOString().split('T')[0];
             const {data} = await sbClient.from('attendance').select('*').eq('user_id',u.id).eq('date',today);
             if(!data.length) await sbClient.from('attendance').insert({user_id:u.id, date:today});
 
             nav('home');
-            // Polling
             setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
             checkNoti(false);
         }
-        function logout() { localStorage.removeItem('slbd_uid'); location.reload(); }
 
-        // --- 3. NAVIGATION & LOGIC ---
+        function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
+
+        // --- 3. NAV & RENDER ---
         function nav(p) {
             STATE.page = p;
-            document.querySelectorAll('[id^="nd-"]').forEach(e => { e.classList.remove('bg-primary','bg-opacity-10','text-white'); e.classList.add('text-secondary'); });
-            document.querySelectorAll('[id^="nm-"]').forEach(e => { e.classList.remove('text-primary','opacity-100'); e.classList.add('opacity-50'); });
-            
+            document.querySelectorAll('[id^="nd-"]').forEach(e => e.classList.remove('bg-primary','bg-opacity-10','text-white'));
+            document.querySelectorAll('[id^="nm-"]').forEach(e => {e.classList.remove('text-primary','opacity-100'); e.classList.add('opacity-50');});
             const nd = document.getElementById(`nd-${p}`); if(nd) { nd.classList.add('bg-primary','bg-opacity-10','text-white'); nd.classList.remove('text-secondary'); }
             const nm = document.getElementById(`nm-${p}`); if(nm) { nm.classList.add('text-primary','opacity-100'); nm.classList.remove('opacity-50'); }
             
-            const titles = {home:'Command Center',cal:'Schedule',task:'Mission Logs',dec:'Decisions',rec:'Archives'};
-            document.getElementById('d-tit').innerText = document.getElementById('m-tit').innerText = titles[p];
+            const titles = {home:'Command Center', cal:'Schedule', task:'Mission Logs', dec:'Decisions', rec:'Archives'};
+            document.getElementById('m-tit').innerText = document.getElementById('d-tit').innerText = titles[p];
             render(false);
         }
+
+        function switchTab(t) { STATE.subTab = t; render(true); }
 
         async function render(silent) {
             const c = document.getElementById('content-box');
@@ -408,84 +407,101 @@
                     sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
                     sbClient.from('calendar_events').select('*')
                 ]);
-
-                // Filter Tasks
+                
+                // Segregate Tasks
                 const activeT = tasks ? tasks.filter(t => t.status !== 'Done' && t.status !== 'Planned') : [];
-                const plannedT = tasks ? tasks.filter(t => t.status === 'Planned') : [];
+                const futureT = tasks ? tasks.filter(t => t.status === 'Planned') : [];
 
                 if(STATE.page === 'home') {
-                    const links = `
+                    // 4 Quick Links (UPDATED)
+                    const quickLinks = `
                         <div class="row g-3 mb-4">
-                            <div class="col-6 col-lg-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="quick-btn"><i data-lucide="shield" size="28" class="text-warning"></i><span class="text-xs fw-bold">ADMIN / FIN</span></a></div>
-                            <div class="col-6 col-lg-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="quick-btn"><i data-lucide="cpu" size="28" class="text-info"></i><span class="text-xs fw-bold">MACHINES</span></a></div>
-                            <div class="col-6 col-lg-3"><a href="#" class="quick-btn"><i data-lucide="users" size="28" class="text-success"></i><span class="text-xs fw-bold">HR & POLICY</span></a></div>
-                            <div class="col-6 col-lg-3"><a href="#" class="quick-btn"><i data-lucide="alert-triangle" size="28" class="text-danger"></i><span class="text-xs fw-bold">SAFETY LOGS</span></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="quick-link"><i data-lucide="shield" size="24" class="text-warning mb-2"></i><span class="text-xs fw-bold">ADMIN & FIN</span></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="quick-link"><i data-lucide="cpu" size="24" class="text-info mb-2"></i><span class="text-xs fw-bold">MACHINE UNIT</span></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="quick-link"><i data-lucide="image" size="24" class="text-success mb-2"></i><span class="text-xs fw-bold">PICTURES</span></a></div>
+                            <div class="col-6 col-md-3"><a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="quick-link"><i data-lucide="presentation" size="24" class="text-danger mb-2"></i><span class="text-xs fw-bold">PROPOSALS & PPT</span></a></div>
                         </div>`;
 
-                    // "Not Yet" / Future Section
-                    const futureSec = `
-                        <div class="card-panel p-3 mb-4 border-start border-4 border-warning bg-opacity-10">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="fw-bold m-0 text-warning d-flex align-items-center gap-2"><i data-lucide="clock" size="16"></i> PLANNED / NOT YET</h6>
-                                <button onclick="openCreate('future')" class="btn btn-sm btn-outline-warning py-0 text-xs">ADD LOG</button>
-                            </div>
-                            <div class="d-flex gap-2 overflow-x-auto pb-2">
-                                ${plannedT.length ? plannedT.map(t => `<div class="bg-black p-3 rounded border border-secondary border-opacity-25" style="min-width:200px"><div class="fw-bold text-sm text-white text-truncate">${t.task_title}</div><div class="text-xs text-secondary mt-1">${t.due_date||'No Date'}</div></div>`).join('') : '<span class="text-secondary text-xs fst-italic">No future logs pending.</span>'}
-                            </div>
+                    // Tab Switcher for "Not Yet"
+                    const tabSwitch = `
+                        <div class="nav-tabs-custom">
+                            <div onclick="switchTab('live')" class="nav-tab-item ${STATE.subTab==='live'?'active':''}">LIVE OPS</div>
+                            <div onclick="switchTab('notyet')" class="nav-tab-item ${STATE.subTab==='notyet'?'active':''}">NOT YET</div>
                         </div>`;
 
-                    let mainContent = '';
-                    if(STATE.user.role === 'LEADER') {
-                        const rows = TEAM.map(u => {
-                            const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
-                            if(!uts.length) return '';
-                            return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span class="avatar" style="width:24px;height:24px;font-size:12px">${u.av}</span><span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
-                        }).join('');
-                        mainContent = `<div class="card-panel"><div class="p-3 bg-sub border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 rounded-pill text-xs">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">No active operations.</div>'}</div></div>`;
+                    let viewContent = '';
+
+                    if(STATE.subTab === 'notyet') {
+                        // "Not Yet" View
+                        viewContent = futureT.length 
+                            ? `<div class="row g-3">${futureT.map(t => `<div class="col-12"><div class="card-box p-3 d-flex justify-content-between align-items-center"><div class="d-flex align-items-center gap-3"><div class="bg-secondary bg-opacity-25 p-2 rounded"><i data-lucide="clock" class="text-secondary"></i></div><div><div class="fw-bold">${t.task_title}</div><div class="text-xs text-secondary">${t.description}</div></div></div><button onclick="setStatus(${t.id},'${STATE.user.role==='LEADER'?'Pending':'ApprovalReq'}',${t.creator_id},'${t.task_title}')" class="btn btn-sm btn-outline-primary rounded-pill">Activate</button></div></div>`).join('')}</div>`
+                            : `<div class="text-center py-5 text-secondary card-box"><i data-lucide="coffee" size="32" class="mb-2 opacity-50"></i><p class="m-0 small">No future plans logged.</p></div>`;
                     } else {
-                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                        mainContent = `<div class="card-panel p-4"><h5 class="fw-bold mb-4">Active Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
+                        // "Live" View
+                        if(STATE.user.role === 'LEADER') {
+                            // Analytics
+                            const doneCount = tasks.filter(t=>t.status==='Done').length;
+                            const totalCount = tasks.length;
+                            const rate = totalCount ? Math.round((doneCount/totalCount)*100) : 0;
+                            const analytics = `
+                                <div class="row g-2 mb-3">
+                                    <div class="col-4"><div class="stat-card text-center"><div class="text-xs text-secondary fw-bold">COMPLETION</div><div class="fs-4 fw-bold text-success">${rate}%</div></div></div>
+                                    <div class="col-4"><div class="stat-card text-center"><div class="text-xs text-secondary fw-bold">ACTIVE</div><div class="fs-4 fw-bold text-primary">${activeT.length}</div></div></div>
+                                    <div class="col-4"><div class="stat-card text-center"><div class="text-xs text-secondary fw-bold">TEAM</div><div class="fs-4 fw-bold text-warning">${TEAM.length}</div></div></div>
+                                </div>`;
+
+                            const rows = TEAM.map(u => {
+                                const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
+                                if(!uts.length) return '';
+                                return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:20px">${u.av}</span> <span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
+                            }).join('');
+                            
+                            viewContent = analytics + `<div class="card-box h-100"><div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Team Status</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">All quiet on the front.</div>'}</div></div>`;
+                        } else {
+                            // Member View
+                            const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
+                            viewContent = `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4">My Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
+                        }
                     }
-                    c.innerHTML = links + futureSec + mainContent;
+
+                    c.innerHTML = quickLinks + tabSwitch + viewContent;
                 }
 
                 if(STATE.page === 'task') {
-                    // Show Planned tasks here too? Let's show separate
-                    const allT = [...activeT, ...plannedT];
-                    c.innerHTML = allT.length ? `<div class="row g-3">${allT.map(t => {
+                    const allT = activeT; // Show only active here
+                    if(!allT.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
+                    else c.innerHTML = `<div class="row g-3">${allT.map(t => {
                         let btn = '';
-                        if(STATE.user.role==='LEADER' && t.status!=='Planned') {
-                            if(t.status==='ApprovalReq') btn=`<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 text-black fw-bold">Approve</button>`;
+                        if(STATE.user.role==='LEADER') {
+                            if(t.status==='ApprovalReq') btn=`<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold text-black">Approve</button>`;
                             else if(t.status==='Review') btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finalize</button>`;
                             else btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
-                        } else if(t.status==='Planned') {
-                             btn=`<button onclick="setStatus(${t.id},'${STATE.user.role==='LEADER'?'Pending':'ApprovalReq'}',${t.creator_id},'${t.task_title}')" class="btn btn-outline-primary w-100 btn-sm mt-3">Activate Now</button>`;
-                        } else if(t.status==='Pending' || t.status==='Ongoing') {
-                             btn=`<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit Review</button>`;
-                        }
-                        return `<div class="col-12 col-md-6 col-lg-4"><div class="card-panel p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small text-secondary fw-bold">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-black" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${btn}</div></div>`;
-                    }).join('')}</div>` : '<div class="text-center py-5 text-secondary">No missions.</div>';
+                        } else if(t.status==='Pending' || t.status==='Ongoing') btn=`<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit for Review</button>`;
+                        
+                        return `<div class="col-12 col-md-6 col-lg-4"><div class="card-box p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small text-secondary fw-bold">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-black" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${btn}</div></div>`;
+                    }).join('')}</div>`;
                 }
 
                 if(STATE.page === 'cal') {
-                    const d = new Date(); const dim = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+                    const d = new Date();
+                    const dim = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
                     let cells = '';
                     for(let i=1;i<=dim;i++) {
                         const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                         const es = evts ? evts.filter(e=>e.date===str) : [];
-                        cells += `<div onclick="openCal('${str}')" class="p-2 rounded border border-transparent hover-border-primary bg-sub d-flex flex-column" style="min-height:80px;cursor:pointer;${i===d.getDate()?'border-color:var(--primary);background:#111':''}"><span class="text-end text-xs opacity-50 fw-bold">${i}</span>${es.map(e=>`<div class="text-xs text-truncate px-1 rounded mt-1 fw-bold" style="background:${e.type==='meeting'?'rgba(59,130,246,0.2)':'rgba(245,158,11,0.2)'};color:${e.type==='meeting'?'#93C5FD':'#FCD34D'}">${e.title}</div>`).join('')}</div>`;
+                        cells += `<div onclick="openCal('${str}')" class="p-2 rounded border border-transparent hover-border-primary bg-dark text-white d-flex flex-column" style="min-height:80px; cursor:pointer; ${i===d.getDate()?'border-color:var(--primary); background:#111':''}"><span class="text-end text-xs opacity-50 fw-bold">${i}</span>${es.map(e=>`<div class="text-xs text-truncate px-1 rounded mt-1 fw-bold" style="background:${e.type==='meeting'?'rgba(59,130,246,0.2)':'rgba(245,158,11,0.2)'};color:${e.type==='meeting'?'#93C5FD':'#FCD34D'}">${e.title}</div>`).join('')}</div>`;
                     }
-                    c.innerHTML = `<div class="d-flex justify-content-between mb-4 align-items-center"><h4 class="fw-bold m-0 text-uppercase">${d.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow">Add Event</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">${['S','M','T','W','T','F','S'].map(x=>`<div class="text-center text-xs text-secondary py-2 fw-bold">${x}</div>`).join('')}${cells}</div>`;
+                    c.innerHTML = `<div class="d-flex justify-content-between mb-4 align-items-center"><h4 class="fw-bold m-0 text-uppercase">${d.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow">Add Event</button></div><div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px;">${['S','M','T','W','T','F','S'].map(x=>`<div class="text-center text-xs text-secondary py-2 fw-bold">${x}</div>`).join('')}${cells}</div>`;
                 }
-
+                
                 if(STATE.page === 'dec') {
                     const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                    c.innerHTML = data && data.length ? data.map(d=>`<div class="card-panel p-4 mb-2"><div class="fw-bold text-white">${d.subject}</div><p class="text-secondary small m-0">${d.details}</p></div>`).join('') : '<div class="text-center text-secondary py-5">No logs.</div>';
+                    c.innerHTML = data && data.length ? data.map(d=>`<div class="card-box p-4 mb-2"><div class="fw-bold text-white">${d.subject}</div><p class="text-secondary small m-0">${d.details}</p></div>`).join('') : '<div class="text-center text-secondary py-5">No logs.</div>';
                 }
 
                 if(STATE.page === 'rec') {
                     const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                    c.innerHTML = `<div class="card-panel overflow-hidden"><table class="table table-dark mb-0"><thead><tr><th class="p-3 text-secondary text-xs">ARCHIVED TASK</th><th class="p-3 text-secondary text-xs text-end">DATE</th></tr></thead><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
+                    c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark mb-0"><thead><tr><th class="p-3 text-secondary text-xs">TASK</th><th class="p-3 text-secondary text-xs text-end">DATE</th></tr></thead><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
                 }
 
             } catch(e) { console.error(e); }
@@ -495,37 +511,38 @@
         // --- 4. ACTIONS ---
         function setMode(m) { 
             STATE.mode = m; 
-            ['task','dec','future'].forEach(k => {
+            ['task','future','dec'].forEach(k => {
                 const el = document.getElementById('bm-'+k);
-                if(el) el.className = (k === m || (k==='future' && m==='future')) ? 'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25' : 'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2';
+                if(el) el.className = (k === m) ? 'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25' : 'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2';
             });
-            document.getElementById('sec-opts').classList.toggle('d-none', m==='dec');
-            document.getElementById('sec-assign').classList.toggle('d-none', m==='future');
-            if(m!=='dec') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="chk-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="chk-${u.id}">${u.name.split(' ')[0]}</label>`).join('');
+            document.getElementById('sec-task').classList.toggle('d-none', m==='dec');
+            document.getElementById('sec-assign').classList.toggle('d-none', m!=='task'); // Only show members for task
+            if(m==='task') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join('');
         }
         function openCreate(m) { setMode(m); MODALS.modCreate.show(); }
         async function saveItem() {
-            const btn = document.getElementById('btn-save'); btn.innerText = 'Processing...';
+            const btn = document.getElementById('btn-save'); btn.innerText = 'Saving...';
             const t = document.getElementById('inp-t').value; const d = document.getElementById('inp-d').value;
-            if(!t) { toast('Error','Title Required','alert-circle','text-danger'); btn.innerText='Initialize Record'; return; }
+            if(!t) { toast('Error','Title Required','alert-circle','text-danger'); btn.innerText='Save Record'; return; }
             
             if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:d});
-            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, status:'Planned', progress:0});
+            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:d, status:'Planned', creator_id:STATE.user.id, progress:0});
             else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
                 await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
                 tags.forEach(id => sendNoti(id, `New Task: ${t}`));
+                if(STATE.user.role!=='LEADER') sendNoti(1, `Approval Req: ${t}`);
             }
-            MODALS.modCreate.hide(); toast('Success','Log Created','check-circle','text-success'); render(false); btn.innerText = 'Initialize Record';
+            MODALS.modCreate.hide(); toast('Success','Record Saved','check-circle','text-success'); render(false); btn.innerText = 'Save Record';
         }
         async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); if(s==='Done') sendNoti(uid,`Complete: ${tit}`); if(s==='Review') sendNoti(1,`Review: ${tit}`); }
         async function updProg(id,v) { await sbClient.from('tasks').update({progress:v}).eq('id',id); }
         function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
         async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success'); render(false); }
-
-        // --- 5. ALERTS ---
+        
+        // --- 5. NOTIFICATIONS ---
         async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
-        function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info'); }
+        function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Team Pinged','radio','text-info'); }
         async function checkNoti(open) {
             const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
             const count = data?.length || 0;
@@ -534,7 +551,7 @@
             if(count > 0) {
                 bM.classList.remove('d-none'); bM.innerText = count; bD.classList.remove('d-none'); bD.innerText = count;
                 if(count > STATE.lastNoti) {
-                    SOUNDS.alert.play().catch(()=>{});
+                    document.getElementById('sfx-ping').play().catch(()=>{});
                     if(navigator.vibrate) navigator.vibrate([100,50,100]);
                     if(Notification.permission === "granted") new Notification("SLBDMIS", {body: `${count} New Alerts`});
                 }
@@ -549,6 +566,7 @@
             }
         }
 
+        // --- UTILS ---
         function toast(t,m,i,c) {
             document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
             document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
