@@ -15,220 +15,204 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === CORE THEME === */
-        :root { 
-            --bg-body: #050505; 
-            --bg-card: #121212; 
-            --bg-subtle: #1E1E1E;
-            --border: #2A2A2A;
-            --primary: #3B82F6; /* Bright Blue */
-            --primary-glow: rgba(59, 130, 246, 0.5);
-            --success: #10B981;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --text-main: #F3F4F6;
-            --text-sub: #9CA3AF;
-            --sidebar-w: 280px;
-            --nav-h: 80px;
+        /* === THEME ENGINE === */
+        :root {
+            --bg-body: #000000;
+            --bg-card: #111111;
+            --bg-glass: rgba(17, 17, 17, 0.85);
+            --border: #262626;
+            --primary: #2563eb;    /* Deep Blue */
+            --primary-g: #3b82f6;  /* Glow Blue */
+            --accent: #f59e0b;     /* Amber */
+            --danger: #ef4444;     /* Red */
+            --success: #10b981;    /* Emerald */
+            --text-main: #ffffff;
+            --text-sub: #a3a3a3;
+            --radius: 16px;
+            --nav-h: 70px;
         }
 
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+        /* === BASE === */
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
-            /* Safe area for iPhone home bar */
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* === UTILITIES === */
-        .glass { 
-            background: rgba(18, 18, 18, 0.85); 
-            backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px); 
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        
+        /* === UTILS === */
+        .glass { background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
         .card-box {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        
         .btn-primary { 
-            background-color: var(--primary); 
-            border: 1px solid rgba(255,255,255,0.1); 
-            box-shadow: 0 0 15px var(--primary-glow);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-g) 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
         .btn-primary:active { transform: scale(0.98); }
-
+        
         .form-control, .form-select {
-            background-color: #000 !important;
-            border: 1px solid var(--border);
-            color: white !important;
-            padding: 12px;
-            border-radius: 10px;
+            background: #0a0a0a; border: 1px solid var(--border);
+            color: white; padding: 14px; border-radius: 12px;
         }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25); }
-
-        /* === AVATARS === */
-        .avatar { 
-            width: 44px; height: 44px; border-radius: 50%; 
-            background: var(--bg-subtle); display: flex; align-items: center; justify-content: center; 
-            font-size: 22px; border: 2px solid var(--border);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
+        
+        /* === COMPONENTS === */
+        .avatar {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: #1a1a1a; display: grid; place-items: center;
+            font-size: 24px; border: 2px solid var(--border);
         }
-        .avatar-sm { width: 28px; height: 28px; font-size: 14px; margin-right: -8px; border: 2px solid var(--bg-card); }
+        .avatar-sm { width: 30px; height: 30px; font-size: 16px; margin-right: -8px; border-color: var(--bg-card); }
+        
+        .status-pill {
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
 
         /* === CALENDAR === */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .cal-day { 
-            min-height: 85px; background: var(--bg-subtle); 
-            border-radius: 8px; padding: 4px; border: 1px solid transparent; cursor: pointer;
-            transition: background 0.2s;
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-day {
+            min-height: 90px; background: #0a0a0a; border-radius: 6px; padding: 4px;
+            border: 1px solid transparent; transition: 0.2s; cursor: pointer;
         }
-        .cal-day:active { background: #2a2a2a; }
-        .cal-evt { 
-            font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: 600;
-            margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        .cal-day.active { border-color: var(--primary); background: #111; }
+        .cal-evt {
+            font-size: 10px; margin-top: 2px; padding: 2px 4px; border-radius: 3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;
         }
-        .cal-evt.meeting { background: rgba(59, 130, 246, 0.2); color: #93C5FD; border-left: 2px solid var(--primary); }
-        .cal-evt.deadline { background: rgba(245, 158, 11, 0.2); color: #FCD34D; border-left: 2px solid var(--warning); }
-        .cal-evt.suggested { border: 1px dashed var(--text-sub); opacity: 0.7; }
 
         /* === LAYOUT === */
         /* Desktop */
         @media (min-width: 992px) {
-            .sidebar { 
-                position: fixed; top: 0; left: 0; bottom: 0; 
-                width: var(--sidebar-w); background: #000; border-right: 1px solid var(--border); 
-                padding: 24px; display: flex; flex-direction: column; z-index: 1000; 
+            .sidebar {
+                position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+                background: #000; border-right: 1px solid var(--border);
+                padding: 30px; display: flex; flex-direction: column; z-index: 999;
             }
-            .mobile-nav, .mobile-header { display: none !important; }
-            .main-wrapper { margin-left: var(--sidebar-w); padding: 40px; max-width: 1400px; }
+            .mobile-stuff { display: none !important; }
+            .main-content { margin-left: 280px; padding: 40px; max-width: 1400px; }
         }
-
         /* Mobile */
         @media (max-width: 991px) {
-            .sidebar { display: none; }
-            .mobile-header { height: 70px; z-index: 1050; }
-            .mobile-nav { 
-                position: fixed; bottom: 0; left: 0; right: 0; 
+            .sidebar, .desktop-stuff { display: none !important; }
+            .mobile-header {
+                height: 60px; z-index: 1000; display: flex; align-items: center; justify-content: space-between;
+                padding: 0 16px; position: fixed; top: 0; width: 100%;
+            }
+            .mobile-nav {
+                position: fixed; bottom: 0; left: 0; width: 100%;
                 height: calc(var(--nav-h) + env(safe-area-inset-bottom));
                 padding-bottom: env(safe-area-inset-bottom);
-                background: rgba(10, 10, 10, 0.95); 
-                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-                border-top: 1px solid var(--border); 
-                display: flex; justify-content: space-around; align-items: center; z-index: 1050; 
+                background: rgba(0,0,0,0.9); border-top: 1px solid var(--border);
+                backdrop-filter: blur(20px); display: flex; justify-content: space-around;
+                align-items: center; z-index: 1000;
             }
-            .main-wrapper { padding: 90px 16px 120px 16px; }
-            
-            /* Better Modal on Mobile */
-            .modal-fullscreen-sm-down .modal-content { border-radius: 16px 16px 0 0; min-height: 80vh; }
-            .modal-dialog { margin: 0; align-items: flex-end; min-height: 100%; }
-            .modal.fade .modal-dialog { transform: translate(0, 100%); transition: transform 0.3s ease-out; }
-            .modal.show .modal-dialog { transform: none; }
+            .main-content { padding: 80px 16px 100px 16px; }
         }
 
         /* Animations */
-        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
-        .ping-anim { animation: pulse-glow 2s infinite; }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: fade-in 0.3s ease-out forwards; }
     </style>
 </head>
 <body>
 
-    <audio id="notisound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sys-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="view-auth" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex align-items-center justify-content-center p-3">
-        <div class="card-box p-4 w-100 position-relative overflow-hidden" style="max-width: 400px; border: 1px solid #333;">
-            <div class="position-absolute top-0 start-50 translate-middle" style="width: 200px; height: 100px; background: var(--primary); filter: blur(80px); opacity: 0.3;"></div>
+        <div class="card-box p-4 w-100 position-relative overflow-hidden" style="max-width: 400px;">
+            <div class="position-absolute top-0 start-50 translate-middle bg-primary opacity-25" style="width:150px; height:100px; filter:blur(60px);"></div>
             
             <div class="text-center mb-5 position-relative">
-                <div class="d-inline-flex p-3 rounded-circle bg-dark border border-secondary border-opacity-25 mb-3 shadow-lg">
-                    <i data-lucide="shield-check" size="32" class="text-primary"></i>
+                <div class="bg-dark d-inline-block p-3 rounded-circle border border-secondary border-opacity-25 mb-3 shadow-lg">
+                    <i data-lucide="shield-check" class="text-primary" size="32"></i>
                 </div>
                 <h3 class="fw-bold text-white tracking-tight">SLBDMIS</h3>
-                <p class="text-secondary small text-uppercase letter-spacing-2">Secure Command Portal</p>
+                <p class="text-secondary small ls-2">COMMANDER V6</p>
             </div>
 
             <div id="auth-list" class="row g-2"></div>
 
-            <div id="auth-pin" class="d-none animate-fade-in">
-                <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3 bg-dark border border-secondary border-opacity-25">
-                    <div id="l-av" class="avatar fs-4"></div>
+            <div id="auth-pin" class="d-none animate-in">
+                <div class="bg-dark p-3 rounded-3 border border-secondary border-opacity-25 mb-4 d-flex align-items-center gap-3">
+                    <div id="l-av" class="avatar fs-4 border-0 bg-black"></div>
                     <div>
-                        <div class="fw-bold text-white fs-5" id="l-name"></div>
-                        <div class="text-secondary text-xs">Enter Access Code</div>
+                        <div id="l-name" class="fw-bold text-white"></div>
+                        <div class="text-xs text-secondary">Security Check</div>
                     </div>
                 </div>
-                <input type="password" id="inp-pin" class="form-control form-control-lg bg-black text-white text-center border-secondary mb-3 py-3 fs-3" placeholder="••••••••••" maxlength="11" inputmode="numeric">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-6">UNLOCK SYSTEM</button>
-                <button onclick="location.reload()" class="btn btn-link w-100 text-secondary mt-3 text-decoration-none">Cancel</button>
+                <input type="password" id="inp-pin" class="form-control text-center fs-2 bg-black py-3 mb-3" placeholder="••••" maxlength="11" inputmode="numeric">
+                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">UNLOCK</button>
+                <button onclick="location.reload()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
         
-        <div class="mobile-header fixed-top glass px-3 d-flex justify-content-between align-items-center">
+        <header class="mobile-header glass mobile-stuff">
             <div class="d-flex align-items-center gap-2">
-                <div class="bg-primary rounded p-1"><i data-lucide="layout-grid" class="text-white" size="18"></i></div>
-                <span class="fw-bold text-white" id="m-tit">Overview</span>
+                <i data-lucide="grid" class="text-primary" size="20"></i>
+                <span id="m-tit" class="fw-bold">Dashboard</span>
             </div>
             <div class="d-flex gap-2">
-                <button onclick="checkNoti(true)" class="btn btn-dark btn-sm border border-secondary border-opacity-25 position-relative rounded-circle p-2">
+                <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 rounded-circle p-2 position-relative">
                     <i data-lucide="bell" size="20"></i>
-                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none border border-black"></span>
+                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger border border-dark rounded-circle d-none"></span>
                 </button>
-                <button onclick="openCreate()" class="btn btn-primary btn-sm rounded-circle p-2 shadow-lg"><i data-lucide="plus" size="20"></i></button>
+                <button onclick="openCreate()" class="btn btn-primary rounded-circle p-2"><i data-lucide="plus" size="20"></i></button>
             </div>
-        </div>
+        </header>
 
         <nav class="sidebar">
-            <div class="mb-5 d-flex align-items-center gap-3 px-2">
-                <div class="p-2 bg-primary rounded-3 shadow-lg"><i data-lucide="hexagon" size="24" class="text-white"></i></div>
-                <div>
-                    <div class="fw-bold fs-5 text-white lh-1">SLBDMIS</div>
-                    <div class="text-xs text-secondary">Commander v5</div>
-                </div>
+            <div class="d-flex align-items-center gap-3 mb-5 px-2">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-3"><i data-lucide="hexagon" class="text-primary" size="24"></i></div>
+                <div><div class="fw-bold lh-1">SLBDMIS</div><small class="text-secondary text-xs">V6.0 Stable</small></div>
             </div>
             <div id="nav-d" class="d-flex flex-column gap-2 flex-grow-1"></div>
             
-            <div class="mt-auto border-top border-secondary border-opacity-25 pt-4">
-                <div class="d-flex align-items-center gap-3 px-2 mb-3 bg-dark p-2 rounded-3 border border-secondary border-opacity-25">
-                    <div id="d-av" class="avatar"></div>
+            <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
+                <button onclick="initAudio()" id="btn-sound-d" class="btn btn-dark w-100 mb-3 text-xs border-secondary d-flex align-items-center justify-content-center gap-2">
+                    <i data-lucide="volume-x" size="14"></i> Enable Sound
+                </button>
+                <div class="d-flex align-items-center gap-3 p-2 rounded bg-dark border border-secondary border-opacity-25">
+                    <div id="d-av" class="avatar" style="width:36px; height:36px; font-size:18px;"></div>
                     <div class="overflow-hidden">
                         <div id="d-name" class="fw-bold text-white small text-truncate"></div>
-                        <div class="text-success text-xs d-flex align-items-center gap-1"><span class="d-inline-block rounded-circle bg-success" style="width:6px;height:6px;"></span> Online</div>
+                        <div class="text-success text-xs">● Online</div>
                     </div>
                 </div>
-                <button onclick="doLogout()" class="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-2"><i data-lucide="log-out" size="14"></i> Sign Out</button>
+                <button onclick="doLogout()" class="btn btn-link text-danger text-decoration-none btn-sm w-100 mt-2">Sign Out</button>
             </div>
         </nav>
 
-        <main class="main-wrapper">
-            <div class="d-none d-lg-flex justify-content-between align-items-center mb-5">
+        <main class="main-content">
+            <div class="desktop-stuff d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h2 id="d-tit" class="fw-bold m-0 text-white">Dashboard</h2>
-                    <p class="text-secondary small m-0">Welcome back to the command center.</p>
+                    <h2 id="d-tit" class="fw-bold m-0">Dashboard</h2>
+                    <p class="text-secondary m-0 small">Operational Overview</p>
                 </div>
                 <div class="d-flex gap-3">
-                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 position-relative px-3 rounded-pill d-flex align-items-center gap-2 hover-bg">
-                        <i data-lucide="bell" size="18"></i>
-                        <span class="small">Alerts</span>
-                        <span id="bad-d" class="position-absolute top-0 end-0 p-1 bg-danger rounded-circle d-none"></span>
+                    <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 px-3 rounded-pill position-relative hover-bg">
+                        <i data-lucide="bell" size="18"></i> Alerts
+                        <span id="bad-d" class="position-absolute top-0 end-0 p-1 bg-danger border border-dark rounded-circle d-none"></span>
                     </button>
-                    <button onclick="openCreate()" class="btn btn-primary px-4 fw-bold shadow-lg rounded-pill d-flex align-items-center gap-2"><i data-lucide="plus-circle" size="18"></i> New Item</button>
+                    <button onclick="openCreate()" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
+                        <i data-lucide="plus-circle" size="18"></i> Create New
+                    </button>
                 </div>
             </div>
-            
+
             <div id="content-box"></div>
         </main>
 
-        <nav class="mobile-nav" id="nav-m"></nav>
+        <nav class="mobile-nav mobile-stuff" id="nav-m"></nav>
 
     </div>
 
@@ -236,39 +220,27 @@
         <div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold text-white">Create New</h5>
+                    <h5 class="fw-bold">New Record</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="d-flex bg-dark p-1 rounded-3 mb-4 border border-secondary border-opacity-25">
-                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm py-2 text-white bg-secondary bg-opacity-25 rounded-2 fw-bold">Task Mission</button>
-                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm py-2 text-secondary rounded-2 fw-bold">Decision Log</button>
+                    <div class="bg-dark p-1 rounded-3 d-flex mb-4 border border-secondary border-opacity-25">
+                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25">Task</button>
+                        <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2">Decision</button>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="text-xs text-secondary fw-bold ms-1 mb-1">TITLE</label>
-                        <input id="inp-t" class="form-control" placeholder="E.g. Machine Maintenance">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="text-xs text-secondary fw-bold ms-1 mb-1">DETAILS</label>
-                        <textarea id="inp-d" class="form-control" rows="4" placeholder="Describe the objectives..."></textarea>
-                    </div>
+                    <input id="inp-t" class="form-control mb-3" placeholder="Title / Subject">
+                    <textarea id="inp-d" class="form-control mb-3" rows="3" placeholder="Description details..."></textarea>
                     
                     <div id="sec-task-opt">
-                        <div class="mb-4">
-                            <label class="text-xs fw-bold text-secondary ms-1 mb-1">DUE DATE</label>
-                            <input type="date" id="inp-date" class="form-control">
-                        </div>
-                        <div class="mb-4">
-                            <label class="text-xs fw-bold text-secondary ms-1 mb-2">ASSIGN MEMBERS</label>
-                            <div id="div-mems" class="d-flex flex-wrap gap-2"></div>
-                        </div>
+                        <label class="text-xs fw-bold text-secondary mb-2">DUE DATE</label>
+                        <input type="date" id="inp-date" class="form-control mb-4">
+                        
+                        <label class="text-xs fw-bold text-secondary mb-2">ASSIGN TO</label>
+                        <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
                     </div>
 
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow d-flex align-items-center justify-content-center gap-2">
-                        <i data-lucide="save" size="18"></i> <span>Confirm & Save</span>
-                    </button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Save Record</button>
                 </div>
             </div>
         </div>
@@ -277,26 +249,19 @@
     <div class="modal fade" id="modCal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold text-white">Event Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
                 <div class="modal-body p-4">
-                    <input id="cal-t" class="form-control mb-3" placeholder="Event Title">
-                    <div class="row g-2 mb-4">
+                    <h5 class="fw-bold mb-3">Add Event</h5>
+                    <input id="cal-t" class="form-control mb-3" placeholder="Event Name">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6"><input type="date" id="cal-d" class="form-control"></div>
                         <div class="col-6">
-                            <label class="text-xs text-secondary fw-bold mb-1">DATE</label>
-                            <input type="date" id="cal-d" class="form-control">
-                        </div>
-                        <div class="col-6">
-                            <label class="text-xs text-secondary fw-bold mb-1">CATEGORY</label>
                             <select id="cal-y" class="form-select">
-                                <option value="meeting">Team Meeting</option>
-                                <option value="deadline">Project Deadline</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="deadline">Deadline</option>
                             </select>
                         </div>
                     </div>
-                    <button onclick="saveCal()" id="btn-cal-save" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow">Add to Calendar</button>
+                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold py-3">Confirm</button>
                 </div>
             </div>
         </div>
@@ -306,11 +271,8 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25 bg-dark">
-                    <h5 class="modal-title fw-bold text-white">Notifications</h5>
-                    <div class="d-flex gap-2">
-                        <button onclick="enableMobileNoti()" class="btn btn-sm btn-outline-warning text-xs d-flex align-items-center gap-1"><i data-lucide="volume-2" size="14"></i> Test Audio</button>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
+                    <h5 class="modal-title fw-bold">Notifications</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
                     <div id="noti-list" class="list-group list-group-flush bg-transparent"></div>
@@ -320,16 +282,11 @@
     </div>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
-        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4" role="alert" aria-live="assertive" aria-atomic="true" style="backdrop-filter: blur(10px);">
+        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4 glass">
             <div class="d-flex">
-                <div class="toast-body d-flex gap-3 align-items-center py-3">
-                    <div id="t-ico-box" class="p-2 rounded-circle bg-success bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                        <i id="t-ico" data-lucide="check" class="text-success" size="18"></i>
-                    </div>
-                    <div>
-                        <strong id="t-tit" class="d-block text-white mb-1">Success</strong>
-                        <small id="t-msg" class="text-secondary">Operation completed successfully.</small>
-                    </div>
+                <div class="toast-body d-flex gap-3 align-items-center">
+                    <div id="t-ico-box" class="p-2 rounded-circle bg-success bg-opacity-25"><i id="t-ico" data-lucide="check" class="text-success" size="18"></i></div>
+                    <div><strong id="t-tit" class="d-block text-white">Success</strong><small id="t-msg" class="text-secondary">Done</small></div>
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
@@ -337,7 +294,6 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
@@ -349,508 +305,237 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', audioReady: false, lastNotiCount: 0 };
+        let STATE = { user: null, page: 'home', mode: 'task', audioReady: false, lastCount: 0 };
         const MODALS = {};
-        const AUDIO = document.getElementById('notisound');
+        const AUDIO = document.getElementById('sys-ping');
 
-        // --- 2. INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
-            // Init Bootstrap Modals
             ['modCreate','modCal','modNoti'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
-            
-            // Check Persistence
             const uid = localStorage.getItem('slbd_uid');
             if(uid) login(TEAM.find(x => x.id == uid));
             else initAuth();
         };
 
-        // --- 3. AUTHENTICATION ---
+        // --- AUTH ---
         function initAuth() {
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="col-6">
-                    <div onclick="preLogin(${u.id})" class="card-box p-4 text-center h-100 d-flex flex-column align-items-center justify-content-center" style="cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#1c1c1e'" onmouseout="this.style.background='#121212'">
-                        <div class="display-6 mb-2">${u.av}</div>
-                        <div class="fw-bold text-white small text-uppercase tracking-wide">${u.name.split(' ')[0]}</div>
-                    </div>
-                </div>`).join('');
+                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center border-opacity-50 hover-border-primary cursor-pointer">
+                    <div class="display-6 mb-2">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
+                </div></div>`).join('');
         }
-
         function preLogin(id) {
             STATE.sel = TEAM.find(u=>u.id===id);
             document.getElementById('auth-list').classList.add('d-none');
             document.getElementById('auth-pin').classList.remove('d-none');
             document.getElementById('l-av').innerText = STATE.sel.av;
             document.getElementById('l-name').innerText = STATE.sel.name;
-            document.getElementById('inp-pin').value = '';
-            document.getElementById('inp-pin').focus();
         }
-
         function tryLogin() {
-            const pin = document.getElementById('inp-pin').value;
-            if(pin === STATE.sel.pin) {
+            if(document.getElementById('inp-pin').value === STATE.sel.pin) {
                 localStorage.setItem('slbd_uid', STATE.sel.id);
                 login(STATE.sel);
-            } else {
-                document.getElementById('inp-pin').value = '';
-                toast('Access Denied', 'Incorrect PIN code entered.', 'lock', 'text-danger', 'bg-danger');
-                if(navigator.vibrate) navigator.vibrate(500);
-            }
+            } else toast('Error', 'Wrong PIN', 'lock', 'text-danger', 'bg-danger');
         }
-
         async function login(u) {
             STATE.user = u;
             document.getElementById('view-auth').classList.add('d-none');
             document.getElementById('view-app').classList.remove('d-none');
-            
-            // Set User Info in UI
             document.getElementById('d-av').innerText = u.av;
             document.getElementById('d-name').innerText = u.name;
-            
-            // Build Navigation
+
             const pages = [
                 {id:'home', t:'Dash', i:'layout-grid'},
-                {id:'cal', t:'Calendar', i:'calendar'},
-                {id:'task', t:'Missions', i:'check-square'},
+                {id:'cal', t:'Schedule', i:'calendar'},
+                {id:'task', t:'Tasks', i:'check-square'},
                 {id:'dec', t:'Decisions', i:'file-signature'},
-                {id:'rec', t:'Files', i:'folder-archive'}
+                {id:'rec', t:'Files', i:'folder'}
             ];
 
-            // Render Desktop Nav
-            document.getElementById('nav-d').innerHTML = pages.map(p => `
-                <a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary" style="transition:0.2s">
-                    <i data-lucide="${p.i}" size="20"></i>
-                    <span class="fw-medium">${p.t}</span>
-                </a>
-            `).join('');
+            document.getElementById('nav-d').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary hover-bg"><i data-lucide="${p.i}" size="20"></i><span class="fw-medium">${p.t}</span></a>`).join('');
+            document.getElementById('nav-m').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center text-decoration-none text-secondary opacity-50 py-2 flex-fill"><i data-lucide="${p.i}" size="22" class="mb-1"></i><span style="font-size:10px; font-weight:700;">${p.t}</span></a>`).join('');
 
-            // Render Mobile Nav
-            document.getElementById('nav-m').innerHTML = pages.map(p => `
-                <a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center text-decoration-none text-secondary small py-2 flex-fill" style="opacity:0.6">
-                    <i data-lucide="${p.i}" size="22" class="mb-1"></i>
-                    <span style="font-size: 10px; font-weight:600;">${p.t}</span>
-                </a>
-            `).join('');
-
-            // Log Attendance
             const today = new Date().toISOString().split('T')[0];
             const { data } = await sbClient.from('attendance').select('*').eq('user_id', u.id).eq('date', today);
-            if(!data || !data.length) await sbClient.from('attendance').insert({user_id: u.id, date: today});
+            if(!data.length) await sbClient.from('attendance').insert({user_id: u.id, date: today});
 
-            // Start Logic
             nav('home');
-            
-            // Polling for updates (Simple Realtime alternative)
-            setInterval(() => { 
-                if(STATE.page !== 'rec') render(true); 
-                checkNoti(false); 
-            }, 4000); // Check every 4 seconds
+            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 4000);
             checkNoti(false);
         }
-
         function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
 
-        // --- 4. NAVIGATION & RENDERING ---
+        // --- CORE ---
         function nav(p) {
             STATE.page = p;
-            
-            // Update Active State styling
-            document.querySelectorAll('.bg-primary.bg-opacity-10').forEach(e => e.classList.remove('bg-primary', 'bg-opacity-10', 'text-white'));
-            document.querySelectorAll('.text-primary').forEach(e => { if(e.tagName==='A' || e.parentElement.tagName==='A') e.classList.remove('text-primary'); });
-            document.querySelectorAll('.text-white').forEach(e => { if(e.tagName==='A') e.classList.remove('text-white'); });
-            
-            // Desktop Highlight
-            const nd = document.getElementById(`nd-${p}`);
-            if(nd) { nd.classList.add('bg-primary', 'bg-opacity-10', 'text-white'); nd.classList.remove('text-secondary'); }
-            
-            // Mobile Highlight
-            const nm = document.getElementById(`nm-${p}`);
-            if(nm) { nm.classList.add('text-primary'); nm.style.opacity = '1'; }
+            document.querySelectorAll('.text-primary, .bg-primary, .opacity-100').forEach(e => {
+                if(e.id.startsWith('nd') || e.id.startsWith('nm')) {
+                    e.classList.remove('text-primary','bg-primary','bg-opacity-10','opacity-100','text-white');
+                    e.classList.add('text-secondary','opacity-50');
+                }
+            });
 
-            // Titles
-            const titles = { home:'Command Center', cal:'Team Schedule', task:'Active Missions', dec:'Decision Logs', rec:'Archives & Files' };
-            document.getElementById('m-tit').innerText = titles[p];
-            document.getElementById('d-tit').innerText = titles[p];
-            
+            const nd = document.getElementById(`nd-${p}`);
+            const nm = document.getElementById(`nm-${p}`);
+            if(nd) { nd.classList.remove('text-secondary'); nd.classList.add('bg-primary','bg-opacity-10','text-white'); }
+            if(nm) { nm.classList.remove('opacity-50'); nm.classList.add('text-primary','opacity-100'); }
+
+            const map = {home:'Dashboard',cal:'Schedule',task:'Missions',dec:'Decisions',rec:'Archives'};
+            document.getElementById('m-tit').innerText = document.getElementById('d-tit').innerText = map[p];
             render(false);
         }
 
         async function render(silent) {
             const c = document.getElementById('content-box');
-            if(!silent) c.innerHTML = '<div class="text-center py-5 mt-5"><div class="spinner-border text-primary" role="status"></div></div>';
-            
+            if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+
             try {
                 const [ {data:tasks}, {data:evts} ] = await Promise.all([
                     sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
                     sbClient.from('calendar_events').select('*')
                 ]);
-                
-                const activeT = tasks ? tasks.filter(t => t.status !== 'Done') : [];
+                const activeT = tasks.filter(t => t.status !== 'Done');
 
-                // === HOME PAGE ===
                 if(STATE.page === 'home') {
+                    // Activate Sound Button logic
+                    const sndBtn = !STATE.audioReady ? `
+                        <div onclick="initAudio()" class="btn btn-warning w-100 mb-4 fw-bold shadow-lg animate-in text-black d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill">
+                            <i data-lucide="volume-2"></i> ACTIVATE SYSTEM SOUNDS
+                        </div>` : '';
+
                     if(STATE.user.role === 'LEADER') {
-                        // LEADER DASHBOARD
                         const rows = TEAM.map(u => {
                             const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
                             if(!uts.length) return '';
-                            return `
-                                <div class="p-3 border-bottom border-secondary border-opacity-25">
-                                    <div class="d-flex align-items-center gap-3 mb-2">
-                                        <span class="avatar avatar-sm">${u.av}</span>
-                                        <span class="fw-bold text-white small">${u.name}</span>
-                                    </div>
-                                    ${uts.map(t => `
-                                        <div class="mb-3 ps-4 border-start border-secondary ms-2">
-                                            <div class="d-flex justify-content-between text-xs mb-1 ms-2">
-                                                <span class="text-truncate text-secondary fw-medium" style="max-width:200px">${t.task_title}</span>
-                                                <span class="${t.progress<100?'text-warning':'text-success'} fw-bold">${t.progress}%</span>
-                                            </div>
-                                            <div class="progress bg-dark ms-2" style="height:6px; border-radius:10px;">
-                                                <div class="progress-bar bg-${t.progress<90?'warning':'success'}" style="width:${t.progress}%"></div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>`;
+                            return `<div class="p-3 border-bottom border-secondary border-opacity-25 animate-in">
+                                <div class="d-flex align-items-center gap-2 mb-2"><span class="avatar avatar-sm">${u.av}</span><span class="fw-bold small">${u.name}</span></div>
+                                ${uts.map(t => `<div class="mb-2 ps-2 border-start border-primary border-2 ms-2"><div class="d-flex justify-content-between text-xs px-2"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span class="${t.progress<100?'text-warning':'text-success'}">${t.progress}%</span></div><div class="progress bg-dark ms-2 mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<90?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}
+                            </div>`;
                         }).join('');
-
                         c.innerHTML = `
-                            <div class="row g-4">
-                                <div class="col-lg-8">
-                                    <div class="card-box h-100 overflow-hidden">
-                                        <div class="p-3 bg-subtle border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                                            <h6 class="fw-bold m-0 text-white d-flex align-items-center gap-2"><i data-lucide="activity" size="16" class="text-primary"></i> Live Operations</h6>
-                                            <button onclick="pingAll()" class="btn btn-sm btn-outline-info py-1 px-3 text-xs rounded-pill border-opacity-25">📢 Ping Team</button>
-                                        </div>
-                                        <div style="max-height:500px; overflow-y:auto;">
-                                            ${rows || '<div class="p-5 text-center text-secondary small">All quiet. No active operations.</div>'}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="card-box p-4 mb-3">
-                                        <h6 class="text-secondary text-xs fw-bold mb-3 tracking-wide">QUICK ACCESS</h6>
-                                        <div class="d-grid gap-2">
-                                            <a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary py-3 px-3 d-flex align-items-center gap-3 rounded-3 hover-bg"><div class="bg-warning bg-opacity-10 p-2 rounded"><i data-lucide="folder" class="text-warning" size="16"></i></div> Admin & Finance</a>
-                                            <a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark btn-sm text-start border-secondary py-3 px-3 d-flex align-items-center gap-3 rounded-3 hover-bg"><div class="bg-info bg-opacity-10 p-2 rounded"><i data-lucide="cpu" class="text-info" size="16"></i></div> Machine Unit</a>
-                                        </div>
-                                    </div>
-                                    <div class="card-box p-4 text-center">
-                                        <div class="display-4 fw-bold text-white mb-1">${activeT.length}</div>
-                                        <div class="text-secondary text-xs fw-bold tracking-widest">ACTIVE TASKS</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // MEMBER DASHBOARD
-                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                        c.innerHTML = `
+                            ${sndBtn}
                             <div class="row g-3">
-                                <div class="col-12">
-                                    <div class="card-box p-4 mb-3 border-start border-5 border-primary">
-                                        <h5 class="fw-bold text-white mb-4">My Workspace</h5>
-                                        ${myT.length ? myT.map(t => `
-                                            <div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25">
-                                                <div class="d-flex justify-content-between mb-2">
-                                                    <span class="fw-bold text-white">${t.task_title}</span>
-                                                    <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary">${t.status}</span>
-                                                </div>
-                                                <div class="d-flex align-items-center gap-3 mt-3">
-                                                    <span class="text-secondary text-xs">0%</span>
-                                                    <input type="range" class="form-range flex-grow-1" min="0" max="100" step="10" value="${t.progress}" onchange="updateProg(${t.id},this.value,'${t.task_title}')">
-                                                    <span class="text-white small fw-bold" style="width:35px text-align:right;">${t.progress}%</span>
-                                                </div>
-                                            </div>
-                                        `).join('') : '<p class="text-secondary small text-center py-4">You have no active assignments. Stand by.</p>'}
-                                    </div>
-                                    
-                                    <div onclick="enableMobileNoti()" class="btn btn-dark w-100 py-3 rounded-4 border-secondary d-flex align-items-center justify-content-center gap-2 mb-4 text-secondary">
-                                        <i data-lucide="bell-ring" size="18"></i> <span>Tap here to enable Alerts</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                                <div class="col-lg-8"><div class="card-box"><div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info rounded-pill px-3">Ping All</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">No active ops.</div>'}</div></div></div>
+                                <div class="col-lg-4"><div class="card-box p-4"><h6 class="text-secondary text-xs fw-bold mb-3">DRIVE LINKS</h6><div class="d-grid gap-2"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark text-start border-secondary p-3"><i data-lucide="folder" class="text-warning me-2" size="16"></i>Admin & Finance</a><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark text-start border-secondary p-3"><i data-lucide="cpu" class="text-info me-2" size="16"></i>Machine Unit</a></div></div></div>
+                            </div>`;
+                    } else {
+                        const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
+                        c.innerHTML = `${sndBtn}
+                            <div class="card-box p-4 mb-3 border-start border-4 border-primary">
+                                <h5 class="fw-bold mb-4">My Workspace</h5>
+                                ${myT.length ? myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="status-pill bg-secondary bg-opacity-25">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updateProg(${t.id},this.value,'${t.task_title}')"><span class="small fw-bold w-25 text-end">${t.progress}%</span></div></div>`).join('') : '<p class="text-secondary small text-center">No active assignments.</p>'}
+                            </div>`;
                     }
                 }
-
-                // === TASK PAGE ===
+                
                 if(STATE.page === 'task') {
-                    if(!activeT.length) c.innerHTML = '<div class="text-center text-secondary py-5 d-flex flex-column align-items-center"><i data-lucide="check-circle" size="48" class="mb-3 opacity-25"></i>All tasks completed.</div>';
-                    else {
-                        c.innerHTML = `<div class="row g-3">${activeT.map(t => {
-                            const mems = (t.tagged_members||[]).map(id=>`<span class="avatar avatar-sm" title="${TEAM.find(u=>u.id==id)?.name}">${TEAM.find(u=>u.id==id)?.av||'?'}</span>`).join('');
-                            let btn = '';
-                            if(STATE.user.role === 'LEADER') {
-                                if(t.status === 'ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 text-black fw-bold py-2">Approve Task</button>`;
-                                else if(t.status === 'Review') btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold py-2">Approve Completion</button>`;
-                                else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
-                            } else if(t.status==='Pending' || t.status==='Ongoing') {
-                                btn = `<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3 py-2">Submit for Review</button>`;
-                            }
-                            
-                            let statusColor = 'secondary';
-                            if(t.status === 'ApprovalReq') statusColor = 'warning text-black';
-                            if(t.status === 'Review') statusColor = 'info text-black';
-                            if(t.status === 'Pending') statusColor = 'success';
-
-                            return `
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="card-box p-4 h-100 d-flex flex-column position-relative overflow-hidden">
-                                        <div class="d-flex justify-content-between mb-3 align-items-start">
-                                            <span class="badge bg-${statusColor} bg-opacity-75">${t.status}</span>
-                                            <div class="d-flex ps-2">${mems}</div>
-                                        </div>
-                                        <h5 class="fw-bold text-white mb-2">${t.task_title}</h5>
-                                        <p class="small text-secondary flex-grow-1 mb-3 text-truncate-3" style="min-height:40px;">${t.description||'No details provided.'}</p>
-                                        
-                                        <div class="bg-black rounded p-2 mb-3">
-                                            <div class="d-flex justify-content-between text-xs text-secondary mb-1"><span>Progress</span><span>${t.progress}%</span></div>
-                                            <div class="progress" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>
-                                        </div>
-                                        ${btn}
-                                    </div>
-                                </div>`;
-                        }).join('')}</div>`;
-                    }
+                    c.innerHTML = activeT.length ? `<div class="row g-3">${activeT.map(t => {
+                        let btn = '';
+                        if(STATE.user.role === 'LEADER') {
+                            if(t.status === 'ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold">Approve</button>`;
+                            else if(t.status === 'Review') btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finalize</button>`;
+                            else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
+                        } else if(t.status==='Pending' || t.status==='Ongoing') btn = `<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit Review</button>`;
+                        
+                        return `<div class="col-12 col-md-6 col-lg-4"><div class="card-box p-3 h-100 d-flex flex-column animate-in"><div class="d-flex justify-content-between mb-2"><span class="status-pill bg-dark border border-secondary text-secondary">${t.status}</span></div><h6 class="fw-bold">${t.task_title}</h6><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-dark" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${btn}</div></div>`;
+                    }).join('')}</div>` : '<div class="text-center text-secondary py-5">All tasks complete.</div>';
                 }
 
-                // === CALENDAR PAGE ===
                 if(STATE.page === 'cal') {
                     const today = new Date();
                     const dim = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
                     const off = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
                     let cells = '';
-                    
-                    for(let i=0;i<off;i++) cells+=`<div class="d-none d-md-block"></div>`; // spacers
-                    
+                    for(let i=0;i<off;i++) cells+=`<div></div>`;
                     for(let d=1;d<=dim;d++) {
                         const str = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                        const es = evts ? evts.filter(e=>e.date===str) : [];
-                        const isToday = (d === today.getDate()) ? 'border-primary' : '';
-                        
-                        cells+=`
-                            <div class="cal-day ${isToday}" onclick="openCal('${str}')">
-                                <div class="text-end text-secondary text-xs mb-1 opacity-50 fw-bold">${d}</div>
-                                <div class="d-flex flex-column gap-1">
-                                    ${es.map(e=>`<div class="cal-evt ${e.type} ${e.status}">${e.status==='suggested'?'?':''} ${e.title}</div>`).join('')}
-                                </div>
-                            </div>`;
+                        const es = evts.filter(e=>e.date===str);
+                        cells+=`<div class="cal-day ${d===today.getDate()?'active':''}" onclick="openCal('${str}')"><div class="text-end text-secondary text-xs opacity-50">${d}</div>${es.map(e=>`<div class="cal-evt" style="background:${e.type==='meeting'?'rgba(37,99,235,0.3)':'rgba(245,158,11,0.3)'}; color:${e.type==='meeting'?'#93c5fd':'#fcd34d'}">${e.status==='suggested'?'? ':''}${e.title}</div>`).join('')}</div>`;
                     }
-
-                    // Approval Box
-                    const suggs = evts ? evts.filter(e=>e.status==='suggested') : [];
-                    const appBox = (STATE.user.role==='LEADER' && suggs.length) ? `
-                        <div class="alert alert-dark border-warning mb-4 bg-warning bg-opacity-10">
-                            <div class="d-flex align-items-center gap-2 mb-2"><i data-lucide="alert-circle" class="text-warning" size="18"></i><strong class="text-warning text-sm">PENDING APPROVALS</strong></div>
-                            ${suggs.map(e=>`<div class="d-flex justify-content-between align-items-center bg-black bg-opacity-50 p-2 rounded mb-1"><span class="small text-white">${e.date}: ${e.title}</span><div><button onclick="appCal(${e.id},1)" class="btn btn-sm btn-success py-0 px-2 me-1">✓</button><button onclick="appCal(${e.id},0)" class="btn btn-sm btn-danger py-0 px-2">✗</button></div></div>`).join('')}
-                        </div>`:'';
-                    
-                    c.innerHTML = `
-                        ${appBox}
-                        <div class="d-flex justify-content-between mb-4 align-items-center">
-                            <h4 class="fw-bold text-white m-0 text-uppercase letter-spacing-2">${today.toLocaleString('default',{month:'long'})} ${today.getFullYear()}</h4>
-                            <button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow-lg"><i data-lucide="plus" size="16" class="me-1"></i> Add Event</button>
-                        </div>
-                        <div class="cal-grid text-white">
-                            ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="text-center text-secondary text-xs py-2 fw-bold text-uppercase">${d}</div>`).join('')}
-                            ${cells}
-                        </div>
-                    `;
+                    const suggs = evts.filter(e=>e.status==='suggested');
+                    const appBox = (STATE.user.role==='LEADER' && suggs.length) ? `<div class="alert alert-dark border-warning mb-3"><strong class="text-warning text-xs">PENDING</strong>${suggs.map(e=>`<div class="d-flex justify-content-between mt-2 small"><span>${e.date}: ${e.title}</span><div><button onclick="appCal(${e.id},1)" class="btn btn-sm btn-success py-0 px-2 me-1">✓</button><button onclick="appCal(${e.id},0)" class="btn btn-sm btn-danger py-0 px-2">✗</button></div></div>`).join('')}</div>`:'';
+                    c.innerHTML = `${appBox}<div class="d-flex justify-content-between mb-3"><h4 class="fw-bold m-0">${today.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-sm btn-primary rounded-pill px-3">Add Event</button></div><div class="cal-grid text-white">${['S','M','T','W','T','F','S'].map(d=>`<div class="text-center text-secondary text-xs fw-bold">${d}</div>`).join('')}${cells}</div>`;
                 }
 
-                // === DECISIONS & FILES ===
                 if(STATE.page === 'dec') {
                     const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                    c.innerHTML = data && data.length ? data.map(d=>`
-                        <div class="card-box p-4 mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary">DECISION LOG</span>
-                                <span class="text-secondary text-xs">${new Date(d.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <h5 class="fw-bold text-white">${d.subject}</h5>
-                            <p class="text-secondary small m-0">${d.details}</p>
-                        </div>`).join('') : '<div class="text-center text-secondary py-5">No records found.</div>';
+                    c.innerHTML = data.map(d=>`<div class="card-box p-3 mb-2 animate-in"><div class="fw-bold">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
                 }
-                
                 if(STATE.page === 'rec') {
                     const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                    c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark table-hover mb-0">
-                        <thead class="bg-black"><tr class="border-bottom border-secondary border-opacity-25"><th class="p-3 text-secondary text-xs">TASK</th><th class="p-3 text-secondary text-xs text-end">COMPLETED</th></tr></thead>
-                        <tbody>${data && data.length ? data.map(t=>`<tr><td class="p-3"><div class="fw-bold text-white small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('') : '<tr><td colspan="2" class="p-4 text-center text-secondary">Archive empty.</td></tr>'}</tbody>
-                    </table></div>`;
+                    c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark mb-0"><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div><div class="text-secondary text-xs">${new Date(t.updated_at).toLocaleDateString()}</div></td></tr>`).join('')}</tbody></table></div>`;
                 }
-
-            } catch(e) { console.error(e); }
+            } catch(e) { console.log(e); }
             lucide.createIcons();
         }
 
-        // --- 5. ACTIONS ---
-        function setMode(m) { 
-            STATE.mode = m; 
-            document.getElementById('bm-task').className = m==='task' ? 'flex-fill btn btn-sm py-2 text-white bg-secondary bg-opacity-25 rounded-2 fw-bold' : 'flex-fill btn btn-sm py-2 text-secondary rounded-2 fw-bold'; 
-            document.getElementById('bm-dec').className = m==='dec' ? 'flex-fill btn btn-sm py-2 text-white bg-secondary bg-opacity-25 rounded-2 fw-bold' : 'flex-fill btn btn-sm py-2 text-secondary rounded-2 fw-bold'; 
-            document.getElementById('sec-task-opt').classList.toggle('d-none', m!=='task'); 
-            
-            if(m==='task') {
-                document.getElementById('div-mems').innerHTML = TEAM.map(u => `
-                    <label class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 border-secondary" style="border-radius:20px;">
-                        <input type="checkbox" class="chk-mem form-check-input m-0" value="${u.id}"> 
-                        <span>${u.name.split(' ')[0]}</span>
-                    </label>`).join('');
-            }
-        }
-        
+        // --- ACTIONS ---
+        function setMode(m) { STATE.mode=m; document.getElementById('bm-task').className = m==='task'?'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2'; document.getElementById('bm-dec').className = m==='dec'?'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2'; document.getElementById('sec-task-opt').classList.toggle('d-none',m!=='task'); if(m==='task') document.getElementById('div-mems').innerHTML=TEAM.map(u=>`<label class="btn btn-dark border-secondary btn-sm d-flex align-items-center gap-2"><input type="checkbox" class="chk-mem form-check-input m-0" value="${u.id}"> ${u.name.split(' ')[0]}</label>`).join(''); }
         function openCreate() { setMode('task'); MODALS.modCreate.show(); }
-        
         async function saveItem() {
-            const btn = document.getElementById('btn-save');
-            btn.innerHTML = 'Saving...'; btn.disabled = true;
-
-            try {
-                const t = document.getElementById('inp-t').value;
-                const d = document.getElementById('inp-d').value;
-                
-                if(!t) throw new Error('Title Missing');
-
-                if(STATE.mode==='dec') {
-                    await sbClient.from('decisions').insert({subject:t, details:d});
-                    toast('Recorded', 'Decision Logged', 'file-signature', 'text-success', 'bg-success');
-                } else {
-                    const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                    const st = STATE.user.role==='LEADER'?'Pending':'ApprovalReq';
-                    
-                    await sbClient.from('tasks').insert({
-                        task_title:t, description:d, 
-                        due_date:document.getElementById('inp-date').value||null, 
-                        creator_id:STATE.user.id, tagged_members:tags, status:st, progress:0
-                    });
-
-                    // Notis
-                    if(STATE.user.role!=='LEADER') sendNoti(1, `${STATE.user.name} asks approval: ${t}`);
-                    else tags.forEach(uid => sendNoti(uid, `New Assignment: ${t}`));
-
-                    toast('Success', 'Task Created', 'check-circle', 'text-success', 'bg-success');
-                }
-                
-                MODALS.modCreate.hide();
-                document.getElementById('inp-t').value = '';
-                document.getElementById('inp-d').value = '';
-                render(false);
-            } catch(e) {
-                toast('Error', 'Please fill all fields', 'alert-circle', 'text-danger', 'bg-danger');
+            const btn = document.getElementById('btn-save'); btn.innerText = "Saving...";
+            const t = document.getElementById('inp-t').value; const d = document.getElementById('inp-d').value;
+            if(!t) return toast('Error','Title required','alert-circle','text-danger','bg-danger');
+            
+            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t,details:d});
+            else {
+                const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
+                await sbClient.from('tasks').insert({task_title:t,description:d,due_date:document.getElementById('inp-date').value||null,creator_id:STATE.user.id,tagged_members:tags,status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq',progress:0});
+                tags.forEach(uid => sendNoti(uid, `New Mission: ${t}`));
+                if(STATE.user.role!=='LEADER') sendNoti(1, `${STATE.user.name} requests approval: ${t}`);
             }
-            
-            btn.innerHTML = '<i data-lucide="save" size="18"></i> <span>Confirm & Save</span>'; btn.disabled = false;
-            lucide.createIcons();
+            MODALS.modCreate.hide(); toast('Saved','Record created','check','text-success','bg-success'); render(false);
+            btn.innerText = "Save Record";
         }
-
-        async function setStatus(id, st, tuid, tit) {
-            // Optimistic Update
-            await sbClient.from('tasks').update({status:st, updated_at:new Date()}).eq('id',id);
-            render(true); // Silent refresh
-            
-            if(st==='Pending') sendNoti(tuid, `Task Approved: ${tit}`);
-            if(st==='Review') sendNoti(1, `${STATE.user.name} finished: ${tit}`);
-            if(st==='Done') sendNoti(tuid, `Task Complete: ${tit}`);
-            
-            toast('Updated', `Status changed to ${st}`, 'refresh-cw', 'text-primary', 'bg-primary');
-        }
-
-        async function updateProg(id, v, t) { 
-            await sbClient.from('tasks').update({progress:v}).eq('id',id); 
-            if(v==100) toast('Great Job', 'Ready for Review', 'star', 'text-warning', 'bg-warning'); 
-        }
-
-        // --- CALENDAR ACTIONS ---
+        async function setStatus(id, st, tuid, tit) { await sbClient.from('tasks').update({status:st,updated_at:new Date()}).eq('id',id); render(true); if(st==='Pending') sendNoti(tuid,`Approved: ${tit}`); if(st==='Done') sendNoti(tuid,`Completed: ${tit}`); if(st==='Review') sendNoti(1,`${STATE.user.name} finished: ${tit}`); }
+        async function updateProg(id,v,t) { await sbClient.from('tasks').update({progress:v}).eq('id',id); if(v==100) toast('Done','Ready for Review','star','text-warning','bg-warning'); }
+        
+        // --- CALENDAR ---
         function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
+        async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value,date:document.getElementById('cal-d').value,type:document.getElementById('cal-y').value,status:STATE.user.role==='LEADER'?'confirmed':'suggested',creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success','bg-success'); render(false); }
+        async function appCal(id,ok) { if(ok) await sbClient.from('calendar_events').update({status:'confirmed'}).eq('id',id); else await sbClient.from('calendar_events').delete().eq('id',id); render(true); }
+
+        // --- NOTIFICATIONS ---
+        async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid,message:msg}); }
+        function pingAll() { TEAM.forEach(u => { if(u.role!=='LEADER') sendNoti(u.id, "LEADER PING: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info','bg-info'); }
         
-        async function saveCal() {
-            const t = document.getElementById('cal-t').value;
-            const d = document.getElementById('cal-d').value;
-            const y = document.getElementById('cal-y').value;
-            const st = STATE.user.role==='LEADER'?'confirmed':'suggested';
-            
-            await sbClient.from('calendar_events').insert({title:t, date:d, type:y, status:st, creator_id:STATE.user.id});
-            
-            if(st==='suggested') sendNoti(1, `${STATE.user.name} suggests event: ${t}`);
-            MODALS.modCal.hide(); 
-            toast('Saved', st==='confirmed'?'Event Added':'Suggestion Sent', 'calendar', 'text-success', 'bg-success');
-            render(false);
-        }
-
-        async function appCal(id,ok) { 
-            if(ok) await sbClient.from('calendar_events').update({status:'confirmed'}).eq('id',id); 
-            else await sbClient.from('calendar_events').delete().eq('id',id); 
-            render(true); 
-        }
-
-        // --- NOTIFICATION ENGINE ---
-        async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
-        
-        function pingAll() { 
-            TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "LEADER PING: UPDATE STATUS NOW"); }); 
-            toast('Pinged', 'Alert sent to all members', 'radio', 'text-info', 'bg-info'); 
-        }
-
-        function enableMobileNoti() {
+        function initAudio() {
             STATE.audioReady = true;
-            AUDIO.play().then(() => { AUDIO.pause(); AUDIO.currentTime = 0; }).catch(e=>{});
+            AUDIO.play().then(() => { AUDIO.pause(); AUDIO.currentTime = 0; }).catch(e=>console.log(e));
             if(Notification.permission !== "granted") Notification.requestPermission();
-            toast('Audio Active', 'System sounds enabled', 'volume-2', 'text-success', 'bg-success');
-            if(navigator.vibrate) navigator.vibrate(100);
+            const btn = document.getElementById('btn-sound-d'); if(btn) { btn.innerHTML = '<i data-lucide="volume-2" size="14"></i> Sound Active'; btn.classList.remove('btn-dark'); btn.classList.add('btn-success'); }
+            toast('Audio On','Notifications Active','volume-2','text-success','bg-success');
+            render(true);
         }
 
         async function checkNoti(open) {
-            const {data} = await sbClient.from('notifications').select('*').eq('user_id', STATE.user.id).eq('is_read', false);
+            const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
             const count = data?.length || 0;
-            const badM = document.getElementById('bad-m');
-            const badD = document.getElementById('bad-d');
+            const bM = document.getElementById('bad-m'); const bD = document.getElementById('bad-d');
             
-            // UI Badge Update
             if(count > 0) {
-                badM.classList.remove('d-none'); badM.innerText = count;
-                badD.classList.remove('d-none'); badD.innerText = count;
-                
-                // Play Sound if new notis arrived since last check
-                if(count > STATE.lastNotiCount) {
-                    if(STATE.audioReady) { AUDIO.play(); if(navigator.vibrate) navigator.vibrate([200,100,200]); }
-                    if(Notification.permission === "granted" && !document.hasFocus()) {
-                        new Notification("SLBDMIS Alert", { body: `You have ${count} unread messages` });
-                    }
+                bM.classList.remove('d-none'); bM.innerText=count; bD.classList.remove('d-none'); bD.innerText=count;
+                if(count > STATE.lastCount && STATE.audioReady) { 
+                    AUDIO.play(); 
+                    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+                    if(Notification.permission==="granted") new Notification("SLBDMIS",{body:`${count} New Alerts`});
                 }
-            } else {
-                badM.classList.add('d-none');
-                badD.classList.add('d-none');
-            }
-            STATE.lastNotiCount = count;
+            } else { bM.classList.add('d-none'); bD.classList.add('d-none'); }
+            STATE.lastCount = count;
 
             if(open) {
-                const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id', STATE.user.id).order('created_at',{ascending:false}).limit(15);
-                
-                document.getElementById('noti-list').innerHTML = msgs && msgs.length ? msgs.map(n => `
-                    <div class="list-group-item bg-dark border-secondary border-opacity-25 p-3 mb-1 rounded-2">
-                        <div class="fw-bold text-white small">${n.message}</div>
-                        <div class="text-xs text-secondary mt-1 d-flex align-items-center gap-1">
-                            <i data-lucide="clock" size="10"></i> ${new Date(n.created_at).toLocaleString()}
-                        </div>
-                    </div>`).join('') : '<div class="p-5 text-center text-secondary">No alerts.</div>';
-                
-                lucide.createIcons();
-                if(count > 0) await sbClient.from('notifications').update({is_read:true}).eq('user_id', STATE.user.id);
+                const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
+                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div><div class="text-secondary text-xs mt-1">${new Date(n.created_at).toLocaleString()}</div></div>`).join('') : '<div class="p-5 text-center text-secondary">No alerts.</div>';
+                if(count>0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
                 MODALS.modNoti.show();
             }
         }
 
-        // --- UTILS ---
         function toast(t, m, i, c, bg) {
-            document.getElementById('t-tit').innerText = t; 
-            document.getElementById('t-msg').innerText = m;
-            document.getElementById('t-ico').setAttribute('data-lucide', i); 
-            document.getElementById('t-ico').className = c;
-            document.getElementById('t-ico-box').className = `p-2 rounded-circle bg-opacity-25 d-flex align-items-center justify-content-center ${bg}`;
-            lucide.createIcons(); 
-            bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
+            document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
+            document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
+            document.getElementById('t-ico-box').className = `p-2 rounded-circle bg-opacity-25 ${bg}`;
+            lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
         }
     </script>
 </body>
