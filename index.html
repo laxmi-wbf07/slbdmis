@@ -20,7 +20,7 @@
             --bg-hover: #161616;
             --border: #222222;
             --primary: #3B82F6;
-            --primary-glow: rgba(59, 130, 246, 0.5);
+            --primary-glow: rgba(59, 130, 246, 0.2);
             --success: #10B981;
             --danger: #EF4444;
             --warning: #F59E0B;
@@ -54,12 +54,23 @@
             position: relative;
         }
 
-        /* === ANALYTICS & GRAPH === */
-        canvas {
-            width: 100%;
-            height: 180px;
-            display: block;
+        /* === SUBMISSION SELECTOR === */
+        .sub-opt {
+            transition: all 0.2s ease;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            opacity: 0.7;
         }
+        .sub-opt:hover { opacity: 1; border-color: var(--primary); }
+        .sub-opt.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary) !important;
+            opacity: 1;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+        }
+
+        /* === ANALYTICS & GRAPH === */
+        canvas { width: 100%; height: 180px; display: block; }
         .analytic-row {
             display: flex;
             justify-content: space-between;
@@ -275,24 +286,22 @@
     <div class="modal fade" id="modSubmit" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25 bg-black">
-                    <h5 class="modal-title fw-bold">Submit Protocol</h5>
+                <div class="modal-header border-bottom border-secondary border-opacity-25">
+                    <h5 class="fw-bold">Mission Debrief</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-secondary small mb-3">Step 1: Upload files to the designated Unit Drive.</p>
-                    <div class="row g-2 mb-4">
-                        <div class="col-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark w-100 py-3 border border-secondary d-flex flex-column align-items-center gap-1"><i data-lucide="shield" size="18" class="text-warning"></i><span style="font-size:9px">ADMIN</span></a></div>
-                        <div class="col-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark w-100 py-3 border border-secondary d-flex flex-column align-items-center gap-1"><i data-lucide="cpu" size="18" class="text-info"></i><span style="font-size:9px">MACH</span></a></div>
-                        <div class="col-3"><a href="https://drive.google.com/drive/folders/11Q6gWSLqU4H88DrmWA_Fmbkx8dsNs0Ka?usp=sharing" target="_blank" class="btn btn-dark w-100 py-3 border border-secondary d-flex flex-column align-items-center gap-1"><i data-lucide="image" size="18" class="text-success"></i><span style="font-size:9px">PICS</span></a></div>
-                        <div class="col-3"><a href="https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing" target="_blank" class="btn btn-dark w-100 py-3 border border-secondary d-flex flex-column align-items-center gap-1"><i data-lucide="presentation" size="18" class="text-danger"></i><span style="font-size:9px">PPT</span></a></div>
+                    <div class="text-center mb-3">
+                        <p class="text-secondary small">Select where the intel was uploaded:</p>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="shield" class="text-warning mb-2"></i><div class="text-xs fw-bold">ADMIN</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="cpu" class="text-info mb-2"></i><div class="text-xs fw-bold">MACHINE</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="image" class="text-success mb-2"></i><div class="text-xs fw-bold">PICTURES</div></div></div>
+                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="presentation" class="text-danger mb-2"></i><div class="text-xs fw-bold">PROPOSALS</div></div></div>
+                        </div>
                     </div>
-                    
-                    <p class="text-secondary small mb-2">Step 2: Provide Proof of Work.</p>
-                    <input id="sub-link" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Paste Link to File/Folder...">
-                    <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="2" placeholder="Submission Notes..."></textarea>
-                    
-                    <button onclick="confirmSubmit()" id="btn-sub-conf" class="btn btn-success w-100 rounded-pill fw-bold shadow-lg">CONFIRM SUBMISSION</button>
+                    <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Add mission notes (optional)..."></textarea>
+                    <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-lg">CONFIRM UPLOAD</button>
                 </div>
             </div>
         </div>
@@ -358,8 +367,7 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', subTab: 'live', lastNotiTime: 0 };
-        let SUBMIT_TARGET = null; // Stores task data for submission
+        let STATE = { user: null, page: 'home', mode: 'task', subTab: 'live', lastNotiTime: 0, subCat: null, subTid: null, subTit: null };
         const MODALS = {};
 
         // --- 2. SILENCE ENGINE (STRICT) ---
@@ -368,7 +376,6 @@
             const muteUntil = parseInt(localStorage.getItem('slbd_mute_until') || '0');
             const isMuted = now < muteUntil;
             
-            // Visual Update
             const indD = document.getElementById('silent-ind-d');
             const indM = document.getElementById('silent-ind-m');
             if(isMuted) {
@@ -396,7 +403,6 @@
                 document.getElementById('sfx-ping').play().catch(()=>{});
                 if(navigator.vibrate) navigator.vibrate([200,50,200]);
                 
-                // *** ACTIVATE 67 MINUTE LOCK ***
                 const lockTime = Date.now() + (67 * 60 * 1000);
                 localStorage.setItem('slbd_mute_until', lockTime);
                 checkSilence(); 
@@ -406,7 +412,7 @@
         // --- 3. INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
-            ['modCreate','modCal','modNoti', 'modSubmit'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
+            ['modCreate','modCal','modNoti','modSubmit'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
             checkSilence();
             document.getElementById('view-boot').classList.remove('d-none');
         };
@@ -509,7 +515,6 @@
                 const activeT = tasks ? tasks.filter(t => t.status !== 'Done' && t.status !== 'Planned') : [];
                 const futureT = tasks ? tasks.filter(t => t.status === 'Planned') : [];
 
-                // --- VIEW: HOME ---
                 if(STATE.page === 'home') {
                     const quickLinks = `
                         <div class="row g-3 mb-4">
@@ -536,7 +541,6 @@
                             }).join('')}</div>`
                             : `<div class="text-center py-5 text-secondary card-box"><i data-lucide="coffee" size="32" class="mb-3 opacity-50"></i><p class="m-0 fw-bold">PLANNED / NOT YET</p><p class="small opacity-75">No future logs pending.</p></div>`;
                     } else {
-                        // LIVE OPS
                         if(STATE.user.role === 'LEADER') {
                             const days = 7;
                             const graphData = new Array(days).fill(0);
@@ -551,7 +555,7 @@
                             const totalTasks = tasks.length;
                             const approved = tasks.filter(t=>t.status==='Done').length;
                             const pending = tasks.filter(t=>t.status==='Pending' || t.status==='Review').length;
-                            const searchApp = TEAM.length * 3 + approved;
+                            const searchApp = TEAM.length * 3 + approved; 
 
                             const analyticsSection = `
                                 <div class="row g-3 mb-4">
@@ -590,7 +594,6 @@
                             setTimeout(() => drawMomentumGraph('momentumGraph', graphData), 100);
 
                         } else {
-                            // MEMBER VIEW
                             const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
                             viewContent = `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4">My Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
                         }
@@ -598,7 +601,6 @@
                     c.innerHTML = quickLinks + tabSwitch + viewContent;
                 }
 
-                // --- VIEW: TASKS ---
                 if(STATE.page === 'task') {
                     if(!activeT.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
                     else c.innerHTML = `<div class="row g-3">${activeT.map(t => {
@@ -613,15 +615,14 @@
                             else if(t.status==='Review') btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finalize</button>`;
                             else btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
                         } else if(t.status==='Pending' || t.status==='Ongoing') {
-                             // --- CHANGE: Button now opens modal ---
-                             btn=`<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3 shadow-lg">Submit for Review</button>`;
+                            // MEMBER SUBMIT BUTTON triggers new modal
+                            btn=`<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit for Review</button>`;
                         }
                         
                         return `<div class="col-12 col-md-6 col-lg-4"><div class="card-box p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small text-secondary fw-bold">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-black" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${assignedHtml}${btn}</div></div>`;
                     }).join('')}</div>`;
                 }
 
-                // --- VIEW: CALENDAR ---
                 if(STATE.page === 'cal') {
                     const d = new Date();
                     const dim = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
@@ -634,19 +635,17 @@
                     c.innerHTML = `<div class="d-flex justify-content-between mb-4 align-items-center"><h4 class="fw-bold m-0 text-uppercase">${d.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow">Add Event</button></div><div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px;">${['S','M','T','W','T','F','S'].map(x=>`<div class="text-center text-xs text-secondary py-2 fw-bold">${x}</div>`).join('')}${cells}</div>`;
                 }
                 
-                // --- VIEW: DECISIONS ---
                 if(STATE.page === 'dec') {
                     const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
                     c.innerHTML = data && data.length ? data.map(d=>`<div class="card-box p-4 mb-2"><div class="fw-bold text-white">${d.subject}</div><p class="text-secondary small m-0">${d.details}</p></div>`).join('') : '<div class="text-center text-secondary py-5">No logs.</div>';
                 }
 
-                // --- VIEW: RECORDS ---
                 if(STATE.page === 'rec') {
                     const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
                     c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark mb-0"><thead><tr><th class="p-3 text-secondary text-xs">TASK</th><th class="p-3 text-secondary text-xs text-end">DATE</th></tr></thead><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
                 }
                 
-                checkSilence(); 
+                checkSilence();
 
             } catch(e) { console.error(e); }
             lucide.createIcons();
@@ -659,7 +658,7 @@
             const ctx = cvs.getContext('2d');
             const w = cvs.width = cvs.parentElement.offsetWidth;
             const h = cvs.height = 180;
-            const max = Math.max(...data, 4); 
+            const max = Math.max(...data, 4);
             const stepX = w / (data.length - 1);
             
             ctx.clearRect(0,0,w,h);
@@ -685,7 +684,7 @@
             ctx.shadowColor = '#3B82F6';
             ctx.shadowBlur = 10;
             ctx.stroke();
-            ctx.shadowBlur = 0;
+            ctx.shadowBlur = 0; 
             
             data.forEach((v,i) => {
                 const x = i * stepX;
@@ -697,7 +696,7 @@
             });
         }
 
-        // --- 7. INTERACTIONS & SUBMISSION ---
+        // --- 7. INTERACTIONS ---
         function setMode(m) { 
             STATE.mode = m; 
             ['task','future','dec'].forEach(k => {
@@ -726,39 +725,33 @@
             MODALS.modCreate.hide(); toast('Success','Record Saved','check-circle','text-success'); render(false); btn.innerText = 'Save Record';
         }
 
-        // --- NEW: SUBMISSION LOGIC ---
+        // NEW: SUBMISSION LOGIC
         function openSubmit(id, title) {
-            SUBMIT_TARGET = {id, title};
-            document.getElementById('sub-link').value = '';
+            STATE.subTid = id;
+            STATE.subTit = title;
+            STATE.subCat = null;
+            document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
             document.getElementById('sub-note').value = '';
             MODALS.modSubmit.show();
         }
 
+        function selSub(cat) {
+            STATE.subCat = cat;
+            document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
+            document.getElementById('sub-'+cat).classList.add('active');
+        }
+
         async function confirmSubmit() {
-            const btn = document.getElementById('btn-sub-conf');
-            btn.innerText = 'Submitting...';
-            const link = document.getElementById('sub-link').value;
+            if(!STATE.subCat) { toast('Error','Select Upload Sector','alert-circle','text-danger'); return; }
             const note = document.getElementById('sub-note').value;
+            const fullMsg = `Review: ${STATE.subTit} - Uploaded to ${STATE.subCat}${note ? ' ('+note+')' : ''}`;
             
-            // Fetch current details to append
-            const {data} = await sbClient.from('tasks').select('description').eq('id',SUBMIT_TARGET.id).single();
-            const newDesc = `${data.description || ''}\n\n[SUBMISSION]\nLink: ${link}\nNote: ${note}`;
-            
-            // Update Task
-            await sbClient.from('tasks').update({
-                status: 'Review', 
-                progress: 100, 
-                description: newDesc,
-                updated_at: new Date()
-            }).eq('id', SUBMIT_TARGET.id);
-            
-            // Notify Leader
-            sendNoti(1, `Review: ${SUBMIT_TARGET.title}`);
+            await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.subTid);
+            await sendNoti(1, fullMsg); // Notify Leader
             
             MODALS.modSubmit.hide();
-            toast('Sent', 'Mission Submitted', 'send', 'text-success');
-            render(true);
-            btn.innerText = 'CONFIRM SUBMISSION';
+            toast('Sent','Mission Submitted','send','text-success');
+            render(false);
         }
         
         async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); if(s==='Done') sendNoti(uid,`Complete: ${tit}`); if(s==='Review') sendNoti(1,`Review: ${tit}`); }
