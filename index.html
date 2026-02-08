@@ -14,31 +14,27 @@
         :root { --primary: #3b82f6; --bg: #050505; --card: #121212; --text: #e5e5e5; }
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* UTILS */
+        /* UTILITIES */
         .card-box { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
         .btn-primary { background: var(--primary); border: none; }
         .text-xs { font-size: 0.75rem; }
-        .text-sm { font-size: 0.875rem; }
         .cursor-pointer { cursor: pointer; }
         
         /* ANIMATIONS */
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-        /* UPLOAD ICONS */
+        /* DRIVE ICONS */
         .sub-opt { border: 1px solid rgba(255,255,255,0.1); background: #000; transition: 0.2s; }
         .sub-opt:hover { background: #1a1a1a; border-color: var(--primary); transform: translateY(-2px); }
         .sub-opt.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
 
-        /* SCREENS */
+        /* FULL SCREENS */
         #view-boot, #view-auth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* NAV */
+        /* NAV BAR */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid #222; padding: 10px 0; z-index: 1000; display: flex; justify-content: space-around; }
-        
-        /* BADGE PULSE */
-        @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }
-        .silence-active { color: #dc3545; animation: pulse 2s infinite; }
+        .nav-active { color: var(--primary) !important; opacity: 1 !important; }
     </style>
 </head>
 <body>
@@ -52,13 +48,13 @@
             <h1 class="fw-bold tracking-wider mb-2">TASK FORCE</h1>
             <p class="text-secondary small mb-5">SECURE COMMAND ENVIRONMENT</p>
             <button onclick="bootSystem()" class="btn btn-outline-primary px-5 rounded-pill fw-bold">INITIALIZE SYSTEM</button>
-            <div id="boot-err" class="text-danger mt-3 text-xs fw-bold"></div>
         </div>
     </div>
 
     <div id="view-auth" class="d-none">
         <div class="container text-center" style="max-width: 400px;">
             <div id="auth-list" class="row g-3 fade-in"></div>
+            
             <div id="auth-pin" class="d-none fade-in">
                 <div id="l-av" class="display-1 mb-3"></div>
                 <h3 id="l-name" class="fw-bold mb-4"></h3>
@@ -74,18 +70,17 @@
             <div class="container-fluid h-100 d-flex align-items-center justify-content-between px-3">
                 <div class="d-flex align-items-center gap-3">
                     <div id="d-av" class="bg-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width:36px; height:36px;"></div>
-                    <div class="d-none d-md-block">
+                    <div>
                         <div id="d-name" class="fw-bold text-sm lh-1"></div>
                         <div class="text-xs text-secondary">OPERATIVE</div>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
                     <button onclick="toggleSilence()" id="btn-silence" class="btn btn-sm text-secondary"><i data-lucide="bell"></i></button>
                     <button onclick="checkNoti(true)" class="btn btn-icon position-relative text-secondary">
                         <i data-lucide="inbox"></i>
                         <span id="bad-d" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-dark d-none">0</span>
                     </button>
-                    <button onclick="openCreate('task')" class="btn btn-primary btn-sm fw-bold px-3 rounded-pill d-none d-md-block">+ NEW</button>
                     <button onclick="doLogout()" class="btn btn-sm text-secondary"><i data-lucide="log-out" size="18"></i></button>
                 </div>
             </div>
@@ -108,7 +103,7 @@
         </div>
 
         <div class="d-md-none bottom-nav px-2 position-relative">
-            <span id="bad-m" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none" style="margin-left: 20px; margin-top: 5px; z-index: 1002;">0</span>
+            <span id="bad-m" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none" style="margin-left: 20px; z-index: 1002;">0</span>
             <div id="nav-m" class="d-flex w-100 justify-content-between"></div>
         </div>
     </div>
@@ -133,7 +128,7 @@
                             <div id="div-mems" class="d-flex flex-wrap gap-2 mb-3"></div>
                         </div>
                     </div>
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">SAVE</button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">SAVE RECORD</button>
                 </div>
             </div>
         </div>
@@ -180,23 +175,6 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modCal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content card-box border-0">
-                <div class="modal-body p-4">
-                    <h5 class="fw-bold mb-3">Add Event</h5>
-                    <input type="text" id="cal-t" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Event Name">
-                    <input type="date" id="cal-d" class="form-control bg-dark text-white border-secondary mb-2">
-                    <select id="cal-y" class="form-select bg-dark text-white border-secondary mb-3">
-                        <option value="meeting">Meeting</option>
-                        <option value="deadline">Deadline</option>
-                    </select>
-                    <button onclick="saveCal()" class="btn btn-primary w-100 rounded-pill">Save Event</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000">
         <div id="sysToast" class="toast bg-dark text-white border-secondary" role="alert">
             <div class="d-flex p-3 align-items-center">
@@ -207,7 +185,16 @@
     </div>
 
     <script>
-    // 1. SAFE INIT
+    // --- SAFETY WRAPPERS (PREVENTS CRASHES) ---
+    function safeText(id, txt) { const el = document.getElementById(id); if(el) el.innerText = txt; }
+    function safeHtml(id, htm) { const el = document.getElementById(id); if(el) el.innerHTML = htm; }
+    function safeClass(id, cls, act) { 
+        const el = document.getElementById(id); 
+        if(el) act === 'add' ? el.classList.add(cls) : el.classList.remove(cls); 
+    }
+    function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+    // --- CONFIG ---
     const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
     const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
     let sbClient = null;
@@ -226,67 +213,62 @@
         'PPT': 'https://drive.google.com/drive/folders/1IBpIa7nH43g1UVMYkFOwLA6iEFVvuv7y?usp=sharing'
     };
 
-    let STATE = { user: null, page: 'home', mode: 'task', lastNoti: 0, subCat: null, subTid: null };
+    let STATE = { user: null, page: 'home', mode: 'task', subCat: null, subTid: null, lastNoti: 0 };
     const MODALS = {};
 
+    // --- INIT ---
     window.onload = function() {
         try {
             lucide.createIcons();
             sbClient = window.supabase.createClient(SB_URL, SB_KEY);
-            ['modCreate','modCal','modNoti','modSubmit'].forEach(id => {
+            ['modCreate','modNoti','modSubmit'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) MODALS[id] = new bootstrap.Modal(el);
             });
             updateSilenceUI();
             
-            // Auto Login if saved
-            const savedUid = localStorage.getItem('slbd_uid');
-            if(savedUid) {
-                // Skip boot screen if logged in
-                document.getElementById('view-boot').classList.add('d-none');
-                login(TEAM.find(x => x.id == savedUid));
+            // Check Auto Login
+            const uid = localStorage.getItem('slbd_uid');
+            if(uid) {
+                safeClass('view-boot', 'd-none', 'add');
+                login(TEAM.find(x => x.id == uid));
             }
-        } catch(e) {
-            console.error(e);
-            document.getElementById('boot-err').innerText = "System Init Failed: " + e.message;
-        }
+        } catch(e) { console.error("Init Error", e); }
     };
 
     function bootSystem() {
-        try {
-            document.getElementById('sfx-boot').play().catch(e=>console.log("Audio blocked"));
-            document.getElementById('view-boot').classList.add('d-none');
-            initAuth();
-        } catch(e) { alert("Boot Error: " + e.message); }
+        document.getElementById('sfx-boot').play().catch(()=>{});
+        safeClass('view-boot', 'd-none', 'add');
+        initAuth();
     }
 
-    // 2. AUTH
+    // --- AUTH ---
     function initAuth() {
-        document.getElementById('view-auth').classList.remove('d-none');
-        document.getElementById('auth-list').innerHTML = TEAM.map(u => `
+        safeClass('view-auth', 'd-none', 'remove');
+        safeHtml('auth-list', TEAM.map(u => `
             <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 cursor-pointer">
                 <div class="fs-1 mb-1">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
-            </div></div>`).join('');
+            </div></div>`).join(''));
     }
 
     function preLogin(id) {
         STATE.sel = TEAM.find(u=>u.id===id);
-        document.getElementById('auth-list').classList.add('d-none');
-        document.getElementById('auth-pin').classList.remove('d-none');
-        document.getElementById('l-av').innerText = STATE.sel.av;
-        document.getElementById('l-name').innerText = STATE.sel.name;
+        safeClass('auth-list', 'd-none', 'add');
+        safeClass('auth-pin', 'd-none', 'remove');
+        safeText('l-av', STATE.sel.av);
+        safeText('l-name', STATE.sel.name);
     }
 
     function resetAuth() {
-        document.getElementById('auth-pin').classList.add('d-none');
-        document.getElementById('auth-list').classList.remove('d-none');
+        safeClass('auth-pin', 'd-none', 'add');
+        safeClass('auth-list', 'd-none', 'remove');
         document.getElementById('inp-pin').value = '';
     }
 
     function tryLogin() {
-        if(document.getElementById('inp-pin').value === STATE.sel.pin) {
+        if(safeVal('inp-pin') === STATE.sel.pin) {
             localStorage.setItem('slbd_uid', STATE.sel.id);
-            document.getElementById('view-auth').classList.add('d-none');
+            safeClass('view-auth', 'd-none', 'add');
             login(STATE.sel);
         } else {
             toast('Error', 'Invalid PIN', 'lock', 'text-danger');
@@ -296,20 +278,20 @@
     function login(u) {
         if(!u) return initAuth();
         STATE.user = u;
-        document.getElementById('view-app').classList.remove('d-none');
-        document.getElementById('d-av').innerText = u.av;
-        document.getElementById('d-name').innerText = u.name;
+        safeClass('view-app', 'd-none', 'remove');
+        safeText('d-av', u.av);
+        safeText('d-name', u.name);
         
+        // Build Nav
         const navs = [
             {id:'home', t:'Dash', i:'layout-grid'},
-            {id:'cal', t:'Schedule', i:'calendar'},
             {id:'task', t:'Tasks', i:'check-square'},
             {id:'dec', t:'Decisions', i:'file-signature'},
             {id:'rec', t:'Files', i:'folder'}
         ];
         
-        document.getElementById('nav-d').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join('');
-        document.getElementById('nav-m').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
+        safeHtml('nav-d', navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join(''));
+        safeHtml('nav-m', navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join(''));
         
         nav('home');
         setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
@@ -321,47 +303,55 @@
         location.reload();
     }
 
-    // 3. NAVIGATION & RENDER
+    // --- NAVIGATION ---
     function nav(p) {
         STATE.page = p;
+        // Reset Nav Styles
         document.querySelectorAll('[id^="nd-"]').forEach(e => e.classList.remove('bg-primary','bg-opacity-10','text-white'));
-        document.querySelectorAll('[id^="nm-"]').forEach(e => {e.classList.remove('text-primary','opacity-100'); e.classList.add('opacity-50');});
+        document.querySelectorAll('[id^="nm-"]').forEach(e => {e.classList.remove('nav-active'); e.classList.add('opacity-50');});
         
-        const nd = document.getElementById(`nd-${p}`); if(nd) { nd.classList.add('bg-primary','bg-opacity-10','text-white'); nd.classList.remove('text-secondary'); }
-        const nm = document.getElementById(`nm-${p}`); if(nm) { nm.classList.add('text-primary','opacity-100'); nm.classList.remove('opacity-50'); }
+        // Set Active
+        safeClass(`nd-${p}`, 'bg-primary', 'add');
+        safeClass(`nd-${p}`, 'bg-opacity-10', 'add');
+        safeClass(`nd-${p}`, 'text-white', 'add');
         
-        document.getElementById('d-tit').innerText = p === 'home' ? 'COMMAND CENTER' : p.toUpperCase();
+        const nm = document.getElementById(`nm-${p}`);
+        if(nm) { nm.classList.add('nav-active'); nm.classList.remove('opacity-50'); }
+        
+        safeText('d-tit', p === 'home' ? 'COMMAND CENTER' : p.toUpperCase());
         render(false);
     }
 
+    // --- RENDER LOGIC ---
     async function render(silent) {
-        const c = document.getElementById('content-box');
-        if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+        if(!silent) safeHtml('content-box', '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
 
         try {
             const { data: tasks, error } = await sbClient.from('tasks').select('*').order('created_at',{ascending:false});
             if(error) throw error;
             
             const activeT = tasks.filter(t => t.status !== 'Done');
+            let html = '';
 
+            // 1. HOME
             if(STATE.page === 'home') {
-                const quick = `<div class="row g-3 mb-4">
-                    ${Object.keys(DRIVE).map(k=>`<div class="col-6 col-md-3"><a href="${DRIVE[k]}" target="_blank" class="text-decoration-none"><div class="card-box p-3 text-center"><i data-lucide="folder" class="mb-2 text-primary"></i><div class="text-white text-xs fw-bold">${k}</div></div></a></div>`).join('')}
-                </div>`;
-
+                const driveLinks = Object.keys(DRIVE).map(k=>`<div class="col-6 col-md-3"><a href="${DRIVE[k]}" target="_blank" class="text-decoration-none"><div class="card-box p-3 text-center"><i data-lucide="folder" class="mb-2 text-primary"></i><div class="text-white text-xs fw-bold">${k}</div></div></a></div>`).join('');
+                
                 if(STATE.user.role === 'LEADER') {
-                     c.innerHTML = quick + `<div class="card-box p-3"><h6 class="fw-bold mb-3 text-white">Team Status</h6>${TEAM.map(u => {
+                    const statusRows = TEAM.map(u => {
                         const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
                         return `<div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1"><small class="fw-bold">${u.name}</small></div>${uts.map(t=>`<div class="progress bg-dark mb-1" style="height:6px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div>`).join('') || '<div class="text-secondary text-xs">Idle</div>'}</div>`;
-                     }).join('')}</div><button onclick="pingAll()" class="btn btn-outline-info w-100 btn-sm mt-3">PING ALL</button>`;
+                    }).join('');
+                    html = `<div class="row g-3 mb-4">${driveLinks}</div><div class="card-box p-3"><h6 class="fw-bold mb-3 text-white">Team Status</h6>${statusRows}</div><button onclick="pingAll()" class="btn btn-outline-info w-100 btn-sm mt-3">PING ALL</button>`;
                 } else {
                     const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                    c.innerHTML = quick + `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-3">My Tasks</h5>${myT.map(t => `<div class="bg-black p-3 rounded mb-2"><div class="d-flex justify-content-between"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary">${t.status}</span></div><input type="range" class="form-range mt-2" value="${t.progress}" onchange="updProg(${t.id},this.value)"></div>`).join('') || '<div class="text-secondary">No active tasks.</div>'}</div>`;
+                    html = `<div class="row g-3 mb-4">${driveLinks}</div><div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-3">My Tasks</h5>${myT.map(t => `<div class="bg-black p-3 rounded mb-2"><div class="d-flex justify-content-between"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary">${t.status}</span></div><input type="range" class="form-range mt-2" value="${t.progress}" onchange="updProg(${t.id},this.value)"></div>`).join('') || '<div class="text-secondary">No active tasks.</div>'}</div>`;
                 }
             }
 
+            // 2. TASKS
             if(STATE.page === 'task') {
-                c.innerHTML = `<div class="row g-3">${activeT.map(t => {
+                html = `<div class="row g-3">${activeT.map(t => {
                     let btn = '';
                     if(STATE.user.role==='LEADER') {
                         if(t.status==='ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-2 fw-bold text-dark">Approve</button>`;
@@ -375,51 +365,55 @@
                 }).join('')}</div>`;
             }
 
-            if(STATE.page === 'cal') {
-                const {data:evts} = await sbClient.from('calendar_events').select('*');
-                c.innerHTML = `<button onclick="MODALS.modCal.show()" class="btn btn-primary w-100 mb-3">Add Event</button><div class="card-box p-3">${evts.map(e=>`<div class="d-flex justify-content-between mb-2 border-bottom border-secondary border-opacity-25 pb-2"><span class="fw-bold">${e.title}</span><span class="text-secondary small">${e.date}</span></div>`).join('')}</div>`;
-            }
-
+            // 3. DECISIONS
             if(STATE.page === 'dec') {
                  const {data:decs} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                 c.innerHTML = decs.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
+                 html = decs.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
             }
             
+            // 4. ARCHIVES
             if(STATE.page === 'rec') {
                 const {data:dones} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                c.innerHTML = `<div class="card-box"><table class="table table-dark mb-0"><tbody>${dones.map(t=>`<tr><td class="p-3 fw-bold">${t.task_title}</td><td class="p-3 text-end text-secondary small">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
+                html = `<div class="card-box"><table class="table table-dark mb-0"><tbody>${dones.map(t=>`<tr><td class="p-3 fw-bold">${t.task_title}</td><td class="p-3 text-end text-secondary small">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
             }
+
+            safeHtml('content-box', html);
 
         } catch(e) { 
             console.error(e);
-            if(!silent) c.innerHTML = `<div class="alert alert-danger">Connection Error: ${e.message}</div>`;
+            if(!silent) safeHtml('content-box', `<div class="alert alert-danger">Connection Error. Retrying...</div>`);
         }
         lucide.createIcons();
     }
 
-    // 4. ACTIONS
+    // --- ACTIONS ---
     function setMode(m) { 
         STATE.mode = m; 
         ['task','future','dec'].forEach(k => {
-            const el = document.getElementById('bm-'+k);
-            if(el) el.className = (k === m) ? 'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25' : 'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2';
+            safeClass('bm-'+k, 'bg-secondary', k===m ? 'add' : 'remove');
+            safeClass('bm-'+k, 'bg-opacity-25', k===m ? 'add' : 'remove');
+            safeClass('bm-'+k, 'text-white', k===m ? 'add' : 'remove');
         });
-        document.getElementById('sec-task').classList.toggle('d-none', m==='dec');
-        if(m==='task') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join('');
+        
+        const secTask = document.getElementById('sec-task');
+        if(secTask) secTask.classList.toggle('d-none', m==='dec');
+        
+        if(m==='task') safeHtml('div-mems', TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join(''));
     }
+
     function openCreate(m) { setMode(m); MODALS.modCreate.show(); }
 
     async function saveItem() {
         const btn = document.getElementById('btn-save'); btn.innerText = 'Saving...';
         try {
-            const t = document.getElementById('inp-t').value;
+            const t = safeVal('inp-t');
             if(!t) throw new Error("Title needed");
             
-            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:document.getElementById('inp-d').value});
-            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:document.getElementById('inp-d').value, status:'Planned', creator_id:STATE.user.id, progress:0});
+            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:safeVal('inp-d')});
+            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:safeVal('inp-d'), status:'Planned', creator_id:STATE.user.id, progress:0});
             else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                await sbClient.from('tasks').insert({task_title:t, description:document.getElementById('inp-d').value, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
+                await sbClient.from('tasks').insert({task_title:t, description:safeVal('inp-d'), due_date:safeVal('inp-date')||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
                 tags.forEach(id => sendNoti(id, `New Task: ${t}`));
                 if(STATE.user.role!=='LEADER') sendNoti(1, `Approval Req: ${t}`);
             }
@@ -428,7 +422,7 @@
         btn.innerText = 'SAVE';
     }
 
-    // SUBMIT
+    // --- SUBMISSION LOGIC ---
     function openSubmit(id, title) {
         STATE.subTid = id; STATE.subTit = title; STATE.subCat = null;
         document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
@@ -437,25 +431,24 @@
     function selSub(cat) {
         STATE.subCat = cat;
         document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
-        document.getElementById('sub-'+cat).classList.add('active');
+        safeClass('sub-'+cat, 'active', 'add');
         if(DRIVE[cat]) window.open(DRIVE[cat], '_blank');
     }
     async function confirmSubmit() {
-        if(!STATE.subCat) return toast('Error','Click a Drive Icon first','x','text-danger');
+        if(!STATE.subCat) return toast('Error','Tap a Drive Icon first','x','text-danger');
         await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.subTid);
-        const note = document.getElementById('sub-note').value;
+        const note = safeVal('sub-note');
         await sendNoti(1, `Review: ${STATE.subTit} in ${STATE.subCat} ${note}`);
         MODALS.modSubmit.hide(); render(false); toast('Sent','Submitted','send','text-success');
     }
 
-    // UTILS
+    // --- HELPERS ---
     async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); }
     async function updProg(id,v) { await sbClient.from('tasks').update({progress:v}).eq('id',id); }
     async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
     function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info'); }
-    async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); render(false); }
-
-    // NOTIFICATIONS & SOUND
+    
+    // --- NOTIFICATIONS & AUDIO ---
     function toggleSilence() {
         const isMuted = localStorage.getItem('mute') === '1';
         localStorage.setItem('mute', isMuted ? '0' : '1');
@@ -463,8 +456,7 @@
     }
     function updateSilenceUI() {
         const isMuted = localStorage.getItem('mute') === '1';
-        const btn = document.getElementById('btn-silence');
-        if(btn) btn.innerHTML = isMuted ? '<i data-lucide="bell-off" class="text-danger"></i>' : '<i data-lucide="bell"></i>';
+        safeHtml('btn-silence', isMuted ? '<i data-lucide="bell-off" class="text-danger"></i>' : '<i data-lucide="bell"></i>');
         lucide.createIcons();
     }
     async function checkNoti(open) {
@@ -472,7 +464,6 @@
         const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false).order('created_at',{ascending:false});
         const count = data?.length || 0;
         
-        // SAFE BADGE UPDATE
         ['bad-d','bad-m'].forEach(id => {
             const el = document.getElementById(id);
             if(el) {
@@ -488,15 +479,16 @@
 
         if(open) {
             const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
-            document.getElementById('noti-list').innerHTML = msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div></div>`).join('');
+            safeHtml('noti-list', msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div></div>`).join(''));
             if(count>0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
             MODALS.modNoti.show();
         }
     }
 
     function toast(t,m,i,c) {
-        document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
-        document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
+        safeText('t-tit', t); safeText('t-msg', m);
+        const ico = document.getElementById('t-ico');
+        if(ico) { ico.setAttribute('data-lucide', i); ico.className = c; }
         lucide.createIcons();
         const el = document.getElementById('sysToast');
         if(el) bootstrap.Toast.getOrCreateInstance(el).show();
