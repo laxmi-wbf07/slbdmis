@@ -38,7 +38,8 @@
 
         /* UPLOAD ICONS */
         .sub-opt { border: 1px solid rgba(255,255,255,0.1); background: #000; transition: 0.2s; }
-        .sub-opt:hover { background: #1a1a1a; border-color: var(--primary); }
+        .sub-opt:hover { background: #1a1a1a; border-color: var(--primary); transform: translateY(-2px); }
+        .sub-opt:active { transform: scale(0.98); }
         .sub-opt.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
 
         /* AUTH & BOOT */
@@ -161,22 +162,24 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold">Mission Debrief</h5>
+                    <h5 class="fw-bold">Mission Upload</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="text-center mb-3">
-                        <p class="text-secondary small fw-bold">1. Click a Sector to Open Drive & Upload:</p>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="shield" class="text-warning mb-2"></i><div class="text-xs fw-bold">ADMIN DRIVE</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="cpu" class="text-info mb-2"></i><div class="text-xs fw-bold">MACHINE DRIVE</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="image" class="text-success mb-2"></i><div class="text-xs fw-bold">PICS DRIVE</div></div></div>
-                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="external-link" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="presentation" class="text-danger mb-2"></i><div class="text-xs fw-bold">PPT DRIVE</div></div></div>
+                    <div class="text-center mb-4">
+                        <p class="text-primary small fw-bold mb-3">1. TAP ICON TO UPLOAD FILES</p>
+                        <div class="row g-3">
+                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="shield" class="text-warning mb-2" size="28"></i><div class="text-xs fw-bold">ADMIN / FINANCE</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="cpu" class="text-info mb-2" size="28"></i><div class="text-xs fw-bold">MACHINE UNIT</div></div></div>
+                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="image" class="text-success mb-2" size="28"></i><div class="text-xs fw-bold">PICTURES</div></div></div>
+                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer position-relative"><i data-lucide="upload-cloud" size="14" class="position-absolute top-0 end-0 m-2 opacity-50"></i><i data-lucide="presentation" class="text-danger mb-2" size="28"></i><div class="text-xs fw-bold">PROPOSALS / PPT</div></div></div>
                         </div>
                     </div>
-                    <p class="text-secondary small fw-bold">2. Confirm Submission:</p>
-                    <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Any notes? (e.g., 'Uploaded the receipts')"></textarea>
-                    <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-lg">CONFIRM UPLOAD</button>
+                    <div class="border-top border-secondary border-opacity-25 pt-3">
+                        <p class="text-secondary small fw-bold mb-2">2. Notify Leader</p>
+                        <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="2" placeholder="Optional note..."></textarea>
+                        <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3 shadow-lg"><i data-lucide="send" size="18" class="me-2"></i> CONFIRM & NOTIFY</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -522,12 +525,12 @@
             document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
             document.getElementById('sub-'+cat).classList.add('active');
             
-            // 2. Open Drive Link
+            // 2. Open Drive Link IMMEDIATELY
             if(DRIVE_LINKS[cat]) window.open(DRIVE_LINKS[cat], '_blank');
         }
 
         async function confirmSubmit() {
-            if(!STATE.subCat) { toast('Error','Please Click a Drive Sector first','alert-circle','text-danger'); return; }
+            if(!STATE.subCat) { toast('Error','Tap a Drive Icon first','alert-circle','text-danger'); return; }
             const note = document.getElementById('sub-note').value;
             const fullMsg = `Review: ${STATE.subTit} - Uploaded to ${STATE.subCat}${note ? ' ('+note+')' : ''}`;
             
