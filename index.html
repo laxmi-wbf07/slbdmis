@@ -3,38 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TASK FORCE COMMAND</title>
+    <title>TASK FORCE | OS v2</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --primary: #3b82f6; --bg: #050505; --card: #121212; --text: #e5e5e5; }
+        /* --- THEME ENGINE --- */
+        :root { 
+            --primary: #00f2ff; /* Cyber Blue */
+            --primary-dim: rgba(0, 242, 255, 0.1);
+            --bg: #030305; 
+            --card: rgba(20, 20, 25, 0.7); 
+            --text: #e5e5e5; 
+            --border: rgba(255,255,255,0.08);
+            --glass: blur(12px) saturate(180%);
+        }
+
         body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* UTILITIES */
-        .card-box { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; }
-        .btn-primary { background: var(--primary); border: none; }
-        .text-xs { font-size: 0.75rem; }
-        .cursor-pointer { cursor: pointer; }
+        /* BACKGROUND MESH */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #000000 70%);
+            z-index: -1; pointer-events: none;
+        }
+
+        /* --- UI COMPONENTS --- */
+        .font-mono { font-family: 'JetBrains Mono', monospace; letter-spacing: -1px; }
         
-        /* ANIMATIONS */
-        .fade-in { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        /* GLASS PANELS */
+        .card-box { 
+            background: var(--card); 
+            backdrop-filter: var(--glass); 
+            -webkit-backdrop-filter: var(--glass);
+            border: 1px solid var(--border); 
+            border-radius: 16px; 
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
 
-        /* DRIVE ICONS */
-        .sub-opt { border: 1px solid rgba(255,255,255,0.1); background: #000; transition: 0.2s; }
-        .sub-opt:hover { background: #1a1a1a; border-color: var(--primary); transform: translateY(-2px); }
-        .sub-opt.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+        /* BUTTONS */
+        .btn { transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; border: none; }
+        .btn:active { transform: scale(0.96); } /* Tactile Click */
+        
+        .btn-primary { 
+            background: var(--primary); color: #000; 
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+        }
+        .btn-primary:hover { background: #fff; box-shadow: 0 0 25px rgba(255, 255, 255, 0.6); }
 
-        /* FULL SCREENS */
+        .btn-outline-secondary { border-color: var(--border); color: #888; }
+        .btn-outline-secondary:hover { background: var(--border); color: #fff; }
+
+        /* INPUTS */
+        .form-control, .form-select {
+            background: rgba(0,0,0,0.3) !important;
+            border: 1px solid var(--border) !important;
+            color: #fff !important;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .form-control:focus { box-shadow: 0 0 0 2px var(--primary-dim); border-color: var(--primary) !important; }
+
+        /* --- ANIMATIONS --- */
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+        /* PULSE DOT */
+        .pulse-dot { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.4;} 100% {opacity:1;} }
+
+        /* --- LAYOUTS --- */
         #view-boot, #view-auth { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* NAV BAR */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0a0a0a; border-top: 1px solid #222; padding: 10px 0; z-index: 1000; display: flex; justify-content: space-around; }
-        .nav-active { color: var(--primary) !important; opacity: 1 !important; }
+        /* HEADER */
+        .app-header {
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* BOTTOM NAV (Mobile) */
+        .bottom-nav { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            width: 90%; max-width: 400px;
+            background: rgba(20,20,20,0.9); 
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 12px 20px; 
+            z-index: 1000; display: flex; justify-content: space-between; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .nav-item { color: #666; transition: 0.3s; position: relative; }
+        .nav-active { color: var(--primary); text-shadow: 0 0 12px var(--primary-dim); }
+        .nav-active::after {
+            content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px; background: var(--primary); border-radius: 50%;
+        }
+
+        /* DRIVE GRID */
+        .drive-icon { 
+            transition: 0.2s; border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+        }
+        .drive-icon:active { transform: scale(0.95); background: var(--primary-dim); border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -43,11 +118,13 @@
     <audio id="sfx-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
     <div id="view-boot">
-        <div class="text-center fade-in">
-            <div class="mb-4 text-primary"><i data-lucide="power" size="64"></i></div>
-            <h1 class="fw-bold tracking-wider mb-2">TASK FORCE</h1>
-            <p class="text-secondary small mb-5">SECURE COMMAND ENVIRONMENT</p>
-            <button onclick="bootSystem()" class="btn btn-outline-primary px-5 rounded-pill fw-bold">INITIALIZE SYSTEM</button>
+        <div class="text-center fade-in" style="max-width: 300px;">
+            <div class="mb-5 d-inline-block p-4 rounded-circle" style="background: radial-gradient(circle, rgba(0,242,255,0.15) 0%, rgba(0,0,0,0) 70%);">
+                <i data-lucide="cpu" size="64" style="color: var(--primary)"></i>
+            </div>
+            <h2 class="font-mono fw-bold mb-2 tracking-wider">COMMAND_OS</h2>
+            <div id="boot-text" class="text-secondary font-mono small mb-5">SYSTEM READY...</div>
+            <button onclick="bootSystem()" class="btn btn-outline-light px-5 py-3 rounded-pill fw-bold w-100" style="border-color: rgba(255,255,255,0.2)">INITIALIZE</button>
         </div>
     </div>
 
@@ -56,23 +133,28 @@
             <div id="auth-list" class="row g-3 fade-in"></div>
             
             <div id="auth-pin" class="d-none fade-in">
-                <div id="l-av" class="display-1 mb-3"></div>
-                <h3 id="l-name" class="fw-bold mb-4"></h3>
-                <input type="password" id="inp-pin" class="form-control bg-dark text-white border-secondary text-center fs-3 mb-4 py-2" maxlength="11" placeholder="ENTER PIN">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 fw-bold rounded-pill mb-3">ACCESS DASHBOARD</button>
-                <button onclick="resetAuth()" class="btn btn-link text-secondary text-decoration-none small">Switch User</button>
+                <div id="l-av" class="display-1 mb-3 filter-grayscale"></div>
+                <h3 id="l-name" class="fw-bold mb-1"></h3>
+                <p class="text-secondary small font-mono mb-4">SECURE LOGIN REQUIRED</p>
+                
+                <input type="password" id="inp-pin" class="form-control text-center fs-3 mb-4 py-3 font-mono" maxlength="11" placeholder="• • • •">
+                
+                <div class="row g-2">
+                    <div class="col-8"><button onclick="tryLogin()" class="btn btn-primary w-100 py-3 fw-bold">ACCESS</button></div>
+                    <div class="col-4"><button onclick="resetAuth()" class="btn btn-outline-secondary w-100 py-3"><i data-lucide="arrow-left"></i></button></div>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
-        <div class="fixed-top bg-black border-bottom border-secondary border-opacity-25" style="height:60px; z-index:1001;">
-            <div class="container-fluid h-100 d-flex align-items-center justify-content-between px-3">
+        <div class="fixed-top app-header" style="height:70px; z-index:1001;">
+            <div class="container-fluid h-100 d-flex align-items-center justify-content-between px-4">
                 <div class="d-flex align-items-center gap-3">
-                    <div id="d-av" class="bg-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width:36px; height:36px;"></div>
+                    <div id="d-av" class="bg-dark rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width:40px; height:40px; font-size: 20px;"></div>
                     <div>
-                        <div id="d-name" class="fw-bold text-sm lh-1"></div>
-                        <div class="text-xs text-secondary">OPERATIVE</div>
+                        <div id="greeting" class="text-xs text-secondary font-mono text-uppercase">WELCOME</div>
+                        <div id="d-name" class="fw-bold text-sm lh-1 text-white"></div>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
@@ -86,25 +168,32 @@
             </div>
         </div>
 
-        <div class="container-fluid" style="margin-top: 60px; padding-bottom: 80px;">
+        <div class="container-fluid" style="margin-top: 70px; padding-bottom: 100px;">
             <div class="row">
-                <div class="col-md-3 col-lg-2 d-none d-md-block position-fixed h-100 bg-black border-end border-secondary border-opacity-25 pt-3">
-                    <div id="nav-d" class="d-flex flex-column gap-2"></div>
+                <div class="col-md-3 col-lg-2 d-none d-md-block position-fixed h-100 border-end border-secondary border-opacity-10 pt-4" style="background: var(--bg); top: 70px;">
+                    <div id="nav-d" class="d-flex flex-column gap-2 px-2"></div>
                 </div>
 
-                <div class="col-12 col-md-9 offset-md-3 col-lg-10 offset-lg-2 p-3 p-md-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 id="d-tit" class="fw-bold m-0 text-uppercase tracking-wide">DASHBOARD</h4>
-                        <button onclick="openCreate('task')" class="btn btn-primary rounded-circle shadow d-md-none" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center"><i data-lucide="plus"></i></button>
+                <div class="col-12 col-md-9 offset-md-3 col-lg-10 offset-lg-2 p-3 p-md-5">
+                    <div class="d-flex justify-content-between align-items-end mb-4 fade-in">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <div class="pulse-dot"></div>
+                                <span class="text-xs font-mono text-primary">LIVE FEED</span>
+                            </div>
+                            <h2 id="d-tit" class="fw-bold m-0 font-mono tracking-tight text-white">DASHBOARD</h2>
+                        </div>
+                        <button onclick="openCreate('task')" class="btn btn-primary rounded-circle shadow d-md-none" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center"><i data-lucide="plus"></i></button>
                     </div>
+                    
                     <div id="content-box" class="fade-in"></div>
                 </div>
             </div>
         </div>
 
-        <div class="d-md-none bottom-nav px-2 position-relative">
-            <span id="bad-m" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none" style="margin-left: 20px; z-index: 1002;">0</span>
-            <div id="nav-m" class="d-flex w-100 justify-content-between"></div>
+        <div class="d-md-none bottom-nav fade-in">
+            <span id="bad-m" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger d-none" style="z-index: 1002;">0</span>
+            <div id="nav-m" class="d-flex w-100 justify-content-around align-items-center"></div>
         </div>
     </div>
 
@@ -112,23 +201,30 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
                 <div class="modal-body p-4">
-                    <div class="bg-dark p-1 rounded-3 d-flex mb-3">
-                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white fw-bold">TASK</button>
+                    <h5 class="font-mono fw-bold mb-3">NEW ENTRY</h5>
+                    <div class="bg-black bg-opacity-50 p-1 rounded-3 d-flex mb-4 border border-secondary border-opacity-10">
+                        <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white">TASK</button>
                         <button onclick="setMode('future')" id="bm-future" class="flex-fill btn btn-sm text-secondary">PLAN</button>
                         <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary">LOG</button>
                     </div>
-                    <input type="text" id="inp-t" class="form-control bg-dark text-white border-secondary mb-2 fw-bold" placeholder="Title">
-                    <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Details..."></textarea>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="text" id="inp-t" class="form-control" placeholder="Title">
+                        <label class="text-secondary">Title / Subject</label>
+                    </div>
+                    
+                    <textarea id="inp-d" class="form-control mb-3" rows="3" placeholder="Description..."></textarea>
                     
                     <div id="sec-task">
-                        <label class="text-xs text-secondary fw-bold mb-1">DUE DATE</label>
-                        <input type="date" id="inp-date" class="form-control bg-dark text-white border-secondary mb-3">
-                        <div id="sec-assign">
-                            <label class="text-xs text-secondary fw-bold mb-1">ASSIGN TO</label>
-                            <div id="div-mems" class="d-flex flex-wrap gap-2 mb-3"></div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-12"><label class="text-xs text-secondary font-mono mb-1">TARGET DATE</label><input type="date" id="inp-date" class="form-control"></div>
+                        </div>
+                        <div id="sec-assign" class="mb-4">
+                            <label class="text-xs text-secondary font-mono mb-2 d-block">ASSIGN OPERATIVES</label>
+                            <div id="div-mems" class="d-flex flex-wrap gap-2"></div>
                         </div>
                     </div>
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">SAVE RECORD</button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill">CONFIRM ENTRY</button>
                 </div>
             </div>
         </div>
@@ -137,25 +233,24 @@
     <div class="modal fade" id="modSubmit" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold">Upload Mission</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="text-center mb-4">
-                        <p class="text-primary small fw-bold mb-3">1. TAP ICON TO UPLOAD</p>
-                        <div class="row g-3">
-                            <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="shield" class="text-warning mb-2" size="28"></i><div class="text-xs fw-bold">ADMIN</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="cpu" class="text-info mb-2" size="28"></i><div class="text-xs fw-bold">MACHINE</div></div></div>
-                            <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="image" class="text-success mb-2" size="28"></i><div class="text-xs fw-bold">PICS</div></div></div>
-                            <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="sub-opt rounded p-3 text-center cursor-pointer"><i data-lucide="presentation" class="text-danger mb-2" size="28"></i><div class="text-xs fw-bold">PPT</div></div></div>
-                        </div>
+                <div class="modal-body p-4 text-center">
+                    <i data-lucide="upload-cloud" class="text-primary mb-3" size="32"></i>
+                    <h5 class="fw-bold mb-1">Upload Protocol</h5>
+                    <p class="text-secondary text-xs mb-4">SELECT DESTINATION DRIVE</p>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-6"><div onclick="selSub('Admin')" id="sub-Admin" class="drive-icon rounded-3 p-3 cursor-pointer"><i data-lucide="shield" class="text-warning mb-2"></i><div class="text-xs fw-bold">ADMIN</div></div></div>
+                        <div class="col-6"><div onclick="selSub('Machine')" id="sub-Machine" class="drive-icon rounded-3 p-3 cursor-pointer"><i data-lucide="cpu" class="text-info mb-2"></i><div class="text-xs fw-bold">MACHINE</div></div></div>
+                        <div class="col-6"><div onclick="selSub('Pics')" id="sub-Pics" class="drive-icon rounded-3 p-3 cursor-pointer"><i data-lucide="image" class="text-success mb-2"></i><div class="text-xs fw-bold">MEDIA</div></div></div>
+                        <div class="col-6"><div onclick="selSub('PPT')" id="sub-PPT" class="drive-icon rounded-3 p-3 cursor-pointer"><i data-lucide="presentation" class="text-danger mb-2"></i><div class="text-xs fw-bold">DECK</div></div></div>
                     </div>
-                    <div class="border-top border-secondary border-opacity-25 pt-3">
-                        <p class="text-secondary small fw-bold mb-2">2. Notify Leader</p>
-                        <textarea id="sub-note" class="form-control bg-dark text-white border-secondary mb-3" rows="2" placeholder="Note (Optional)"></textarea>
-                        <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill fw-bold py-3"><i data-lucide="send" size="18" class="me-2"></i> NOTIFY LEADER</button>
+
+                    <div class="text-start bg-black bg-opacity-25 p-3 rounded-3 border border-secondary border-opacity-10">
+                        <label class="text-xs text-secondary font-mono mb-2">MISSION REPORT</label>
+                        <textarea id="sub-note" class="form-control bg-transparent border-0 p-0 text-white" rows="2" placeholder="Brief note for commander..."></textarea>
                     </div>
+                    
+                    <button onclick="confirmSubmit()" class="btn btn-success w-100 rounded-pill mt-3 py-3">TRANSMIT</button>
                 </div>
             </div>
         </div>
@@ -164,8 +259,8 @@
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h6 class="fw-bold m-0">Alerts</h6>
+                <div class="modal-header border-bottom border-secondary border-opacity-10">
+                    <h6 class="font-mono fw-bold m-0 text-primary">INCOMING ALERTS</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -176,22 +271,19 @@
     </div>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000">
-        <div id="sysToast" class="toast bg-dark text-white border-secondary" role="alert">
+        <div id="sysToast" class="toast bg-dark text-white border border-secondary" role="alert">
             <div class="d-flex p-3 align-items-center">
-                <div class="me-3"><i id="t-ico" data-lucide="info"></i></div>
-                <div><strong id="t-tit" class="d-block">System</strong><small id="t-msg" class="text-secondary">Message</small></div>
+                <div class="me-3 text-primary"><i id="t-ico" data-lucide="info"></i></div>
+                <div><strong id="t-tit" class="d-block font-mono text-uppercase">System</strong><small id="t-msg" class="text-secondary">Message</small></div>
             </div>
         </div>
     </div>
 
     <script>
-    // --- SAFETY WRAPPERS (PREVENTS CRASHES) ---
+    // --- SAFETY WRAPPERS ---
     function safeText(id, txt) { const el = document.getElementById(id); if(el) el.innerText = txt; }
     function safeHtml(id, htm) { const el = document.getElementById(id); if(el) el.innerHTML = htm; }
-    function safeClass(id, cls, act) { 
-        const el = document.getElementById(id); 
-        if(el) act === 'add' ? el.classList.add(cls) : el.classList.remove(cls); 
-    }
+    function safeClass(id, cls, act) { const el = document.getElementById(id); if(el) act === 'add' ? el.classList.add(cls) : el.classList.remove(cls); }
     function safeVal(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 
     // --- CONFIG ---
@@ -227,11 +319,19 @@
             });
             updateSilenceUI();
             
-            // Check Auto Login
             const uid = localStorage.getItem('slbd_uid');
             if(uid) {
                 safeClass('view-boot', 'd-none', 'add');
                 login(TEAM.find(x => x.id == uid));
+            } else {
+                // Typewriter effect for boot
+                const txt = "SECURE COMMAND ENVIRONMENT // V2.0";
+                let i=0;
+                const interval = setInterval(()=>{
+                    safeText('boot-text', txt.substring(0,i));
+                    i++;
+                    if(i>txt.length) clearInterval(interval);
+                }, 50);
             }
         } catch(e) { console.error("Init Error", e); }
     };
@@ -246,8 +346,8 @@
     function initAuth() {
         safeClass('view-auth', 'd-none', 'remove');
         safeHtml('auth-list', TEAM.map(u => `
-            <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 cursor-pointer">
-                <div class="fs-1 mb-1">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
+            <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 cursor-pointer h-100 d-flex flex-column align-items-center justify-content-center">
+                <div class="fs-1 mb-2">${u.av}</div><div class="fw-bold small font-mono text-uppercase">${u.name.split(' ')[0]}</div>
             </div></div>`).join(''));
     }
 
@@ -271,7 +371,7 @@
             safeClass('view-auth', 'd-none', 'add');
             login(STATE.sel);
         } else {
-            toast('Error', 'Invalid PIN', 'lock', 'text-danger');
+            toast('ACCESS DENIED', 'Invalid Credentials', 'lock', 'text-danger');
         }
     }
 
@@ -282,16 +382,23 @@
         safeText('d-av', u.av);
         safeText('d-name', u.name);
         
-        // Build Nav
+        // Time greeting
+        const hr = new Date().getHours();
+        const greet = hr < 12 ? "GOOD MORNING" : hr < 18 ? "GOOD AFTERNOON" : "EVENING REPORT";
+        safeText('greeting', greet);
+        
         const navs = [
             {id:'home', t:'Dash', i:'layout-grid'},
-            {id:'task', t:'Tasks', i:'check-square'},
-            {id:'dec', t:'Decisions', i:'file-signature'},
-            {id:'rec', t:'Files', i:'folder'}
+            {id:'task', t:'Ops', i:'crosshair'},
+            {id:'dec', t:'Logs', i:'file-text'},
+            {id:'rec', t:'Files', i:'database'}
         ];
         
-        safeHtml('nav-d', navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join(''));
-        safeHtml('nav-m', navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join(''));
+        // Desktop Nav
+        safeHtml('nav-d', navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary mb-2" style="transition:0.3s"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium font-mono small">${p.t.toUpperCase()}</span></a>`).join(''));
+        
+        // Mobile Nav
+        safeHtml('nav-m', navs.map(p => `<div onclick="nav('${p.id}')" id="nm-${p.id}" class="nav-item cursor-pointer p-2"><i data-lucide="${p.i}" size="24"></i></div>`).join(''));
         
         nav('home');
         setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
@@ -303,28 +410,28 @@
         location.reload();
     }
 
-    // --- NAVIGATION ---
+    // --- NAV & RENDER ---
     function nav(p) {
         STATE.page = p;
-        // Reset Nav Styles
-        document.querySelectorAll('[id^="nd-"]').forEach(e => e.classList.remove('bg-primary','bg-opacity-10','text-white'));
-        document.querySelectorAll('[id^="nm-"]').forEach(e => {e.classList.remove('nav-active'); e.classList.add('opacity-50');});
+        // Desktop
+        document.querySelectorAll('[id^="nd-"]').forEach(e => {
+            e.classList.remove('bg-primary','bg-opacity-10','text-white');
+            e.classList.add('text-secondary');
+        });
+        const nd = document.getElementById(`nd-${p}`);
+        if(nd) { nd.classList.add('bg-primary','bg-opacity-10','text-white'); nd.classList.remove('text-secondary'); }
         
-        // Set Active
-        safeClass(`nd-${p}`, 'bg-primary', 'add');
-        safeClass(`nd-${p}`, 'bg-opacity-10', 'add');
-        safeClass(`nd-${p}`, 'text-white', 'add');
-        
+        // Mobile
+        document.querySelectorAll('[id^="nm-"]').forEach(e => e.classList.remove('nav-active'));
         const nm = document.getElementById(`nm-${p}`);
-        if(nm) { nm.classList.add('nav-active'); nm.classList.remove('opacity-50'); }
+        if(nm) nm.classList.add('nav-active');
         
-        safeText('d-tit', p === 'home' ? 'COMMAND CENTER' : p.toUpperCase());
+        safeText('d-tit', p === 'home' ? 'COMMAND CENTER' : p === 'task' ? 'OPERATIONS' : p === 'dec' ? 'DECISION LOGS' : 'ARCHIVES');
         render(false);
     }
 
-    // --- RENDER LOGIC ---
     async function render(silent) {
-        if(!silent) safeHtml('content-box', '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>');
+        if(!silent) safeHtml('content-box', '<div class="text-center py-5"><div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div><div class="mt-3 font-mono small text-secondary">FETCHING DATA...</div></div>');
 
         try {
             const { data: tasks, error } = await sbClient.from('tasks').select('*').order('created_at',{ascending:false});
@@ -333,55 +440,55 @@
             const activeT = tasks.filter(t => t.status !== 'Done');
             let html = '';
 
-            // 1. HOME
+            // 1. HOME DASHBOARD
             if(STATE.page === 'home') {
-                const driveLinks = Object.keys(DRIVE).map(k=>`<div class="col-6 col-md-3"><a href="${DRIVE[k]}" target="_blank" class="text-decoration-none"><div class="card-box p-3 text-center"><i data-lucide="folder" class="mb-2 text-primary"></i><div class="text-white text-xs fw-bold">${k}</div></div></a></div>`).join('');
+                const driveLinks = Object.keys(DRIVE).map(k=>`<div class="col-6 col-md-3"><a href="${DRIVE[k]}" target="_blank" class="text-decoration-none"><div class="card-box p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center hover-glow"><i data-lucide="folder" class="mb-2 text-primary"></i><div class="text-white text-xs font-mono fw-bold">${k}</div></div></a></div>`).join('');
                 
                 if(STATE.user.role === 'LEADER') {
                     const statusRows = TEAM.map(u => {
                         const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
-                        return `<div class="mb-3"><div class="d-flex align-items-center gap-2 mb-1"><small class="fw-bold">${u.name}</small></div>${uts.map(t=>`<div class="progress bg-dark mb-1" style="height:6px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div>`).join('') || '<div class="text-secondary text-xs">Idle</div>'}</div>`;
+                        return `<div class="mb-4"><div class="d-flex align-items-center gap-2 mb-2"><span class="badge bg-secondary bg-opacity-25 text-white font-mono rounded-pill">${u.name}</span></div>${uts.map(t=>`<div class="d-flex align-items-center gap-2 mb-1"><div class="progress flex-fill bg-dark border border-secondary border-opacity-25" style="height:6px"><div class="progress-bar bg-${t.progress<100?'primary':'success'}" style="width:${t.progress}%"></div></div><span class="text-xs font-mono text-secondary w-25 text-end">${t.task_title}</span></div>`).join('') || '<div class="text-secondary text-xs fst-italic ms-1">No active missions</div>'}</div>`;
                     }).join('');
-                    html = `<div class="row g-3 mb-4">${driveLinks}</div><div class="card-box p-3"><h6 class="fw-bold mb-3 text-white">Team Status</h6>${statusRows}</div><button onclick="pingAll()" class="btn btn-outline-info w-100 btn-sm mt-3">PING ALL</button>`;
+                    html = `<div class="row g-3 mb-4">${driveLinks}</div><div class="card-box p-4"><h6 class="font-mono fw-bold mb-4 text-primary">UNIT STATUS</h6>${statusRows}</div><button onclick="pingAll()" class="btn btn-outline-secondary w-100 btn-sm mt-3 font-mono py-2">BROADCAST PING</button>`;
                 } else {
                     const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                    html = `<div class="row g-3 mb-4">${driveLinks}</div><div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-3">My Tasks</h5>${myT.map(t => `<div class="bg-black p-3 rounded mb-2"><div class="d-flex justify-content-between"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary">${t.status}</span></div><input type="range" class="form-range mt-2" value="${t.progress}" onchange="updProg(${t.id},this.value)"></div>`).join('') || '<div class="text-secondary">No active tasks.</div>'}</div>`;
+                    html = `<div class="row g-3 mb-4">${driveLinks}</div><div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4 font-mono">MY OBJECTIVES</h5>${myT.map(t => `<div class="bg-black bg-opacity-50 p-3 rounded mb-3 border border-secondary border-opacity-10"><div class="d-flex justify-content-between align-items-center mb-2"><span class="fw-bold text-sm">${t.task_title}</span><span class="badge bg-${t.status==='Review'?'warning':'primary'} text-dark">${t.status}</span></div><input type="range" class="form-range" value="${t.progress}" onchange="updProg(${t.id},this.value)"><div class="d-flex justify-content-between text-xs text-secondary font-mono mt-1"><span>0%</span><span>${t.progress}%</span><span>100%</span></div></div>`).join('') || '<div class="text-secondary">All objectives complete. Standby.</div>'}</div>`;
                 }
             }
 
-            // 2. TASKS
+            // 2. TASKS / OPS
             if(STATE.page === 'task') {
                 html = `<div class="row g-3">${activeT.map(t => {
                     let btn = '';
                     if(STATE.user.role==='LEADER') {
-                        if(t.status==='ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-2 fw-bold text-dark">Approve</button>`;
-                        else if(t.status==='Review') btn = `<div class="d-flex gap-2 mt-2"><button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-danger btn-sm flex-fill">Reject</button><button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success btn-sm flex-fill">Finalize</button></div>`;
-                        else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-2">Mark Done</button>`;
+                        if(t.status==='ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold text-dark">AUTHORIZE</button>`;
+                        else if(t.status==='Review') btn = `<div class="d-flex gap-2 mt-3"><button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-outline-danger btn-sm flex-fill">REJECT</button><button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success btn-sm flex-fill">APPROVE</button></div>`;
+                        else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">CLOSE TICKET</button>`;
                     } else {
-                        if(t.status!=='Done' && t.status!=='Review') btn = `<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-2">Submit Work</button>`;
-                        else if(t.status==='Review') btn = `<div class="btn btn-dark w-100 btn-sm mt-2 text-secondary">In Review</div>`;
+                        if(t.status!=='Done' && t.status!=='Review') btn = `<button onclick="openSubmit(${t.id},'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">SUBMIT REPORT</button>`;
+                        else if(t.status==='Review') btn = `<div class="btn btn-dark w-100 btn-sm mt-3 text-secondary border border-secondary border-opacity-25">UNDER REVIEW</div>`;
                     }
-                    return `<div class="col-12 col-md-6"><div class="card-box p-3 h-100"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small fw-bold text-secondary">${t.progress}%</span></div><h5 class="fw-bold">${t.task_title}</h5><p class="small text-secondary text-truncate">${t.description}</p>${btn}</div></div>`;
+                    return `<div class="col-12 col-md-6"><div class="card-box p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-3"><span class="badge bg-dark border border-secondary text-secondary font-mono">${t.status.toUpperCase()}</span><span class="small fw-bold text-primary font-mono">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary text-truncate flex-fill">${t.description}</p>${btn}</div></div>`;
                 }).join('')}</div>`;
             }
 
             // 3. DECISIONS
             if(STATE.page === 'dec') {
                  const {data:decs} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                 html = decs.map(d=>`<div class="card-box p-3 mb-2"><div class="fw-bold">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
+                 html = decs.map(d=>`<div class="card-box p-3 mb-2 border-start border-4 border-warning"><div class="fw-bold font-mono text-warning mb-1">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
             }
             
-            // 4. ARCHIVES
+            // 4. ARCHIVE
             if(STATE.page === 'rec') {
                 const {data:dones} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                html = `<div class="card-box"><table class="table table-dark mb-0"><tbody>${dones.map(t=>`<tr><td class="p-3 fw-bold">${t.task_title}</td><td class="p-3 text-end text-secondary small">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
+                html = `<div class="card-box overflow-hidden"><table class="table table-dark table-hover mb-0"><thead><tr><th class="bg-black text-secondary font-mono small">MISSION</th><th class="bg-black text-secondary font-mono small text-end">DATE</th></tr></thead><tbody>${dones.map(t=>`<tr><td class="p-3 fw-bold">${t.task_title}</td><td class="p-3 text-end text-secondary small font-mono">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
             }
 
             safeHtml('content-box', html);
 
         } catch(e) { 
             console.error(e);
-            if(!silent) safeHtml('content-box', `<div class="alert alert-danger">Connection Error. Retrying...</div>`);
+            if(!silent) safeHtml('content-box', `<div class="alert alert-danger border-danger bg-transparent text-danger">CONNECTION FAILURE: ${e.message}</div>`);
         }
         lucide.createIcons();
     }
@@ -390,63 +497,65 @@
     function setMode(m) { 
         STATE.mode = m; 
         ['task','future','dec'].forEach(k => {
-            safeClass('bm-'+k, 'bg-secondary', k===m ? 'add' : 'remove');
-            safeClass('bm-'+k, 'bg-opacity-25', k===m ? 'add' : 'remove');
-            safeClass('bm-'+k, 'text-white', k===m ? 'add' : 'remove');
+            safeClass('bm-'+k, 'bg-primary', k===m ? 'add' : 'remove');
+            safeClass('bm-'+k, 'text-dark', k===m ? 'add' : 'remove');
+            safeClass('bm-'+k, 'fw-bold', k===m ? 'add' : 'remove');
+            safeClass('bm-'+k, 'text-secondary', k===m ? 'remove' : 'add');
         });
         
         const secTask = document.getElementById('sec-task');
         if(secTask) secTask.classList.toggle('d-none', m==='dec');
         
-        if(m==='task') safeHtml('div-mems', TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join(''));
+        if(m==='task') safeHtml('div-mems', TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="btn-check-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill font-mono" for="btn-check-${u.id}">${u.name.split(' ')[0]}</label>`).join(''));
     }
 
     function openCreate(m) { setMode(m); MODALS.modCreate.show(); }
 
     async function saveItem() {
-        const btn = document.getElementById('btn-save'); btn.innerText = 'Saving...';
+        const btn = document.getElementById('btn-save'); btn.innerText = 'PROCESSING...';
         try {
             const t = safeVal('inp-t');
-            if(!t) throw new Error("Title needed");
+            if(!t) throw new Error("SUBJECT REQUIRED");
             
             if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:safeVal('inp-d')});
             else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:safeVal('inp-d'), status:'Planned', creator_id:STATE.user.id, progress:0});
             else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
                 await sbClient.from('tasks').insert({task_title:t, description:safeVal('inp-d'), due_date:safeVal('inp-date')||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
-                tags.forEach(id => sendNoti(id, `New Task: ${t}`));
-                if(STATE.user.role!=='LEADER') sendNoti(1, `Approval Req: ${t}`);
+                tags.forEach(id => sendNoti(id, `New Order: ${t}`));
+                if(STATE.user.role!=='LEADER') sendNoti(1, `Auth Req: ${t}`);
             }
-            MODALS.modCreate.hide(); toast('Saved','Done','check','text-success'); render(false);
-        } catch(e) { toast('Error',e.message,'alert-circle','text-danger'); }
-        btn.innerText = 'SAVE';
+            MODALS.modCreate.hide(); toast('CONFIRMED', 'Entry Logged', 'check-circle', 'text-success'); render(false);
+        } catch(e) { toast('ERROR',e.message,'alert-triangle','text-danger'); }
+        btn.innerText = 'CONFIRM ENTRY';
     }
 
-    // --- SUBMISSION LOGIC ---
+    // --- SUBMISSION ---
     function openSubmit(id, title) {
         STATE.subTid = id; STATE.subTit = title; STATE.subCat = null;
-        document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.drive-icon').forEach(el => { el.classList.remove('border-primary', 'bg-primary-dim'); el.style.background = 'rgba(255,255,255,0.03)'; });
         MODALS.modSubmit.show();
     }
     function selSub(cat) {
         STATE.subCat = cat;
-        document.querySelectorAll('.sub-opt').forEach(el => el.classList.remove('active'));
-        safeClass('sub-'+cat, 'active', 'add');
+        document.querySelectorAll('.drive-icon').forEach(el => { el.classList.remove('border-primary'); el.style.background = 'rgba(255,255,255,0.03)'; });
+        const el = document.getElementById('sub-'+cat);
+        if(el) { el.classList.add('border-primary'); el.style.background = 'rgba(0, 242, 255, 0.1)'; }
         if(DRIVE[cat]) window.open(DRIVE[cat], '_blank');
     }
     async function confirmSubmit() {
-        if(!STATE.subCat) return toast('Error','Tap a Drive Icon first','x','text-danger');
+        if(!STATE.subCat) return toast('HALT', 'Select Drive Destination', 'x-circle', 'text-danger');
         await sbClient.from('tasks').update({status:'Review', updated_at:new Date()}).eq('id',STATE.subTid);
         const note = safeVal('sub-note');
-        await sendNoti(1, `Review: ${STATE.subTit} in ${STATE.subCat} ${note}`);
-        MODALS.modSubmit.hide(); render(false); toast('Sent','Submitted','send','text-success');
+        await sendNoti(1, `Review: ${STATE.subTit} [${STATE.subCat}] ${note}`);
+        MODALS.modSubmit.hide(); render(false); toast('SENT', 'Report Transmitted', 'send', 'text-success');
     }
 
-    // --- HELPERS ---
-    async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); }
+    // --- UTILS ---
+    async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Authorized: ${tit}`); }
     async function updProg(id,v) { await sbClient.from('tasks').update({progress:v}).eq('id',id); }
     async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
-    function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info'); }
+    function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: STATUS REPORT REQUIRED"); }); toast('BROADCAST', 'Signal Sent to All Units', 'radio', 'text-info'); }
     
     // --- NOTIFICATIONS & AUDIO ---
     function toggleSilence() {
@@ -479,7 +588,7 @@
 
         if(open) {
             const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
-            safeHtml('noti-list', msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div></div>`).join(''));
+            safeHtml('noti-list', msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white font-mono">> ${n.message}</div></div>`).join(''));
             if(count>0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
             MODALS.modNoti.show();
         }
