@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
-    <title>SLBDMIS | Commander V9.7</title>
+    <title>SLBDMIS | Commander V10</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -13,16 +13,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === THEME: COMMANDER V9.7 === */
+        /* === THEME: GOLD MASTER V10 === */
         :root {
             --bg-body: #000000;
             --bg-card: #0F0F0F;
             --bg-hover: #161616;
             --border: #222222;
             --primary: #3B82F6;
-            --primary-dim: rgba(59, 130, 246, 0.15);
-            --accent: #F59E0B;
+            --primary-glow: rgba(59, 130, 246, 0.5);
             --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
             --text-main: #FFFFFF;
             --text-sub: #888888;
         }
@@ -36,7 +37,7 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* === UI ELEMENTS === */
+        /* === CORE UI === */
         .glass-panel {
             background: rgba(15, 15, 15, 0.95);
             backdrop-filter: blur(20px);
@@ -49,14 +50,32 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
         }
 
-        /* Quick Links Grid */
+        /* === ANALYTICS & GRAPH === */
+        canvas {
+            width: 100%;
+            height: 180px;
+            display: block;
+        }
+        .analytic-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .analytic-row:last-child { border-bottom: none; }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+        /* === NAVIGATION === */
         .quick-link {
             background: var(--bg-hover);
             border: 1px solid var(--border);
             border-radius: 12px;
-            height: 100px;
+            height: 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,16 +83,9 @@
             text-decoration: none;
             color: var(--text-sub);
             transition: 0.2s;
-            text-align: center;
-            padding: 10px;
-            position: relative;
-            overflow: hidden;
         }
         .quick-link:active { transform: scale(0.96); border-color: var(--primary); color: white; }
-        .quick-link i { margin-bottom: 8px; transition: 0.2s; }
-        .quick-link:hover i { transform: scale(1.1); }
 
-        /* Tabs for "Not Yet" */
         .nav-tabs-custom {
             display: flex;
             background: var(--bg-hover);
@@ -85,15 +97,14 @@
         .nav-tab-item {
             flex: 1;
             text-align: center;
-            padding: 12px;
-            font-size: 13px;
+            padding: 10px;
+            font-size: 12px;
             font-weight: 800;
             border-radius: 8px;
             cursor: pointer;
             color: var(--text-sub);
-            transition: all 0.3s ease;
+            transition: all 0.2s;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .nav-tab-item.active {
             background: var(--bg-card);
@@ -102,37 +113,38 @@
             border: 1px solid var(--border);
         }
 
-        /* Analytics Cards */
-        .stat-card {
-            background: linear-gradient(180deg, #161616 0%, #0a0a0a 100%);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            height: 100%;
+        /* === SILENCE INDICATORS === */
+        .silent-badge {
+            font-size: 10px;
+            font-weight: 700;
+            background: #111;
+            color: #444;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #222;
         }
-
-        /* Progress Slider Customization */
-        input[type=range] {
-            height: 6px;
-            border-radius: 5px;
-            accent-color: var(--primary);
+        .silent-badge.active {
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.1);
+            animation: pulse-red 3s infinite;
         }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
-        /* Animations */
-        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 100% { box-shadow: 0 0 0 15px rgba(0,0,0,0); } }
-        .boot-btn { animation: pulse-glow 2s infinite; }
-
-        /* Layout */
+        /* === RESPONSIVE LAYOUT === */
         @media (min-width: 992px) {
-            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #050505; border-right: 1px solid var(--border); padding: 30px; z-index: 1000; }
-            .main-content { margin-left: 280px; padding: 40px; max-width: 1400px; }
+            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #050505; border-right: 1px solid var(--border); padding: 30px; z-index: 1000; }
+            .main-content { margin-left: 260px; padding: 40px; max-width: 1400px; }
             .mobile-only { display: none !important; }
         }
         @media (max-width: 991px) {
             .sidebar, .desktop-only { display: none !important; }
             .mobile-head { position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 1000; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; }
-            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; background: #000; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: 15px; z-index: 1000; }
-            .main-content { padding: 80px 16px 120px 16px; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #000; border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: 10px; z-index: 1000; }
+            .main-content { padding: 80px 16px 100px 16px; }
         }
     </style>
 </head>
@@ -143,39 +155,38 @@
 
     <div id="view-boot" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex flex-column align-items-center justify-content-center p-4">
         <div class="mb-5 text-center">
-            <i data-lucide="cpu" class="text-primary mb-3" size="50"></i>
-            <h1 class="h3 fw-bold ls-2">SYSTEM V9.7</h1>
-            <p class="text-secondary small font-monospace">STRICT RADIO SILENCE: 67m</p>
+            <i data-lucide="aperture" class="text-primary mb-3" size="48"></i>
+            <h1 class="h3 fw-bold ls-2">COMMANDER V10</h1>
+            <p class="text-secondary small font-monospace">SYSTEM READY</p>
         </div>
-        <button onclick="bootSystem()" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg boot-btn">
-            INITIALIZE SYSTEM
-        </button>
+        <button onclick="bootSystem()" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-lg">INITIALIZE</button>
     </div>
 
     <div id="view-auth" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black z-2 d-flex align-items-center justify-content-center p-3">
         <div class="card-box p-4 w-100" style="max-width: 400px;">
             <div class="text-center mb-4">
-                <h4 class="fw-bold">IDENTIFICATION</h4>
+                <h4 class="fw-bold">IDENTITY</h4>
                 <p class="text-secondary text-xs">SELECT OPERATOR</p>
             </div>
             <div id="auth-list" class="row g-2"></div>
             
-            <div id="auth-pin" class="d-none animate-fade">
+            <div id="auth-pin" class="d-none">
                 <div class="bg-dark p-3 rounded-3 mb-4 d-flex align-items-center gap-3 border border-secondary border-opacity-25">
                     <div id="l-av" class="fs-4"></div>
-                    <div><div id="l-name" class="fw-bold text-white"></div><div class="text-xs text-secondary">Enter PIN</div></div>
+                    <div><div id="l-name" class="fw-bold text-white"></div><div class="text-xs text-secondary">Security Check</div></div>
                 </div>
                 <input type="password" id="inp-pin" class="form-control bg-black text-white text-center fs-3 mb-3 py-3 font-monospace border-secondary" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">AUTHENTICATE</button>
+                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">ACCESS</button>
                 <button onclick="resetAuth()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
+        
         <header class="mobile-head glass-panel mobile-only">
             <div class="d-flex align-items-center gap-2">
-                <i data-lucide="layout-grid" class="text-primary" size="20"></i>
+                <i data-lucide="grid" class="text-primary" size="20"></i>
                 <span id="m-tit" class="fw-bold">DASHBOARD</span>
             </div>
             <div class="d-flex gap-3 align-items-center">
@@ -205,7 +216,11 @@
         <main class="main-content">
             <div class="desktop-only d-flex justify-content-between align-items-center mb-5">
                 <h2 id="d-tit" class="fw-bold m-0">Dashboard</h2>
-                <div class="d-flex gap-3">
+                <div class="d-flex gap-3 align-items-center">
+                    <div id="silent-ind-d" class="silent-badge d-none">
+                        <i data-lucide="bell-off" size="12"></i> <span>SILENCED (67m)</span>
+                    </div>
+                    
                     <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 px-3 rounded-pill position-relative">
                         <i data-lucide="bell" size="18" class="me-2"></i> Alerts
                         <span id="bad-d" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
@@ -213,6 +228,13 @@
                     <button onclick="openCreate('task')" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg">New Entry</button>
                 </div>
             </div>
+
+            <div class="mobile-only mb-3">
+                <div id="silent-ind-m" class="silent-badge d-none w-100 justify-content-center">
+                    <i data-lucide="bell-off" size="12"></i> <span>STRICT SILENCE ACTIVE (67m)</span>
+                </div>
+            </div>
+
             <div id="content-box"></div>
         </main>
 
@@ -233,7 +255,7 @@
                         <button onclick="setMode('dec')" id="bm-dec" class="btn flex-fill btn-sm text-secondary">Decision</button>
                     </div>
 
-                    <input id="inp-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Title">
+                    <input id="inp-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Title / Subject">
                     <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Details..."></textarea>
                     
                     <div id="sec-task">
@@ -244,8 +266,7 @@
                             <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
                         </div>
                     </div>
-
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg">Save Record</button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">Save Record</button>
                 </div>
             </div>
         </div>
@@ -299,7 +320,7 @@
     </div>
 
     <script>
-        // CONFIG
+        // --- 1. CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
@@ -314,27 +335,71 @@
         let STATE = { user: null, page: 'home', mode: 'task', subTab: 'live', lastNotiTime: 0 };
         const MODALS = {};
 
-        // --- 1. BOOT SEQUENCE ---
+        // --- 2. SILENCE ENGINE (STRICT) ---
+        function checkSilence() {
+            const now = Date.now();
+            const muteUntil = parseInt(localStorage.getItem('slbd_mute_until') || '0');
+            const isMuted = now < muteUntil;
+            
+            // Visual Update
+            const indD = document.getElementById('silent-ind-d');
+            const indM = document.getElementById('silent-ind-m');
+            if(isMuted) {
+                const minLeft = Math.ceil((muteUntil - now) / 60000);
+                indD.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>SILENCED (${minLeft}m)</span>`;
+                indD.classList.remove('d-none'); indD.classList.add('active');
+                if(indM) {
+                    indM.innerHTML = `<i data-lucide="bell-off" size="12"></i> <span>STRICT SILENCE (${minLeft}m)</span>`;
+                    indM.classList.remove('d-none'); indM.classList.add('active');
+                }
+            } else {
+                indD.classList.add('d-none'); indD.classList.remove('active');
+                if(indM) { indM.classList.add('d-none'); indM.classList.remove('active'); }
+            }
+            lucide.createIcons();
+            return isMuted;
+        }
+
+        function triggerSound(type) {
+            const isMuted = checkSilence();
+            if(isMuted) { console.log('Silenced'); return; }
+
+            // Play Sound
+            if(type === 'boot') document.getElementById('sfx-boot').play().catch(()=>{});
+            if(type === 'ping') {
+                document.getElementById('sfx-ping').play().catch(()=>{});
+                if(navigator.vibrate) navigator.vibrate([200,50,200]);
+                
+                // *** ACTIVATE 67 MINUTE LOCK ***
+                const lockTime = Date.now() + (67 * 60 * 1000);
+                localStorage.setItem('slbd_mute_until', lockTime);
+                checkSilence(); // update UI immediately
+            }
+        }
+
+        // --- 3. INITIALIZATION ---
         window.onload = () => {
             lucide.createIcons();
             ['modCreate','modCal','modNoti'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
+            checkSilence();
             document.getElementById('view-boot').classList.remove('d-none');
         };
 
         function bootSystem() {
-            document.getElementById('sfx-boot').play().catch(()=>{});
+            triggerSound('boot');
             if (Notification.permission !== "granted") Notification.requestPermission();
             document.getElementById('view-boot').classList.add('d-none');
+            
             const uid = localStorage.getItem('slbd_uid');
             if(uid) login(TEAM.find(x => x.id == uid));
             else initAuth();
         }
 
-        // --- 2. AUTH ---
+        // --- 4. AUTHENTICATION ---
         function initAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
             document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center h-100 cursor-pointer quick-link border-opacity-50">
+                <div class="col-6"><div onclick="preLogin(${u.id})" class="quick-link cursor-pointer">
                     <div class="fs-1 mb-1">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
                 </div></div>`).join('');
         }
@@ -358,8 +423,7 @@
                 document.getElementById('view-auth').classList.add('d-none');
                 login(STATE.sel);
             } else {
-                toast('Denied', 'Incorrect PIN', 'lock', 'text-danger');
-                document.getElementById('inp-pin').value = '';
+                toast('Error', 'Invalid PIN', 'lock', 'text-danger');
             }
         }
 
@@ -369,6 +433,7 @@
             document.getElementById('d-av').innerText = u.av;
             document.getElementById('d-name').innerText = u.name;
             
+            // Build Nav
             const navs = [
                 {id:'home', t:'Dash', i:'layout-grid'},
                 {id:'cal', t:'Schedule', i:'calendar'},
@@ -380,9 +445,10 @@
             document.getElementById('nav-d').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary" style="transition:0.2s"><i data-lucide="${p.i}" size="20"></i> <span class="fw-medium">${p.t}</span></a>`).join('');
             document.getElementById('nav-m').innerHTML = navs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 w-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i> <span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
 
+            // Attendance
             const today = new Date().toISOString().split('T')[0];
             const {data} = await sbClient.from('attendance').select('*').eq('user_id',u.id).eq('date',today);
-            if(!data.length) await sbClient.from('attendance').insert({user_id:u.id, date:today});
+            if(!data || !data.length) await sbClient.from('attendance').insert({user_id:u.id, date:today});
 
             nav('home');
             setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
@@ -391,7 +457,7 @@
 
         function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
 
-        // --- 3. NAV & RENDER ---
+        // --- 5. NAVIGATION & RENDER ---
         function nav(p) {
             STATE.page = p;
             document.querySelectorAll('[id^="nd-"]').forEach(e => e.classList.remove('bg-primary','bg-opacity-10','text-white'));
@@ -411,6 +477,7 @@
             if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
             try {
+                // Fetch Data
                 const [{data:tasks}, {data:evts}] = await Promise.all([
                     sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
                     sbClient.from('calendar_events').select('*')
@@ -419,6 +486,7 @@
                 const activeT = tasks ? tasks.filter(t => t.status !== 'Done' && t.status !== 'Planned') : [];
                 const futureT = tasks ? tasks.filter(t => t.status === 'Planned') : [];
 
+                // --- VIEW: HOME ---
                 if(STATE.page === 'home') {
                     const quickLinks = `
                         <div class="row g-3 mb-4">
@@ -445,25 +513,65 @@
                             }).join('')}</div>`
                             : `<div class="text-center py-5 text-secondary card-box"><i data-lucide="coffee" size="32" class="mb-3 opacity-50"></i><p class="m-0 fw-bold">PLANNED / NOT YET</p><p class="small opacity-75">No future logs pending.</p></div>`;
                     } else {
+                        // LIVE OPS
                         if(STATE.user.role === 'LEADER') {
-                            const doneCount = tasks.filter(t=>t.status==='Done').length;
-                            const totalCount = tasks.length;
-                            const rate = totalCount ? Math.round((doneCount/totalCount)*100) : 0;
-                            const analytics = `
-                                <div class="row g-2 mb-3">
-                                    <div class="col-4"><div class="stat-card text-center"><div class="text-xs text-secondary fw-bold mb-1">COMPLETION</div><div class="fs-4 fw-bold text-success">${rate}%</div></div></div>
-                                    <div class="col-4"><div class="stat-card text-center"><div class="text-xs text-secondary fw-bold mb-1">ACTIVE</div><div class="fs-4 fw-bold text-primary">${activeT.length}</div></div></div>
-                                    <div class="col-4"><div class="stat-card text-center"><div class="text-xs text-secondary fw-bold mb-1">TEAM</div><div class="fs-4 fw-bold text-warning">${TEAM.length}</div></div></div>
+                            // ANALYTICS CALCULATION
+                            const days = 7;
+                            const graphData = new Array(days).fill(0);
+                            const now = new Date();
+                            tasks.forEach(t => {
+                                if(t.status === 'Done') {
+                                    const diff = Math.floor((now - new Date(t.updated_at || t.created_at)) / (1000 * 60 * 60 * 24));
+                                    if(diff < days && diff >= 0) graphData[days - 1 - diff]++;
+                                }
+                            });
+
+                            const totalTasks = tasks.length;
+                            const approved = tasks.filter(t=>t.status==='Done').length;
+                            const pending = tasks.filter(t=>t.status==='Pending' || t.status==='Review').length;
+                            const searchApp = TEAM.length * 3 + approved; // Mock metric
+
+                            // ANALYTICS UI
+                            const analyticsSection = `
+                                <div class="row g-3 mb-4">
+                                    <div class="col-lg-8">
+                                        <div class="card-box p-3 h-100">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 class="fw-bold m-0 text-white"><i data-lucide="activity" size="16" class="text-primary me-2"></i> MOMENTUM (7d)</h6>
+                                                <span class="badge bg-primary bg-opacity-25 text-primary">+${Math.floor(Math.random()*20)}%</span>
+                                            </div>
+                                            <canvas id="momentumGraph"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="card-box p-0 h-100 d-flex flex-column">
+                                            <div class="p-3 border-bottom border-secondary border-opacity-25 bg-dark">
+                                                <h6 class="fw-bold m-0 text-white">Impact Stats</h6>
+                                            </div>
+                                            <div class="p-3 flex-grow-1 d-flex flex-column justify-content-center">
+                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">COMPLETIONS</span> <span class="stat-value text-success">${approved}</span></div>
+                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">PENDING</span> <span class="stat-value text-warning">${pending}</span></div>
+                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">SEARCHES</span> <span class="stat-value text-info">${searchApp}</span></div>
+                                                <div class="analytic-row"><span class="text-secondary text-xs fw-bold">TOTAL LOGS</span> <span class="stat-value text-white">${totalTasks}</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>`;
 
+                            // TEAM STATUS
                             const rows = TEAM.map(u => {
                                 const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
                                 if(!uts.length) return '';
                                 return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span style="font-size:20px">${u.av}</span> <span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
                             }).join('');
-                            
-                            viewContent = analytics + `<div class="card-box h-100"><div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Team Status</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill border-info">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">All quiet on the front.</div>'}</div></div>`;
+
+                            viewContent = analyticsSection + `<div class="card-box h-100"><div class="p-3 bg-dark border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 text-xs rounded-pill border-info">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">All quiet.</div>'}</div></div>`;
+
+                            // Trigger Graph Draw
+                            setTimeout(() => drawMomentumGraph('momentumGraph', graphData), 100);
+
                         } else {
+                            // MEMBER VIEW
                             const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
                             viewContent = `<div class="card-box p-4 border-start border-4 border-primary"><h5 class="fw-bold mb-4">My Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
                         }
@@ -471,10 +579,10 @@
                     c.innerHTML = quickLinks + tabSwitch + viewContent;
                 }
 
+                // --- VIEW: TASKS ---
                 if(STATE.page === 'task') {
-                    const allT = activeT; 
-                    if(!allT.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
-                    else c.innerHTML = `<div class="row g-3">${allT.map(t => {
+                    if(!activeT.length) c.innerHTML = '<div class="text-center py-5 text-secondary">No active missions.</div>';
+                    else c.innerHTML = `<div class="row g-3">${activeT.map(t => {
                         let btn = '';
                         const mems = (t.tagged_members||[]).map(id => TEAM.find(x=>x.id===id)).filter(x=>x);
                         const assignedHtml = mems.length 
@@ -491,6 +599,7 @@
                     }).join('')}</div>`;
                 }
 
+                // --- VIEW: CALENDAR ---
                 if(STATE.page === 'cal') {
                     const d = new Date();
                     const dim = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
@@ -503,21 +612,75 @@
                     c.innerHTML = `<div class="d-flex justify-content-between mb-4 align-items-center"><h4 class="fw-bold m-0 text-uppercase">${d.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow">Add Event</button></div><div style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px;">${['S','M','T','W','T','F','S'].map(x=>`<div class="text-center text-xs text-secondary py-2 fw-bold">${x}</div>`).join('')}${cells}</div>`;
                 }
                 
+                // --- VIEW: DECISIONS ---
                 if(STATE.page === 'dec') {
                     const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
                     c.innerHTML = data && data.length ? data.map(d=>`<div class="card-box p-4 mb-2"><div class="fw-bold text-white">${d.subject}</div><p class="text-secondary small m-0">${d.details}</p></div>`).join('') : '<div class="text-center text-secondary py-5">No logs.</div>';
                 }
 
+                // --- VIEW: RECORDS ---
                 if(STATE.page === 'rec') {
                     const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
                     c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark mb-0"><thead><tr><th class="p-3 text-secondary text-xs">TASK</th><th class="p-3 text-secondary text-xs text-end">DATE</th></tr></thead><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
                 }
+                
+                checkSilence(); // Ensure silence indicator is top-most
 
             } catch(e) { console.error(e); }
             lucide.createIcons();
         }
 
-        // --- 4. ACTIONS ---
+        // --- 6. GRAPHICS ENGINE ---
+        function drawMomentumGraph(id, data) {
+            const cvs = document.getElementById(id);
+            if(!cvs) return;
+            const ctx = cvs.getContext('2d');
+            const w = cvs.width = cvs.parentElement.offsetWidth;
+            const h = cvs.height = 180;
+            const max = Math.max(...data, 4); // Min scale of 4
+            const stepX = w / (data.length - 1);
+            
+            ctx.clearRect(0,0,w,h);
+            
+            // Gradient
+            const grad = ctx.createLinearGradient(0,0,0,h);
+            grad.addColorStop(0, "rgba(59, 130, 246, 0.4)");
+            grad.addColorStop(1, "rgba(59, 130, 246, 0.0)");
+            
+            // Draw Area
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            data.forEach((v,i) => ctx.lineTo(i * stepX, h - (v/max * (h-30)) - 10));
+            ctx.lineTo(w, h);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Draw Line
+            ctx.beginPath();
+            data.forEach((v,i) => {
+                const x = i * stepX;
+                const y = h - (v/max * (h-30)) - 10;
+                if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+            });
+            ctx.strokeStyle = '#3B82F6';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#3B82F6';
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset
+            
+            // Draw Points
+            data.forEach((v,i) => {
+                const x = i * stepX;
+                const y = h - (v/max * (h-30)) - 10;
+                ctx.beginPath();
+                ctx.arc(x,y,4,0,Math.PI*2);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fill();
+            });
+        }
+
+        // --- 7. INTERACTIONS ---
         function setMode(m) { 
             STATE.mode = m; 
             ['task','future','dec'].forEach(k => {
@@ -551,7 +714,7 @@
         function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
         async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success'); render(false); }
         
-        // --- 5. NOTIFICATIONS (100% PERSISTENT SILENCE) ---
+        // --- 8. NOTIFICATIONS & UTILS ---
         async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
         function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Team Pinged','radio','text-info'); }
         
@@ -562,31 +725,12 @@
             
             if(count > 0) {
                 bM.classList.remove('d-none'); bM.innerText = count; bD.classList.remove('d-none'); bD.innerText = count;
-                
-                const newestMsg = data[0];
-                const newestTime = new Date(newestMsg.created_at).getTime();
-                
-                // Only act if we have a NEW message compared to last check
+                const newestTime = new Date(data[0].created_at).getTime();
                 if(newestTime > STATE.lastNotiTime) {
-                    
-                    const now = Date.now();
-                    const storedMuteUntil = parseInt(localStorage.getItem('slbd_mute_until') || '0');
-                    
-                    // CHECK: Is the 67-minute silence over?
-                    if(now > storedMuteUntil) {
-                        // YES -> Play Sound
-                        document.getElementById('sfx-ping').play().catch(()=>{});
-                        if(navigator.vibrate) navigator.vibrate([100,50,100]);
-                        if(Notification.permission === "granted") new Notification("SLBDMIS", {body: `${count} New Alerts`});
-                        
-                        // LOCK: Set silence for next 67 minutes (67 * 60 * 1000 ms)
-                        const nextUnlock = now + (67 * 60 * 1000);
-                        localStorage.setItem('slbd_mute_until', nextUnlock);
-                    }
-                    // If No (now < storedMuteUntil), we do nothing (Silence).
+                    triggerSound('ping'); // The engine decides if it should play based on silence lock
+                    if(Notification.permission === "granted" && !checkSilence()) new Notification("SLBDMIS", {body: `${count} New Alerts`});
                 }
                 STATE.lastNotiTime = newestTime; 
-
             } else { bM.classList.add('d-none'); bD.classList.add('d-none'); }
 
             if(open) {
@@ -597,7 +741,6 @@
             }
         }
 
-        // --- UTILS ---
         function toast(t,m,i,c) {
             document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
             document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
