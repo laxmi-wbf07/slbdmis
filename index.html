@@ -6,205 +6,197 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
-    <title>SLBDMIS | Commander</title>
+    <title>SLBDMIS | Commander V8</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* === THEME ENGINE === */
+        /* === THEME: DEEP OLED === */
         :root {
-            --bg-body: #000000;
-            --bg-card: #111111;
-            --bg-glass: rgba(17, 17, 17, 0.85);
-            --border: #262626;
-            --primary: #2563eb;    /* Deep Blue */
-            --primary-g: #3b82f6;  /* Glow Blue */
-            --accent: #f59e0b;     /* Amber */
-            --danger: #ef4444;     /* Red */
-            --success: #10b981;    /* Emerald */
-            --text-main: #ffffff;
-            --text-sub: #a3a3a3;
+            --bg-core: #000000;
+            --bg-card: #0F0F0F;
+            --bg-sub: #181818;
+            --border: #2A2A2A;
+            --primary: #3B82F6; 
+            --primary-glow: rgba(59, 130, 246, 0.15);
+            --accent: #F59E0B;
+            --text-main: #FFFFFF;
+            --text-mute: #888888;
             --radius: 16px;
-            --nav-h: 70px;
         }
 
-        /* === BASE === */
         body {
-            background-color: var(--bg-body);
+            background-color: var(--bg-core);
             color: var(--text-main);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* === UTILS === */
-        .glass { background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .card-box {
+        /* === UI COMPONENTS === */
+        .glass-header {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.2s ease;
         }
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-g) 100%);
-            border: none;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
-        .btn-primary:active { transform: scale(0.98); }
         
-        .form-control, .form-select {
-            background: #0a0a0a; border: 1px solid var(--border);
-            color: white; padding: 14px; border-radius: 12px;
+        .quick-btn {
+            background: var(--bg-sub);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-mute);
+            height: 100px;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
         }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2); }
-        
-        /* === COMPONENTS === */
-        .avatar {
-            width: 48px; height: 48px; border-radius: 50%;
-            background: #1a1a1a; display: grid; place-items: center;
-            font-size: 24px; border: 2px solid var(--border);
-        }
-        .avatar-sm { width: 30px; height: 30px; font-size: 16px; margin-right: -8px; border-color: var(--bg-card); }
-        
-        .status-pill {
-            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        .quick-btn:active { transform: scale(0.96); background: #222; border-color: var(--text-mute); color: white; }
+        .quick-btn::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0.5;
         }
 
-        /* === CALENDAR === */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-        .cal-day {
-            min-height: 90px; background: #0a0a0a; border-radius: 6px; padding: 4px;
-            border: 1px solid transparent; transition: 0.2s; cursor: pointer;
+        /* === ANIMATIONS === */
+        @keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+        .boot-scan {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
+            background: linear-gradient(to bottom, transparent 50%, rgba(59, 130, 246, 0.02) 51%);
+            background-size: 100% 4px;
         }
-        .cal-day.active { border-color: var(--primary); background: #111; }
-        .cal-evt {
-            font-size: 10px; margin-top: 2px; padding: 2px 4px; border-radius: 3px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;
-        }
+        @keyframes pulse-g { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+        .pulse-btn { animation: pulse-g 2s infinite; }
 
         /* === LAYOUT === */
-        /* Desktop */
-        @media (min-width: 992px) {
-            .sidebar {
-                position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
-                background: #000; border-right: 1px solid var(--border);
-                padding: 30px; display: flex; flex-direction: column; z-index: 999;
-            }
-            .mobile-stuff { display: none !important; }
-            .main-content { margin-left: 280px; padding: 40px; max-width: 1400px; }
-        }
-        /* Mobile */
-        @media (max-width: 991px) {
-            .sidebar, .desktop-stuff { display: none !important; }
-            .mobile-header {
-                height: 60px; z-index: 1000; display: flex; align-items: center; justify-content: space-between;
-                padding: 0 16px; position: fixed; top: 0; width: 100%;
-            }
-            .mobile-nav {
-                position: fixed; bottom: 0; left: 0; width: 100%;
-                height: calc(var(--nav-h) + env(safe-area-inset-bottom));
-                padding-bottom: env(safe-area-inset-bottom);
-                background: rgba(0,0,0,0.9); border-top: 1px solid var(--border);
-                backdrop-filter: blur(20px); display: flex; justify-content: space-around;
-                align-items: center; z-index: 1000;
-            }
-            .main-content { padding: 80px 16px 100px 16px; }
-        }
+        .avatar { width: 42px; height: 42px; border-radius: 50%; background: #222; display: grid; place-items: center; border: 1px solid var(--border); font-size: 20px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
 
-        /* Animations */
-        @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fade-in 0.3s ease-out forwards; }
+        /* Responsive */
+        @media (min-width: 992px) {
+            .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #050505; border-right: 1px solid var(--border); padding: 30px; z-index: 1000; display: flex; flex-direction: column; }
+            .main-view { margin-left: 280px; padding: 50px; max-width: 1400px; }
+            .mobile-el { display: none !important; }
+        }
+        @media (max-width: 991px) {
+            .sidebar, .desktop-el { display: none !important; }
+            .mobile-head { position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 1000; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; }
+            .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(70px + env(safe-area-inset-bottom)); background: rgba(5,5,5,0.95); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 1000; align-items: center; }
+            .main-view { padding: 80px 16px 120px 16px; }
+        }
     </style>
 </head>
 <body>
 
-    <audio id="sys-ping" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="sys-boot" src="https://assets.mixkit.co/active_storage/sfx/1364/1364-preview.mp3" preload="auto"></audio>
+    <audio id="sys-alert" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    <div id="view-auth" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex align-items-center justify-content-center p-3">
-        <div class="card-box p-4 w-100 position-relative overflow-hidden" style="max-width: 400px;">
-            <div class="position-absolute top-0 start-50 translate-middle bg-primary opacity-25" style="width:150px; height:100px; filter:blur(60px);"></div>
-            
-            <div class="text-center mb-5 position-relative">
-                <div class="bg-dark d-inline-block p-3 rounded-circle border border-secondary border-opacity-25 mb-3 shadow-lg">
-                    <i data-lucide="shield-check" class="text-primary" size="32"></i>
-                </div>
-                <h3 class="fw-bold text-white tracking-tight">SLBDMIS</h3>
-                <p class="text-secondary small ls-2">COMMANDER V6</p>
+    <div id="view-boot" class="position-fixed top-0 start-0 w-100 h-100 bg-black z-3 d-flex flex-column align-items-center justify-content-center p-4">
+        <div class="text-center mb-5">
+            <div class="mb-4 d-inline-block p-3 rounded-circle border border-primary border-opacity-25 bg-primary bg-opacity-10">
+                <i data-lucide="cpu" class="text-primary" size="48"></i>
             </div>
+            <h1 class="h3 fw-bold text-white tracking-tight">COMMANDER V8</h1>
+            <p class="text-secondary small font-monospace">SYSTEM INITIALIZATION REQUIRED</p>
+        </div>
+        <button onclick="systemInit()" class="btn btn-primary btn-lg rounded-pill fw-bold px-5 py-3 shadow-lg pulse-btn border-0">
+            INITIALIZE SYSTEM
+        </button>
+        <div class="mt-5 text-secondary text-xs opacity-50 font-monospace">
+            AUDIO: STANDBY<br>NOTIFICATIONS: STANDBY<br>DB: CONNECTED
+        </div>
+    </div>
 
-            <div id="auth-list" class="row g-2"></div>
-
-            <div id="auth-pin" class="d-none animate-in">
-                <div class="bg-dark p-3 rounded-3 border border-secondary border-opacity-25 mb-4 d-flex align-items-center gap-3">
-                    <div id="l-av" class="avatar fs-4 border-0 bg-black"></div>
+    <div id="view-auth" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-black z-2 d-flex align-items-center justify-content-center p-3">
+        <div class="card-panel p-4 w-100 position-relative overflow-hidden" style="max-width: 400px;">
+            <div class="text-center mb-4">
+                <h4 class="fw-bold">IDENTIFICATION</h4>
+                <p class="text-secondary text-xs">SELECT OPERATOR</p>
+            </div>
+            <div id="auth-grid" class="row g-2"></div>
+            
+            <div id="auth-pin" class="d-none">
+                <div class="bg-sub p-3 rounded-3 mb-4 border border-secondary border-opacity-10 d-flex align-items-center gap-3">
+                    <div id="l-av" class="avatar"></div>
                     <div>
                         <div id="l-name" class="fw-bold text-white"></div>
-                        <div class="text-xs text-secondary">Security Check</div>
+                        <div class="text-xs text-secondary">Security Clearance</div>
                     </div>
                 </div>
-                <input type="password" id="inp-pin" class="form-control text-center fs-2 bg-black py-3 mb-3" placeholder="••••" maxlength="11" inputmode="numeric">
-                <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">UNLOCK</button>
-                <button onclick="location.reload()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none">Back</button>
+                <input type="password" id="inp-pin" class="form-control bg-dark border-secondary text-center fs-3 mb-3 text-white py-3 font-monospace" placeholder="••••" maxlength="11" inputmode="numeric">
+                <button onclick="verifyPin()" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">ACCESS</button>
+                <button onclick="resetAuth()" class="btn btn-link w-100 text-secondary mt-2 text-decoration-none small">Cancel</button>
             </div>
         </div>
     </div>
 
     <div id="view-app" class="d-none">
         
-        <header class="mobile-header glass mobile-stuff">
+        <header class="mobile-head glass-header mobile-el">
             <div class="d-flex align-items-center gap-2">
-                <i data-lucide="grid" class="text-primary" size="20"></i>
+                <i data-lucide="layout-grid" class="text-primary" size="20"></i>
                 <span id="m-tit" class="fw-bold">Dashboard</span>
             </div>
             <div class="d-flex gap-2">
                 <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 rounded-circle p-2 position-relative">
                     <i data-lucide="bell" size="20"></i>
-                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger border border-dark rounded-circle d-none"></span>
+                    <span id="bad-m" class="position-absolute top-0 end-0 p-1 bg-danger border border-black rounded-circle d-none"></span>
                 </button>
-                <button onclick="openCreate()" class="btn btn-primary rounded-circle p-2"><i data-lucide="plus" size="20"></i></button>
+                <button onclick="openCreate('task')" class="btn btn-primary rounded-circle p-2 text-white"><i data-lucide="plus" size="20"></i></button>
             </div>
         </header>
 
         <nav class="sidebar">
-            <div class="d-flex align-items-center gap-3 mb-5 px-2">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-3"><i data-lucide="hexagon" class="text-primary" size="24"></i></div>
-                <div><div class="fw-bold lh-1">SLBDMIS</div><small class="text-secondary text-xs">V6.0 Stable</small></div>
+            <div class="d-flex align-items-center gap-3 mb-5">
+                <div class="bg-primary bg-opacity-10 p-2 rounded-3"><i data-lucide="command" class="text-primary" size="24"></i></div>
+                <div><div class="fw-bold lh-1">SLBDMIS</div><small class="text-secondary text-xs">V8.0 FINAL</small></div>
             </div>
             <div id="nav-d" class="d-flex flex-column gap-2 flex-grow-1"></div>
-            
-            <div class="mt-auto border-top border-secondary border-opacity-25 pt-3">
-                <button onclick="initAudio()" id="btn-sound-d" class="btn btn-dark w-100 mb-3 text-xs border-secondary d-flex align-items-center justify-content-center gap-2">
-                    <i data-lucide="volume-x" size="14"></i> Enable Sound
-                </button>
-                <div class="d-flex align-items-center gap-3 p-2 rounded bg-dark border border-secondary border-opacity-25">
-                    <div id="d-av" class="avatar" style="width:36px; height:36px; font-size:18px;"></div>
+            <div class="mt-auto border-top border-secondary border-opacity-25 pt-4">
+                <div class="d-flex align-items-center gap-3 p-2 rounded bg-sub border border-secondary border-opacity-10 mb-3">
+                    <div id="d-av" class="avatar" style="width:32px; height:32px; font-size:16px;"></div>
                     <div class="overflow-hidden">
                         <div id="d-name" class="fw-bold text-white small text-truncate"></div>
-                        <div class="text-success text-xs">● Online</div>
+                        <div class="text-success text-xs">● Active</div>
                     </div>
                 </div>
-                <button onclick="doLogout()" class="btn btn-link text-danger text-decoration-none btn-sm w-100 mt-2">Sign Out</button>
+                <button onclick="logout()" class="btn btn-outline-danger btn-sm w-100">Abort Session</button>
             </div>
         </nav>
 
-        <main class="main-content">
-            <div class="desktop-stuff d-flex justify-content-between align-items-center mb-5">
+        <main class="main-view">
+            <div class="desktop-el d-flex justify-content-between align-items-center mb-5">
                 <div>
-                    <h2 id="d-tit" class="fw-bold m-0">Dashboard</h2>
-                    <p class="text-secondary m-0 small">Operational Overview</p>
+                    <h2 id="d-tit" class="fw-bold m-0">Command Center</h2>
+                    <p class="text-secondary m-0 small font-monospace">SYSTEM STATUS: OPTIMAL</p>
                 </div>
                 <div class="d-flex gap-3">
                     <button onclick="checkNoti(true)" class="btn btn-dark border border-secondary border-opacity-25 px-3 rounded-pill position-relative hover-bg">
-                        <i data-lucide="bell" size="18"></i> Alerts
-                        <span id="bad-d" class="position-absolute top-0 end-0 p-1 bg-danger border border-dark rounded-circle d-none"></span>
+                        <i data-lucide="bell" size="18" class="me-2"></i>Alerts
+                        <span id="bad-d" class="position-absolute top-0 end-0 translate-middle p-1 bg-danger border border-black rounded-circle d-none"></span>
                     </button>
-                    <button onclick="openCreate()" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
-                        <i data-lucide="plus-circle" size="18"></i> Create New
+                    <button onclick="openCreate('task')" class="btn btn-primary px-4 rounded-pill fw-bold shadow-lg d-flex align-items-center gap-2">
+                        <i data-lucide="plus-circle" size="18"></i> New Entry
                     </button>
                 </div>
             </div>
@@ -212,35 +204,36 @@
             <div id="content-box"></div>
         </main>
 
-        <nav class="mobile-nav mobile-stuff" id="nav-m"></nav>
-
+        <nav class="mobile-nav mobile-el" id="nav-m"></nav>
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered">
-            <div class="modal-content card-box border-0">
+            <div class="modal-content card-panel border-0">
                 <div class="modal-header border-bottom border-secondary border-opacity-25">
-                    <h5 class="fw-bold">New Record</h5>
+                    <h5 class="fw-bold">New Log Entry</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="bg-dark p-1 rounded-3 d-flex mb-4 border border-secondary border-opacity-25">
+                    <div class="d-flex gap-2 mb-4 bg-black p-1 rounded-3 border border-secondary border-opacity-25">
                         <button onclick="setMode('task')" id="bm-task" class="flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25">Task</button>
+                        <button onclick="setMode('future')" id="bm-future" class="flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2">Future/Plan</button>
                         <button onclick="setMode('dec')" id="bm-dec" class="flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2">Decision</button>
                     </div>
 
-                    <input id="inp-t" class="form-control mb-3" placeholder="Title / Subject">
-                    <textarea id="inp-d" class="form-control mb-3" rows="3" placeholder="Description details..."></textarea>
+                    <input id="inp-t" class="form-control bg-dark text-white border-secondary mb-3 py-3" placeholder="Subject / Title">
+                    <textarea id="inp-d" class="form-control bg-dark text-white border-secondary mb-3" rows="3" placeholder="Description..."></textarea>
                     
-                    <div id="sec-task-opt">
-                        <label class="text-xs fw-bold text-secondary mb-2">DUE DATE</label>
-                        <input type="date" id="inp-date" class="form-control mb-4">
-                        
-                        <label class="text-xs fw-bold text-secondary mb-2">ASSIGN TO</label>
-                        <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
+                    <div id="sec-opts">
+                        <label class="text-xs fw-bold text-secondary mb-2">TARGET DATE</label>
+                        <input type="date" id="inp-date" class="form-control bg-dark text-white border-secondary mb-4">
+                        <div id="sec-assign">
+                            <label class="text-xs fw-bold text-secondary mb-2">ASSIGN PERSONNEL</label>
+                            <div id="div-mems" class="d-flex flex-wrap gap-2 mb-4"></div>
+                        </div>
                     </div>
 
-                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Save Record</button>
+                    <button onclick="saveItem()" id="btn-save" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow">Initialize Record</button>
                 </div>
             </div>
         </div>
@@ -248,20 +241,20 @@
 
     <div class="modal fade" id="modCal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content card-box border-0">
+            <div class="modal-content card-panel border-0">
                 <div class="modal-body p-4">
                     <h5 class="fw-bold mb-3">Add Event</h5>
-                    <input id="cal-t" class="form-control mb-3" placeholder="Event Name">
+                    <input id="cal-t" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Event Name">
                     <div class="row g-2 mb-3">
-                        <div class="col-6"><input type="date" id="cal-d" class="form-control"></div>
+                        <div class="col-6"><input type="date" id="cal-d" class="form-control bg-dark text-white border-secondary"></div>
                         <div class="col-6">
-                            <select id="cal-y" class="form-select">
+                            <select id="cal-y" class="form-select bg-dark text-white border-secondary">
                                 <option value="meeting">Meeting</option>
                                 <option value="deadline">Deadline</option>
                             </select>
                         </div>
                     </div>
-                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold py-3">Confirm</button>
+                    <button onclick="saveCal()" class="btn btn-success w-100 rounded-pill fw-bold py-3">Confirm Schedule</button>
                 </div>
             </div>
         </div>
@@ -269,9 +262,9 @@
 
     <div class="modal fade" id="modNoti" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content card-box border-0">
-                <div class="modal-header border-bottom border-secondary border-opacity-25 bg-dark">
-                    <h5 class="modal-title fw-bold">Notifications</h5>
+            <div class="modal-content card-panel border-0">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 bg-black">
+                    <h5 class="modal-title fw-bold">System Logs</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-0">
@@ -282,11 +275,11 @@
     </div>
 
     <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 2000;">
-        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4 glass">
+        <div id="sysToast" class="toast align-items-center text-bg-dark border border-secondary shadow-lg rounded-4 glass-header">
             <div class="d-flex">
                 <div class="toast-body d-flex gap-3 align-items-center">
-                    <div id="t-ico-box" class="p-2 rounded-circle bg-success bg-opacity-25"><i id="t-ico" data-lucide="check" class="text-success" size="18"></i></div>
-                    <div><strong id="t-tit" class="d-block text-white">Success</strong><small id="t-msg" class="text-secondary">Done</small></div>
+                    <i id="t-ico" data-lucide="check" class="text-success"></i>
+                    <div><strong id="t-tit" class="d-block text-white">System</strong><small id="t-msg" class="text-secondary">Done</small></div>
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
@@ -294,6 +287,7 @@
     </div>
 
     <script>
+        // CONFIGURATION
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
@@ -305,83 +299,103 @@
             { id: 4, name: "Ngawang",    av: "👨",   pin: "10801003243", role: "MEMBER" }
         ];
 
-        let STATE = { user: null, page: 'home', mode: 'task', audioReady: false, lastCount: 0 };
+        let STATE = { user: null, page: 'home', mode: 'task', lastNoti: 0 };
         const MODALS = {};
-        const AUDIO = document.getElementById('sys-ping');
+        const SOUNDS = { boot: document.getElementById('sys-boot'), alert: document.getElementById('sys-alert') };
 
+        // --- 1. BOOT SEQUENCE ---
         window.onload = () => {
             lucide.createIcons();
             ['modCreate','modCal','modNoti'].forEach(id => MODALS[id] = new bootstrap.Modal('#'+id));
+            // Ensure Boot Screen is visible first
+            document.getElementById('view-boot').classList.remove('d-none');
+        };
+
+        function systemInit() {
+            // Unlocks Audio Context for mobile browsers
+            SOUNDS.boot.play().catch(e => console.log("Audio prevent", e));
+            
+            // Request Notifications
+            if (Notification.permission !== "granted") Notification.requestPermission();
+
+            // Proceed
+            document.getElementById('view-boot').classList.add('d-none');
             const uid = localStorage.getItem('slbd_uid');
             if(uid) login(TEAM.find(x => x.id == uid));
             else initAuth();
-        };
+        }
 
-        // --- AUTH ---
+        // --- 2. AUTHENTICATION ---
         function initAuth() {
-            document.getElementById('auth-list').innerHTML = TEAM.map(u => `
-                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-box p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center border-opacity-50 hover-border-primary cursor-pointer">
-                    <div class="display-6 mb-2">${u.av}</div><div class="fw-bold small text-uppercase">${u.name.split(' ')[0]}</div>
+            document.getElementById('view-auth').classList.remove('d-none');
+            document.getElementById('auth-grid').innerHTML = TEAM.map(u => `
+                <div class="col-6"><div onclick="preLogin(${u.id})" class="card-panel p-3 text-center h-100 d-flex flex-column align-items-center justify-content-center cursor-pointer border-opacity-25 hover-border-primary">
+                    <div class="display-6 mb-2">${u.av}</div><div class="fw-bold small text-uppercase text-secondary">${u.name.split(' ')[0]}</div>
                 </div></div>`).join('');
         }
+
         function preLogin(id) {
             STATE.sel = TEAM.find(u=>u.id===id);
-            document.getElementById('auth-list').classList.add('d-none');
+            document.getElementById('auth-grid').classList.add('d-none');
             document.getElementById('auth-pin').classList.remove('d-none');
             document.getElementById('l-av').innerText = STATE.sel.av;
             document.getElementById('l-name').innerText = STATE.sel.name;
         }
-        function tryLogin() {
+        function resetAuth() {
+            document.getElementById('auth-pin').classList.add('d-none');
+            document.getElementById('auth-grid').classList.remove('d-none');
+        }
+        function verifyPin() {
             if(document.getElementById('inp-pin').value === STATE.sel.pin) {
                 localStorage.setItem('slbd_uid', STATE.sel.id);
+                document.getElementById('view-auth').classList.add('d-none');
                 login(STATE.sel);
-            } else toast('Error', 'Wrong PIN', 'lock', 'text-danger', 'bg-danger');
+            } else {
+                toast('Error', 'Invalid Credentials', 'lock', 'text-danger');
+                document.getElementById('inp-pin').value = '';
+            }
         }
         async function login(u) {
             STATE.user = u;
-            document.getElementById('view-auth').classList.add('d-none');
             document.getElementById('view-app').classList.remove('d-none');
             document.getElementById('d-av').innerText = u.av;
             document.getElementById('d-name').innerText = u.name;
-
-            const pages = [
+            
+            // Build Navigation
+            const pgs = [
                 {id:'home', t:'Dash', i:'layout-grid'},
                 {id:'cal', t:'Schedule', i:'calendar'},
                 {id:'task', t:'Tasks', i:'check-square'},
                 {id:'dec', t:'Decisions', i:'file-signature'},
                 {id:'rec', t:'Files', i:'folder'}
             ];
+            
+            document.getElementById('nav-d').innerHTML = pgs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary hover-bg"><i data-lucide="${p.i}" size="20"></i><span class="fw-bold small">${p.t}</span></a>`).join('');
+            document.getElementById('nav-m').innerHTML = pgs.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center justify-content-center text-decoration-none text-secondary opacity-50 flex-fill h-100"><i data-lucide="${p.i}" size="24" class="mb-1"></i><span style="font-size:10px; font-weight:600">${p.t}</span></a>`).join('');
 
-            document.getElementById('nav-d').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nd-${p.id}" class="text-decoration-none p-3 rounded-3 d-flex align-items-center gap-3 text-secondary hover-bg"><i data-lucide="${p.i}" size="20"></i><span class="fw-medium">${p.t}</span></a>`).join('');
-            document.getElementById('nav-m').innerHTML = pages.map(p => `<a href="#" onclick="nav('${p.id}')" id="nm-${p.id}" class="d-flex flex-column align-items-center text-decoration-none text-secondary opacity-50 py-2 flex-fill"><i data-lucide="${p.i}" size="22" class="mb-1"></i><span style="font-size:10px; font-weight:700;">${p.t}</span></a>`).join('');
-
+            // Log Attendance
             const today = new Date().toISOString().split('T')[0];
-            const { data } = await sbClient.from('attendance').select('*').eq('user_id', u.id).eq('date', today);
-            if(!data.length) await sbClient.from('attendance').insert({user_id: u.id, date: today});
+            const {data} = await sbClient.from('attendance').select('*').eq('user_id',u.id).eq('date',today);
+            if(!data.length) await sbClient.from('attendance').insert({user_id:u.id, date:today});
 
             nav('home');
-            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 4000);
+            // Polling
+            setInterval(() => { if(STATE.page!=='rec') render(true); checkNoti(false); }, 5000);
             checkNoti(false);
         }
-        function doLogout() { localStorage.removeItem('slbd_uid'); location.reload(); }
+        function logout() { localStorage.removeItem('slbd_uid'); location.reload(); }
 
-        // --- CORE ---
+        // --- 3. NAVIGATION & LOGIC ---
         function nav(p) {
             STATE.page = p;
-            document.querySelectorAll('.text-primary, .bg-primary, .opacity-100').forEach(e => {
-                if(e.id.startsWith('nd') || e.id.startsWith('nm')) {
-                    e.classList.remove('text-primary','bg-primary','bg-opacity-10','opacity-100','text-white');
-                    e.classList.add('text-secondary','opacity-50');
-                }
-            });
-
-            const nd = document.getElementById(`nd-${p}`);
-            const nm = document.getElementById(`nm-${p}`);
-            if(nd) { nd.classList.remove('text-secondary'); nd.classList.add('bg-primary','bg-opacity-10','text-white'); }
-            if(nm) { nm.classList.remove('opacity-50'); nm.classList.add('text-primary','opacity-100'); }
-
-            const map = {home:'Dashboard',cal:'Schedule',task:'Missions',dec:'Decisions',rec:'Archives'};
-            document.getElementById('m-tit').innerText = document.getElementById('d-tit').innerText = map[p];
+            document.querySelectorAll('[id^="nd-"]').forEach(e => { e.classList.remove('bg-primary','bg-opacity-10','text-white'); e.classList.add('text-secondary'); });
+            document.querySelectorAll('[id^="nm-"]').forEach(e => { e.classList.remove('text-primary','opacity-100'); e.classList.add('opacity-50'); });
+            
+            const nd = document.getElementById(`nd-${p}`); if(nd) { nd.classList.add('bg-primary','bg-opacity-10','text-white'); nd.classList.remove('text-secondary'); }
+            const nm = document.getElementById(`nm-${p}`); if(nm) { nm.classList.add('text-primary','opacity-100'); nm.classList.remove('opacity-50'); }
+            
+            const titles = {home:'Command Center',cal:'Schedule',task:'Mission Logs',dec:'Decisions',rec:'Archives'};
+            document.getElementById('d-tit').innerText = document.getElementById('m-tit').innerText = titles[p];
             render(false);
         }
 
@@ -390,151 +404,154 @@
             if(!silent) c.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
             try {
-                const [ {data:tasks}, {data:evts} ] = await Promise.all([
+                const [{data:tasks}, {data:evts}] = await Promise.all([
                     sbClient.from('tasks').select('*').order('created_at',{ascending:false}),
                     sbClient.from('calendar_events').select('*')
                 ]);
-                const activeT = tasks.filter(t => t.status !== 'Done');
+
+                // Filter Tasks
+                const activeT = tasks ? tasks.filter(t => t.status !== 'Done' && t.status !== 'Planned') : [];
+                const plannedT = tasks ? tasks.filter(t => t.status === 'Planned') : [];
 
                 if(STATE.page === 'home') {
-                    // Activate Sound Button logic
-                    const sndBtn = !STATE.audioReady ? `
-                        <div onclick="initAudio()" class="btn btn-warning w-100 mb-4 fw-bold shadow-lg animate-in text-black d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill">
-                            <i data-lucide="volume-2"></i> ACTIVATE SYSTEM SOUNDS
-                        </div>` : '';
+                    const links = `
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-lg-3"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="quick-btn"><i data-lucide="shield" size="28" class="text-warning"></i><span class="text-xs fw-bold">ADMIN / FIN</span></a></div>
+                            <div class="col-6 col-lg-3"><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="quick-btn"><i data-lucide="cpu" size="28" class="text-info"></i><span class="text-xs fw-bold">MACHINES</span></a></div>
+                            <div class="col-6 col-lg-3"><a href="#" class="quick-btn"><i data-lucide="users" size="28" class="text-success"></i><span class="text-xs fw-bold">HR & POLICY</span></a></div>
+                            <div class="col-6 col-lg-3"><a href="#" class="quick-btn"><i data-lucide="alert-triangle" size="28" class="text-danger"></i><span class="text-xs fw-bold">SAFETY LOGS</span></a></div>
+                        </div>`;
 
+                    // "Not Yet" / Future Section
+                    const futureSec = `
+                        <div class="card-panel p-3 mb-4 border-start border-4 border-warning bg-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold m-0 text-warning d-flex align-items-center gap-2"><i data-lucide="clock" size="16"></i> PLANNED / NOT YET</h6>
+                                <button onclick="openCreate('future')" class="btn btn-sm btn-outline-warning py-0 text-xs">ADD LOG</button>
+                            </div>
+                            <div class="d-flex gap-2 overflow-x-auto pb-2">
+                                ${plannedT.length ? plannedT.map(t => `<div class="bg-black p-3 rounded border border-secondary border-opacity-25" style="min-width:200px"><div class="fw-bold text-sm text-white text-truncate">${t.task_title}</div><div class="text-xs text-secondary mt-1">${t.due_date||'No Date'}</div></div>`).join('') : '<span class="text-secondary text-xs fst-italic">No future logs pending.</span>'}
+                            </div>
+                        </div>`;
+
+                    let mainContent = '';
                     if(STATE.user.role === 'LEADER') {
                         const rows = TEAM.map(u => {
                             const uts = activeT.filter(t => (t.tagged_members||[]).includes(u.id));
                             if(!uts.length) return '';
-                            return `<div class="p-3 border-bottom border-secondary border-opacity-25 animate-in">
-                                <div class="d-flex align-items-center gap-2 mb-2"><span class="avatar avatar-sm">${u.av}</span><span class="fw-bold small">${u.name}</span></div>
-                                ${uts.map(t => `<div class="mb-2 ps-2 border-start border-primary border-2 ms-2"><div class="d-flex justify-content-between text-xs px-2"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span class="${t.progress<100?'text-warning':'text-success'}">${t.progress}%</span></div><div class="progress bg-dark ms-2 mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<90?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}
-                            </div>`;
+                            return `<div class="p-3 border-bottom border-secondary border-opacity-25"><div class="d-flex align-items-center gap-2 mb-2"><span class="avatar" style="width:24px;height:24px;font-size:12px">${u.av}</span><span class="fw-bold small">${u.name}</span></div>${uts.map(t => `<div class="mb-2 ps-2 border-start border-2 border-primary ms-2"><div class="d-flex justify-content-between text-xs text-secondary"><span class="text-truncate" style="max-width:150px">${t.task_title}</span><span>${t.progress}%</span></div><div class="progress bg-black mt-1" style="height:4px"><div class="progress-bar bg-${t.progress<100?'warning':'success'}" style="width:${t.progress}%"></div></div></div>`).join('')}</div>`;
                         }).join('');
-                        c.innerHTML = `
-                            ${sndBtn}
-                            <div class="row g-3">
-                                <div class="col-lg-8"><div class="card-box"><div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info rounded-pill px-3">Ping All</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">No active ops.</div>'}</div></div></div>
-                                <div class="col-lg-4"><div class="card-box p-4"><h6 class="text-secondary text-xs fw-bold mb-3">DRIVE LINKS</h6><div class="d-grid gap-2"><a href="https://drive.google.com/drive/folders/1VskzY_IgfF6lagiEdaF5-yy6Te_u-MMG?usp=sharing" target="_blank" class="btn btn-dark text-start border-secondary p-3"><i data-lucide="folder" class="text-warning me-2" size="16"></i>Admin & Finance</a><a href="https://drive.google.com/drive/folders/1FivXbl7Qo5qnKV2Kn6DXxdtVUS4nB5CF?usp=sharing" target="_blank" class="btn btn-dark text-start border-secondary p-3"><i data-lucide="cpu" class="text-info me-2" size="16"></i>Machine Unit</a></div></div></div>
-                            </div>`;
+                        mainContent = `<div class="card-panel"><div class="p-3 bg-sub border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center"><h6 class="fw-bold m-0 text-white">Live Operations</h6><button onclick="pingAll()" class="btn btn-sm btn-outline-info py-0 px-2 rounded-pill text-xs">PING ALL</button></div><div style="max-height:400px;overflow-y:auto">${rows||'<div class="p-4 text-center text-secondary small">No active operations.</div>'}</div></div>`;
                     } else {
                         const myT = activeT.filter(t => (t.tagged_members||[]).includes(STATE.user.id));
-                        c.innerHTML = `${sndBtn}
-                            <div class="card-box p-4 mb-3 border-start border-4 border-primary">
-                                <h5 class="fw-bold mb-4">My Workspace</h5>
-                                ${myT.length ? myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="status-pill bg-secondary bg-opacity-25">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updateProg(${t.id},this.value,'${t.task_title}')"><span class="small fw-bold w-25 text-end">${t.progress}%</span></div></div>`).join('') : '<p class="text-secondary small text-center">No active assignments.</p>'}
-                            </div>`;
+                        mainContent = `<div class="card-panel p-4"><h5 class="fw-bold mb-4">Active Assignments</h5>${myT.map(t => `<div class="bg-black p-3 rounded-3 mb-3 border border-secondary border-opacity-25"><div class="d-flex justify-content-between mb-2"><span class="fw-bold">${t.task_title}</span><span class="badge bg-secondary bg-opacity-25 text-white">${t.status}</span></div><div class="d-flex align-items-center gap-3"><input type="range" class="form-range flex-grow-1" value="${t.progress}" onchange="updProg(${t.id},this.value)"> <span class="fw-bold small">${t.progress}%</span></div></div>`).join('') || '<div class="text-center text-secondary small">No active tasks.</div>'}</div>`;
                     }
+                    c.innerHTML = links + futureSec + mainContent;
                 }
-                
+
                 if(STATE.page === 'task') {
-                    c.innerHTML = activeT.length ? `<div class="row g-3">${activeT.map(t => {
+                    // Show Planned tasks here too? Let's show separate
+                    const allT = [...activeT, ...plannedT];
+                    c.innerHTML = allT.length ? `<div class="row g-3">${allT.map(t => {
                         let btn = '';
-                        if(STATE.user.role === 'LEADER') {
-                            if(t.status === 'ApprovalReq') btn = `<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 fw-bold">Approve</button>`;
-                            else if(t.status === 'Review') btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finalize</button>`;
-                            else btn = `<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
-                        } else if(t.status==='Pending' || t.status==='Ongoing') btn = `<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit Review</button>`;
-                        
-                        return `<div class="col-12 col-md-6 col-lg-4"><div class="card-box p-3 h-100 d-flex flex-column animate-in"><div class="d-flex justify-content-between mb-2"><span class="status-pill bg-dark border border-secondary text-secondary">${t.status}</span></div><h6 class="fw-bold">${t.task_title}</h6><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-dark" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${btn}</div></div>`;
-                    }).join('')}</div>` : '<div class="text-center text-secondary py-5">All tasks complete.</div>';
+                        if(STATE.user.role==='LEADER' && t.status!=='Planned') {
+                            if(t.status==='ApprovalReq') btn=`<button onclick="setStatus(${t.id},'Pending',${t.creator_id},'${t.task_title}')" class="btn btn-warning w-100 btn-sm mt-3 text-black fw-bold">Approve</button>`;
+                            else if(t.status==='Review') btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-success w-100 btn-sm mt-3 fw-bold">Finalize</button>`;
+                            else btn=`<button onclick="setStatus(${t.id},'Done',${t.creator_id},'${t.task_title}')" class="btn btn-outline-secondary w-100 btn-sm mt-3">Mark Done</button>`;
+                        } else if(t.status==='Planned') {
+                             btn=`<button onclick="setStatus(${t.id},'${STATE.user.role==='LEADER'?'Pending':'ApprovalReq'}',${t.creator_id},'${t.task_title}')" class="btn btn-outline-primary w-100 btn-sm mt-3">Activate Now</button>`;
+                        } else if(t.status==='Pending' || t.status==='Ongoing') {
+                             btn=`<button onclick="setStatus(${t.id},'Review',1,'${t.task_title}')" class="btn btn-primary w-100 btn-sm mt-3">Submit Review</button>`;
+                        }
+                        return `<div class="col-12 col-md-6 col-lg-4"><div class="card-panel p-4 h-100 d-flex flex-column"><div class="d-flex justify-content-between mb-2"><span class="badge bg-dark border border-secondary text-secondary">${t.status}</span><span class="small text-secondary fw-bold">${t.progress}%</span></div><h5 class="fw-bold mb-2">${t.task_title}</h5><p class="small text-secondary flex-grow-1 text-truncate">${t.description}</p><div class="progress bg-black" style="height:4px"><div class="progress-bar bg-white" style="width:${t.progress}%"></div></div>${btn}</div></div>`;
+                    }).join('')}</div>` : '<div class="text-center py-5 text-secondary">No missions.</div>';
                 }
 
                 if(STATE.page === 'cal') {
-                    const today = new Date();
-                    const dim = new Date(today.getFullYear(), today.getMonth()+1, 0).getDate();
-                    const off = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                    const d = new Date(); const dim = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
                     let cells = '';
-                    for(let i=0;i<off;i++) cells+=`<div></div>`;
-                    for(let d=1;d<=dim;d++) {
-                        const str = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                        const es = evts.filter(e=>e.date===str);
-                        cells+=`<div class="cal-day ${d===today.getDate()?'active':''}" onclick="openCal('${str}')"><div class="text-end text-secondary text-xs opacity-50">${d}</div>${es.map(e=>`<div class="cal-evt" style="background:${e.type==='meeting'?'rgba(37,99,235,0.3)':'rgba(245,158,11,0.3)'}; color:${e.type==='meeting'?'#93c5fd':'#fcd34d'}">${e.status==='suggested'?'? ':''}${e.title}</div>`).join('')}</div>`;
+                    for(let i=1;i<=dim;i++) {
+                        const str = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                        const es = evts ? evts.filter(e=>e.date===str) : [];
+                        cells += `<div onclick="openCal('${str}')" class="p-2 rounded border border-transparent hover-border-primary bg-sub d-flex flex-column" style="min-height:80px;cursor:pointer;${i===d.getDate()?'border-color:var(--primary);background:#111':''}"><span class="text-end text-xs opacity-50 fw-bold">${i}</span>${es.map(e=>`<div class="text-xs text-truncate px-1 rounded mt-1 fw-bold" style="background:${e.type==='meeting'?'rgba(59,130,246,0.2)':'rgba(245,158,11,0.2)'};color:${e.type==='meeting'?'#93C5FD':'#FCD34D'}">${e.title}</div>`).join('')}</div>`;
                     }
-                    const suggs = evts.filter(e=>e.status==='suggested');
-                    const appBox = (STATE.user.role==='LEADER' && suggs.length) ? `<div class="alert alert-dark border-warning mb-3"><strong class="text-warning text-xs">PENDING</strong>${suggs.map(e=>`<div class="d-flex justify-content-between mt-2 small"><span>${e.date}: ${e.title}</span><div><button onclick="appCal(${e.id},1)" class="btn btn-sm btn-success py-0 px-2 me-1">✓</button><button onclick="appCal(${e.id},0)" class="btn btn-sm btn-danger py-0 px-2">✗</button></div></div>`).join('')}</div>`:'';
-                    c.innerHTML = `${appBox}<div class="d-flex justify-content-between mb-3"><h4 class="fw-bold m-0">${today.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-sm btn-primary rounded-pill px-3">Add Event</button></div><div class="cal-grid text-white">${['S','M','T','W','T','F','S'].map(d=>`<div class="text-center text-secondary text-xs fw-bold">${d}</div>`).join('')}${cells}</div>`;
+                    c.innerHTML = `<div class="d-flex justify-content-between mb-4 align-items-center"><h4 class="fw-bold m-0 text-uppercase">${d.toLocaleString('default',{month:'long'})}</h4><button onclick="openCal('${new Date().toISOString().split('T')[0]}')" class="btn btn-primary btn-sm rounded-pill px-3 shadow">Add Event</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">${['S','M','T','W','T','F','S'].map(x=>`<div class="text-center text-xs text-secondary py-2 fw-bold">${x}</div>`).join('')}${cells}</div>`;
                 }
 
                 if(STATE.page === 'dec') {
                     const {data} = await sbClient.from('decisions').select('*').order('created_at',{ascending:false});
-                    c.innerHTML = data.map(d=>`<div class="card-box p-3 mb-2 animate-in"><div class="fw-bold">${d.subject}</div><div class="text-secondary small">${d.details}</div></div>`).join('');
+                    c.innerHTML = data && data.length ? data.map(d=>`<div class="card-panel p-4 mb-2"><div class="fw-bold text-white">${d.subject}</div><p class="text-secondary small m-0">${d.details}</p></div>`).join('') : '<div class="text-center text-secondary py-5">No logs.</div>';
                 }
+
                 if(STATE.page === 'rec') {
                     const {data} = await sbClient.from('tasks').select('*').eq('status','Done').order('updated_at',{ascending:false});
-                    c.innerHTML = `<div class="card-box overflow-hidden"><table class="table table-dark mb-0"><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div><div class="text-secondary text-xs">${new Date(t.updated_at).toLocaleDateString()}</div></td></tr>`).join('')}</tbody></table></div>`;
+                    c.innerHTML = `<div class="card-panel overflow-hidden"><table class="table table-dark mb-0"><thead><tr><th class="p-3 text-secondary text-xs">ARCHIVED TASK</th><th class="p-3 text-secondary text-xs text-end">DATE</th></tr></thead><tbody>${data.map(t=>`<tr><td class="p-3"><div class="fw-bold small">${t.task_title}</div></td><td class="p-3 text-secondary text-xs text-end">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}</tbody></table></div>`;
                 }
-            } catch(e) { console.log(e); }
+
+            } catch(e) { console.error(e); }
             lucide.createIcons();
         }
 
-        // --- ACTIONS ---
-        function setMode(m) { STATE.mode=m; document.getElementById('bm-task').className = m==='task'?'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2'; document.getElementById('bm-dec').className = m==='dec'?'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25':'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2'; document.getElementById('sec-task-opt').classList.toggle('d-none',m!=='task'); if(m==='task') document.getElementById('div-mems').innerHTML=TEAM.map(u=>`<label class="btn btn-dark border-secondary btn-sm d-flex align-items-center gap-2"><input type="checkbox" class="chk-mem form-check-input m-0" value="${u.id}"> ${u.name.split(' ')[0]}</label>`).join(''); }
-        function openCreate() { setMode('task'); MODALS.modCreate.show(); }
+        // --- 4. ACTIONS ---
+        function setMode(m) { 
+            STATE.mode = m; 
+            ['task','dec','future'].forEach(k => {
+                const el = document.getElementById('bm-'+k);
+                if(el) el.className = (k === m || (k==='future' && m==='future')) ? 'flex-fill btn btn-sm text-white fw-bold py-2 rounded-2 bg-secondary bg-opacity-25' : 'flex-fill btn btn-sm text-secondary fw-bold py-2 rounded-2';
+            });
+            document.getElementById('sec-opts').classList.toggle('d-none', m==='dec');
+            document.getElementById('sec-assign').classList.toggle('d-none', m==='future');
+            if(m!=='dec') document.getElementById('div-mems').innerHTML = TEAM.map(u=>`<input type="checkbox" class="btn-check chk-mem" id="chk-${u.id}" value="${u.id}"><label class="btn btn-outline-secondary btn-sm rounded-pill" for="chk-${u.id}">${u.name.split(' ')[0]}</label>`).join('');
+        }
+        function openCreate(m) { setMode(m); MODALS.modCreate.show(); }
         async function saveItem() {
-            const btn = document.getElementById('btn-save'); btn.innerText = "Saving...";
+            const btn = document.getElementById('btn-save'); btn.innerText = 'Processing...';
             const t = document.getElementById('inp-t').value; const d = document.getElementById('inp-d').value;
-            if(!t) return toast('Error','Title required','alert-circle','text-danger','bg-danger');
+            if(!t) { toast('Error','Title Required','alert-circle','text-danger'); btn.innerText='Initialize Record'; return; }
             
-            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t,details:d});
+            if(STATE.mode==='dec') await sbClient.from('decisions').insert({subject:t, details:d});
+            else if(STATE.mode==='future') await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, status:'Planned', progress:0});
             else {
                 const tags = [...document.querySelectorAll('.chk-mem:checked')].map(x=>parseInt(x.value));
-                await sbClient.from('tasks').insert({task_title:t,description:d,due_date:document.getElementById('inp-date').value||null,creator_id:STATE.user.id,tagged_members:tags,status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq',progress:0});
-                tags.forEach(uid => sendNoti(uid, `New Mission: ${t}`));
-                if(STATE.user.role!=='LEADER') sendNoti(1, `${STATE.user.name} requests approval: ${t}`);
+                await sbClient.from('tasks').insert({task_title:t, description:d, due_date:document.getElementById('inp-date').value||null, creator_id:STATE.user.id, tagged_members:tags, status:STATE.user.role==='LEADER'?'Pending':'ApprovalReq', progress:0});
+                tags.forEach(id => sendNoti(id, `New Task: ${t}`));
             }
-            MODALS.modCreate.hide(); toast('Saved','Record created','check','text-success','bg-success'); render(false);
-            btn.innerText = "Save Record";
+            MODALS.modCreate.hide(); toast('Success','Log Created','check-circle','text-success'); render(false); btn.innerText = 'Initialize Record';
         }
-        async function setStatus(id, st, tuid, tit) { await sbClient.from('tasks').update({status:st,updated_at:new Date()}).eq('id',id); render(true); if(st==='Pending') sendNoti(tuid,`Approved: ${tit}`); if(st==='Done') sendNoti(tuid,`Completed: ${tit}`); if(st==='Review') sendNoti(1,`${STATE.user.name} finished: ${tit}`); }
-        async function updateProg(id,v,t) { await sbClient.from('tasks').update({progress:v}).eq('id',id); if(v==100) toast('Done','Ready for Review','star','text-warning','bg-warning'); }
-        
-        // --- CALENDAR ---
+        async function setStatus(id,s,uid,tit) { await sbClient.from('tasks').update({status:s, updated_at:new Date()}).eq('id',id); render(true); if(s==='Pending') sendNoti(uid,`Approved: ${tit}`); if(s==='Done') sendNoti(uid,`Complete: ${tit}`); if(s==='Review') sendNoti(1,`Review: ${tit}`); }
+        async function updProg(id,v) { await sbClient.from('tasks').update({progress:v}).eq('id',id); }
         function openCal(d) { document.getElementById('cal-d').value=d; MODALS.modCal.show(); }
-        async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value,date:document.getElementById('cal-d').value,type:document.getElementById('cal-y').value,status:STATE.user.role==='LEADER'?'confirmed':'suggested',creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success','bg-success'); render(false); }
-        async function appCal(id,ok) { if(ok) await sbClient.from('calendar_events').update({status:'confirmed'}).eq('id',id); else await sbClient.from('calendar_events').delete().eq('id',id); render(true); }
+        async function saveCal() { await sbClient.from('calendar_events').insert({title:document.getElementById('cal-t').value, date:document.getElementById('cal-d').value, type:document.getElementById('cal-y').value, status:'confirmed', creator_id:STATE.user.id}); MODALS.modCal.hide(); toast('Saved','Event Added','calendar','text-success'); render(false); }
 
-        // --- NOTIFICATIONS ---
-        async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid,message:msg}); }
-        function pingAll() { TEAM.forEach(u => { if(u.role!=='LEADER') sendNoti(u.id, "LEADER PING: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info','bg-info'); }
-        
-        function initAudio() {
-            STATE.audioReady = true;
-            AUDIO.play().then(() => { AUDIO.pause(); AUDIO.currentTime = 0; }).catch(e=>console.log(e));
-            if(Notification.permission !== "granted") Notification.requestPermission();
-            const btn = document.getElementById('btn-sound-d'); if(btn) { btn.innerHTML = '<i data-lucide="volume-2" size="14"></i> Sound Active'; btn.classList.remove('btn-dark'); btn.classList.add('btn-success'); }
-            toast('Audio On','Notifications Active','volume-2','text-success','bg-success');
-            render(true);
-        }
-
+        // --- 5. ALERTS ---
+        async function sendNoti(uid, msg) { await sbClient.from('notifications').insert({user_id:uid, message:msg}); }
+        function pingAll() { TEAM.forEach(u=>{ if(u.role!=='LEADER') sendNoti(u.id, "COMMANDER: REPORT STATUS"); }); toast('Sent','Pinged Team','radio','text-info'); }
         async function checkNoti(open) {
             const {data} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).eq('is_read',false);
             const count = data?.length || 0;
             const bM = document.getElementById('bad-m'); const bD = document.getElementById('bad-d');
             
             if(count > 0) {
-                bM.classList.remove('d-none'); bM.innerText=count; bD.classList.remove('d-none'); bD.innerText=count;
-                if(count > STATE.lastCount && STATE.audioReady) { 
-                    AUDIO.play(); 
-                    if(navigator.vibrate) navigator.vibrate([200,100,200]);
-                    if(Notification.permission==="granted") new Notification("SLBDMIS",{body:`${count} New Alerts`});
+                bM.classList.remove('d-none'); bM.innerText = count; bD.classList.remove('d-none'); bD.innerText = count;
+                if(count > STATE.lastNoti) {
+                    SOUNDS.alert.play().catch(()=>{});
+                    if(navigator.vibrate) navigator.vibrate([100,50,100]);
+                    if(Notification.permission === "granted") new Notification("SLBDMIS", {body: `${count} New Alerts`});
                 }
             } else { bM.classList.add('d-none'); bD.classList.add('d-none'); }
-            STATE.lastCount = count;
+            STATE.lastNoti = count;
 
             if(open) {
                 const {data:msgs} = await sbClient.from('notifications').select('*').eq('user_id',STATE.user.id).order('created_at',{ascending:false}).limit(10);
-                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div><div class="text-secondary text-xs mt-1">${new Date(n.created_at).toLocaleString()}</div></div>`).join('') : '<div class="p-5 text-center text-secondary">No alerts.</div>';
+                document.getElementById('noti-list').innerHTML = msgs.length ? msgs.map(n => `<div class="list-group-item bg-dark border-secondary border-opacity-25 p-3"><div class="fw-bold small text-white">${n.message}</div><div class="text-secondary text-xs mt-1">${new Date(n.created_at).toLocaleTimeString()}</div></div>`).join('') : '<div class="p-4 text-center text-secondary small">No alerts.</div>';
                 if(count>0) await sbClient.from('notifications').update({is_read:true}).eq('user_id',STATE.user.id);
                 MODALS.modNoti.show();
             }
         }
 
-        function toast(t, m, i, c, bg) {
+        function toast(t,m,i,c) {
             document.getElementById('t-tit').innerText = t; document.getElementById('t-msg').innerText = m;
             document.getElementById('t-ico').setAttribute('data-lucide', i); document.getElementById('t-ico').className = c;
-            document.getElementById('t-ico-box').className = `p-2 rounded-circle bg-opacity-25 ${bg}`;
             lucide.createIcons(); bootstrap.Toast.getOrCreateInstance(document.getElementById('sysToast')).show();
         }
     </script>
