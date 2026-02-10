@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>COMMAND OS | PRO v4.2</title>
+    <title>COMMAND OS | PRO v5.0</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💠</text></svg>">
 
@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* --- PROFESSIONAL DARK THEME --- */
+        /* --- THEME CONFIGURATION --- */
         :root { 
             --primary: #3b82f6;
             --primary-dim: rgba(59, 130, 246, 0.15);
@@ -29,93 +29,101 @@
             --font-mono: 'JetBrains Mono', monospace;
         }
 
-        body { background-color: var(--bg); color: var(--text-main); font-family: var(--font-ui); overflow-x: hidden; }
+        body { background-color: var(--bg); color: var(--text-main); font-family: var(--font-ui); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
+        /* Subtle Background Grid */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
-            z-index: -1; pointer-events: none;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 40px 40px; opacity: 0.05; z-index: -1; pointer-events: none;
         }
 
-        /* --- COMPONENTS --- */
+        /* --- UI COMPONENTS --- */
         .glass-panel { 
             background: var(--panel); 
             border: 1px solid var(--border); 
             border-radius: 12px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
         }
 
-        .mono-label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); }
+        .hover-panel:active { transform: scale(0.98); }
 
-        .btn { border-radius: 8px; font-weight: 500; transition: 0.2s; border: none; }
-        .btn:active { transform: translateY(1px); }
-        .btn-primary { background: var(--primary); color: white; }
+        .mono-label { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); opacity: 0.8; }
+
+        .btn { border-radius: 8px; font-weight: 500; border: none; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 0 15px var(--primary-dim); }
         .btn-primary:hover { background: #2563eb; }
         .btn-outline-secondary { border: 1px solid var(--border); color: var(--text-muted); }
         .btn-outline-secondary:hover { background: var(--border); color: white; }
         
+        /* Dark Mode Inputs */
         .form-control, .form-select {
             background: #020617 !important; border: 1px solid var(--border) !important;
-            color: white !important; border-radius: 8px; padding: 10px;
+            color: white !important; border-radius: 8px; padding: 12px;
         }
         .form-control:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 2px var(--primary-dim); }
 
+        /* Custom Range Slider */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: var(--primary); margin-top: -6px; cursor: pointer; border: 2px solid #fff;
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: var(--primary); margin-top: -7px; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 10px var(--primary);
         }
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%; height: 4px; cursor: pointer; background: var(--border); border-radius: 2px;
         }
 
-        /* --- CALENDAR --- */
+        /* --- CALENDAR STYLES --- */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-        .cal-day { background: var(--panel); min-height: 100px; padding: 8px; cursor: pointer; transition: 0.2s; }
+        .cal-day { background: var(--panel); min-height: 100px; padding: 6px; cursor: pointer; transition: 0.2s; }
         .cal-day:hover { background: #2a3855; }
-        .cal-today { background: rgba(59, 130, 246, 0.1); }
+        .cal-today { background: rgba(59, 130, 246, 0.05); box-shadow: inset 0 0 0 1px var(--primary); }
         .cal-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 4px; }
-        .cal-task-item { font-size: 0.7rem; color: #cbd5e1; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cal-task-item { font-size: 0.65rem; color: #cbd5e1; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 4px; }
 
-        /* --- GRAPH --- */
-        .bar-container { display: flex; align-items: flex-end; height: 120px; gap: 12px; padding-top: 20px; }
-        .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .bar-track { width: 100%; height: 100%; background: rgba(255,255,255,0.05); border-radius: 6px; position: relative; overflow: hidden; }
-        .bar-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: var(--primary); transition: height 0.8s ease; }
+        /* --- MOMENTUM GRAPH --- */
+        .bar-container { display: flex; align-items: flex-end; height: 140px; gap: 12px; padding-top: 20px; }
+        .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .bar-track { width: 100%; height: 100%; background: rgba(255,255,255,0.03); border-radius: 6px; position: relative; overflow: hidden; }
+        .bar-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, var(--primary), #60a5fa); transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.8; }
         
-        /* --- LAYOUTS --- */
+        /* --- NAVIGATION --- */
         .nav-link-custom { 
-            display: flex; align-items: center; gap: 12px; padding: 12px; 
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
             color: var(--text-muted); border-radius: 8px; text-decoration: none; transition: 0.2s; 
         }
         .nav-link-custom:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-link-custom.active { background: var(--primary); color: white; }
+        .nav-link-custom.active { background: var(--primary); color: white; font-weight: 600; }
         
-        .nav-mobile-item { color: #666; padding: 10px; position: relative; }
-        .nav-mobile-item.active { color: var(--primary); }
+        .nav-mobile-item { color: #64748b; padding: 12px; flex: 1; text-align: center; border-radius: 8px; }
+        .nav-mobile-item.active { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
 
-        .chat-bubble { background: #2a3855; border-radius: 12px; padding: 12px; margin-bottom: 12px; border-left: 4px solid var(--border); }
-        .chat-bubble.leader { border-left-color: var(--primary); }
+        .chat-bubble { background: #2a3855; border-radius: 12px; padding: 12px; margin-bottom: 12px; border-left: 4px solid var(--border); animation: fadeIn 0.3s ease; }
+        .chat-bubble.leader { border-left-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="view-auth" class="d-none fixed-top w-100 h-100 bg-black d-flex flex-column justify-content-center align-items-center" style="z-index: 2000;">
-        <div class="text-center mb-4">
-            <div class="bg-primary rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
-                <i data-lucide="command" class="text-white" size="32"></i>
+        <div class="text-center mb-5">
+            <div class="bg-primary rounded-3 d-inline-flex align-items-center justify-content-center mb-3 shadow-lg" style="width: 72px; height: 72px;">
+                <i data-lucide="command" class="text-white" size="36"></i>
             </div>
-            <h2 class="fw-bold text-white tracking-tight">COMMAND OS</h2>
-            <p class="text-muted small">SECURE WORKSPACE</p>
+            <h1 class="fw-bold text-white tracking-tight">COMMAND OS</h1>
+            <p class="text-muted small letter-spacing-2">SYSTEM ACCESS</p>
         </div>
-        <div id="auth-list" class="row g-3" style="max-width: 400px; width: 100%;"></div>
+        
+        <div id="auth-list" class="row g-3 px-3" style="max-width: 450px; width: 100%;"></div>
         
         <div id="auth-pin" class="d-none text-center" style="max-width: 300px;">
-            <div id="l-av" class="display-4 mb-3"></div>
-            <h4 id="l-name" class="text-white mb-4"></h4>
-            <input type="password" id="inp-pin" class="form-control text-center fs-4 mb-3" maxlength="11" placeholder="Enter PIN">
-            <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 fw-bold">UNLOCK</button>
-            <button onclick="resetAuth()" class="btn btn-link text-secondary mt-2 text-decoration-none">Back</button>
+            <div id="l-av" class="display-3 mb-3"></div>
+            <h3 id="l-name" class="text-white mb-4"></h3>
+            <input type="password" id="inp-pin" class="form-control text-center fs-3 mb-3 text-white" maxlength="11" placeholder="• • • •">
+            <button onclick="tryLogin()" class="btn btn-primary w-100 py-3 fw-bold mb-2">UNLOCK SYSTEM</button>
+            <button onclick="resetAuth()" class="btn btn-link text-secondary text-decoration-none">Cancel</button>
         </div>
     </div>
 
@@ -132,7 +140,7 @@
                 <a onclick="nav('cal')" id="nd-cal" class="nav-link-custom cursor-pointer"><i data-lucide="calendar" size="18"></i> Calendar</a>
                 <a onclick="nav('task')" id="nd-task" class="nav-link-custom cursor-pointer"><i data-lucide="check-square" size="18"></i> Tasks</a>
                 <a onclick="nav('idea')" id="nd-idea" class="nav-link-custom cursor-pointer"><i data-lucide="lightbulb" size="18"></i> Ideas</a>
-                <a onclick="nav('feed')" id="nd-feed" class="nav-link-custom cursor-pointer"><i data-lucide="message-square" size="18"></i> Team Feed</a>
+                <a onclick="nav('feed')" id="nd-feed" class="nav-link-custom cursor-pointer"><i data-lucide="message-square" size="18"></i> Feed</a>
                 <a onclick="nav('drive')" id="nd-drive" class="nav-link-custom cursor-pointer"><i data-lucide="hard-drive" size="18"></i> Drive</a>
             </nav>
 
@@ -143,16 +151,18 @@
                         <div id="d-name" class="text-white fw-bold small text-truncate"></div>
                         <div id="d-role" class="text-muted text-xs small"></div>
                     </div>
-                    <button onclick="doLogout()" class="btn btn-icon ms-auto text-secondary"><i data-lucide="log-out" size="16"></i></button>
+                    <button onclick="doLogout()" class="btn btn-icon ms-auto text-secondary hover-white"><i data-lucide="log-out" size="16"></i></button>
                 </div>
             </div>
         </div>
 
         <div class="d-md-none fixed-top glass-panel m-2 d-flex align-items-center justify-content-between px-3" style="height: 60px; z-index: 1001;">
-            <div class="fw-bold text-white">COMMAND OS</div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="fw-bold text-white d-flex align-items-center gap-2">
+                <i data-lucide="command" size="18" class="text-primary"></i> COMMAND OS
+            </div>
+            <div class="d-flex align-items-center gap-3">
                 <div id="m-av" class="small"></div>
-                <button onclick="doLogout()" class="btn btn-sm text-secondary"><i data-lucide="log-out"></i></button>
+                <button onclick="doLogout()" class="btn btn-sm text-secondary p-0"><i data-lucide="log-out" size="18"></i></button>
             </div>
         </div>
 
@@ -161,7 +171,7 @@
                 <div class="row">
                     <div class="col-md-9 offset-md-3 col-lg-10 offset-lg-2 p-3 p-md-5">
                         
-                        <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
                             <h2 id="page-title" class="fw-bold text-white m-0">Dashboard</h2>
                             <button onclick="openCreate()" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
                                 <i data-lucide="plus" size="18"></i> <span class="d-none d-sm-inline">New Item</span>
@@ -175,22 +185,21 @@
             </div>
         </div>
 
-        <div class="d-md-none fixed-bottom m-3 p-2 glass-panel d-flex justify-content-between" style="z-index: 1001;">
-            <div onclick="nav('home')" id="nm-home" class="nav-mobile-item"><i data-lucide="layout-dashboard"></i></div>
-            <div onclick="nav('cal')" id="nm-cal" class="nav-mobile-item"><i data-lucide="calendar"></i></div>
-            <div onclick="nav('task')" id="nm-task" class="nav-mobile-item"><i data-lucide="check-square"></i></div>
-            <div onclick="nav('idea')" id="nm-idea" class="nav-mobile-item"><i data-lucide="lightbulb"></i></div>
-            <div onclick="nav('feed')" id="nm-feed" class="nav-mobile-item"><i data-lucide="message-square"></i></div>
-            <div onclick="nav('drive')" id="nm-drive" class="nav-mobile-item"><i data-lucide="hard-drive"></i></div>
+        <div class="d-md-none fixed-bottom m-3 p-1 glass-panel d-flex justify-content-between" style="z-index: 1001;">
+            <div onclick="nav('home')" id="nm-home" class="nav-mobile-item"><i data-lucide="layout-dashboard" size="20"></i></div>
+            <div onclick="nav('cal')" id="nm-cal" class="nav-mobile-item"><i data-lucide="calendar" size="20"></i></div>
+            <div onclick="nav('task')" id="nm-task" class="nav-mobile-item"><i data-lucide="check-square" size="20"></i></div>
+            <div onclick="nav('idea')" id="nm-idea" class="nav-mobile-item"><i data-lucide="lightbulb" size="20"></i></div>
+            <div onclick="nav('feed')" id="nm-feed" class="nav-mobile-item"><i data-lucide="message-square" size="20"></i></div>
+            <div onclick="nav('drive')" id="nm-drive" class="nav-mobile-item"><i data-lucide="hard-drive" size="20"></i></div>
         </div>
-
     </div>
 
     <div class="modal fade" id="modCreate" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-panel border-0">
                 <div class="modal-body p-4">
-                    <h5 class="fw-bold text-white mb-3">Create New</h5>
+                    <h5 class="fw-bold text-white mb-3">Create New Item</h5>
                     
                     <div class="btn-group w-100 mb-3" role="group">
                         <input type="radio" class="btn-check" name="ctype" id="ct-task" value="task" checked onchange="toggleForm('task')">
@@ -224,7 +233,7 @@
                         <div id="div-mems" class="d-flex flex-wrap gap-2 mb-3"></div>
                     </div>
 
-                    <button onclick="saveItem()" class="btn btn-primary w-100 py-3">Create</button>
+                    <button onclick="saveItem()" class="btn btn-primary w-100 py-3">Confirm Creation</button>
                 </div>
             </div>
         </div>
@@ -234,16 +243,16 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content glass-panel border-0">
                 <div class="modal-body p-4 text-center">
-                    <h5 class="fw-bold text-white mb-2">Upload File</h5>
-                    <p class="text-muted small mb-4">Select the drive folder</p>
+                    <h5 class="fw-bold text-white mb-2">Upload Submission</h5>
+                    <p class="text-muted small mb-4">Select destination folder</p>
                     <div class="row g-3 mb-3">
-                        <div class="col-6"><button onclick="openDriveLink('Admin')" class="btn btn-outline-secondary w-100 p-3"><i data-lucide="shield" class="mb-2"></i><br>Admin</button></div>
-                        <div class="col-6"><button onclick="openDriveLink('Machine')" class="btn btn-outline-secondary w-100 p-3"><i data-lucide="cpu" class="mb-2"></i><br>Machine</button></div>
-                        <div class="col-6"><button onclick="openDriveLink('Pics')" class="btn btn-outline-secondary w-100 p-3"><i data-lucide="image" class="mb-2"></i><br>Media</button></div>
-                        <div class="col-6"><button onclick="openDriveLink('PPT')" class="btn btn-outline-secondary w-100 p-3"><i data-lucide="presentation" class="mb-2"></i><br>Decks</button></div>
+                        <div class="col-6"><button onclick="openDriveLink('Admin')" class="btn btn-outline-secondary w-100 p-3 h-100"><i data-lucide="shield" class="mb-2"></i><br>Admin</button></div>
+                        <div class="col-6"><button onclick="openDriveLink('Machine')" class="btn btn-outline-secondary w-100 p-3 h-100"><i data-lucide="cpu" class="mb-2"></i><br>Machine</button></div>
+                        <div class="col-6"><button onclick="openDriveLink('Pics')" class="btn btn-outline-secondary w-100 p-3 h-100"><i data-lucide="image" class="mb-2"></i><br>Media</button></div>
+                        <div class="col-6"><button onclick="openDriveLink('PPT')" class="btn btn-outline-secondary w-100 p-3 h-100"><i data-lucide="presentation" class="mb-2"></i><br>Decks</button></div>
                     </div>
                     <textarea id="sub-note" class="form-control mb-3" placeholder="Add a note..."></textarea>
-                    <button onclick="confirmSubmit()" class="btn btn-success w-100">Confirm Upload</button>
+                    <button onclick="confirmSubmit()" class="btn btn-success w-100 py-2">Confirm Upload</button>
                 </div>
             </div>
         </div>
@@ -259,7 +268,7 @@
     </div>
 
     <script>
-        // --- CONFIG & STATE ---
+        // --- CONFIGURATION ---
         const SB_URL = 'https://bzrkbjjgymdbbwpatfct.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmtiampneW1kYmJ3cGF0ZmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTcyNjcsImV4cCI6MjA4NTg3MzI2N30.Icv1daEp7NophE_ktPl2G1EgDP6awo0tyV14yh3Q4Sw';
         const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
@@ -279,19 +288,16 @@
         };
 
         let STATE = { user: null, page: 'home', createMode: 'task', activeTaskForSub: null, selectedDrive: null };
-        
-        // --- GLOBAL UI ELEMENTS (Initialized in onload) ---
         let MODAL_CREATE, MODAL_SUBMIT;
 
-        // --- INIT ---
+        // --- INITIALIZATION ---
         window.onload = function() {
             lucide.createIcons();
             
-            // Initialize Modals
             MODAL_CREATE = new bootstrap.Modal(document.getElementById('modCreate'));
             MODAL_SUBMIT = new bootstrap.Modal(document.getElementById('modSubmit'));
 
-            // Check Auth
+            // Check Login
             const storedUid = localStorage.getItem('cmd_uid');
             if(storedUid) {
                 const u = TEAM.find(x => x.id == storedUid);
@@ -299,9 +305,17 @@
             } else {
                 initAuth();
             }
+
+            // --- REALTIME SUBSCRIPTION (New Feature) ---
+            sbClient.channel('public:any')
+            .on('postgres_changes', { event: '*', schema: 'public' }, payload => {
+                console.log('Realtime Update:', payload);
+                if(STATE.user) render(); // Auto refresh on database change
+            })
+            .subscribe();
         };
 
-        // --- AUTH ---
+        // --- AUTHENTICATION FLOW ---
         function initAuth() {
             document.getElementById('view-auth').classList.remove('d-none');
             const list = document.getElementById('auth-list');
@@ -321,12 +335,13 @@
             document.getElementById('auth-pin').classList.remove('d-none');
             document.getElementById('l-av').innerText = STATE.selUser.av;
             document.getElementById('l-name').innerText = STATE.selUser.name;
+            document.getElementById('inp-pin').value = '';
+            document.getElementById('inp-pin').focus();
         }
 
         function resetAuth() {
             document.getElementById('auth-pin').classList.add('d-none');
             document.getElementById('auth-list').classList.remove('d-none');
-            document.getElementById('inp-pin').value = '';
         }
 
         function tryLogin() {
@@ -342,11 +357,11 @@
         function login(u) {
             STATE.user = u;
             document.getElementById('view-app').classList.remove('d-none');
+            // Update UI with User Info
             document.getElementById('d-name').innerText = u.name;
             document.getElementById('d-role').innerText = u.role;
             document.getElementById('d-av').innerText = u.av;
             document.getElementById('m-av').innerText = u.av;
-            
             nav('home');
         }
 
@@ -355,59 +370,42 @@
             location.reload();
         }
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION ENGINE ---
         function nav(page) {
             STATE.page = page;
             
-            // Desktop Active State
-            document.querySelectorAll('.nav-link-custom').forEach(el => el.classList.remove('active'));
-            const nd = document.getElementById('nd-' + page);
-            if(nd) nd.classList.add('active');
+            // Update UI Active States
+            document.querySelectorAll('.nav-link-custom, .nav-mobile-item').forEach(el => el.classList.remove('active'));
+            if(document.getElementById('nd-' + page)) document.getElementById('nd-' + page).classList.add('active');
+            if(document.getElementById('nm-' + page)) document.getElementById('nm-' + page).classList.add('active');
 
-            // Mobile Active State
-            document.querySelectorAll('.nav-mobile-item').forEach(el => el.classList.remove('active'));
-            const nm = document.getElementById('nm-' + page);
-            if(nm) nm.classList.add('active');
-
-            // Titles
-            const titles = {
-                'home': 'Dashboard',
-                'cal': 'Calendar',
-                'task': 'Tasks',
-                'idea': 'Ideas',
-                'feed': 'Team Feed',
-                'drive': 'Drive'
-            };
+            // Set Page Title
+            const titles = { 'home':'Dashboard', 'cal':'Calendar', 'task':'Tasks', 'idea':'Ideas', 'feed':'Team Feed', 'drive':'Drive' };
             document.getElementById('page-title').innerText = titles[page];
             
             render();
         }
 
-        // --- RENDER ENGINE ---
+        // --- CORE RENDER FUNCTION ---
         async function render() {
             const container = document.getElementById('app-content');
-            container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+            // Subtle loading state, don't wipe content if it exists to prevent flicker
+            if(!container.innerHTML) container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
 
             try {
-                // Fetch data
-                const { data: tasks, error: tErr } = await sbClient.from('tasks').select('*').order('created_at', {ascending: false});
-                const { data: feed, error: fErr } = await sbClient.from('decisions').select('*').order('created_at', {ascending: false});
+                const { data: tasks } = await sbClient.from('tasks').select('*').order('created_at', {ascending: false});
+                const { data: feed } = await sbClient.from('decisions').select('*').order('created_at', {ascending: false});
                 
-                if(tErr) console.error(tErr);
-                if(fErr) console.error(fErr);
-
                 let html = '';
 
-                // 1. DASHBOARD
+                // 1. DASHBOARD VIEW
                 if(STATE.page === 'home') {
-                    // Momentum Graph Logic (Avg Completion %)
                     let graphHtml = '';
                     TEAM.forEach(member => {
                         const memberTasks = tasks.filter(t => (t.tagged_members||[]).includes(member.id) && t.status !== 'Idea');
                         let totalProg = 0;
-                        if(memberTasks.length > 0) {
-                            totalProg = memberTasks.reduce((acc, curr) => acc + (curr.progress || 0), 0) / memberTasks.length;
-                        }
+                        if(memberTasks.length > 0) totalProg = memberTasks.reduce((acc, curr) => acc + (curr.progress || 0), 0) / memberTasks.length;
+                        
                         graphHtml += `
                             <div class="bar-group">
                                 <div class="bar-track">
@@ -419,26 +417,25 @@
                         `;
                     });
 
-                    // Pending Tasks List
-                    const myTasks = tasks.filter(t => t.status !== 'Done' && t.status !== 'Idea' && (t.tagged_members||[]).includes(STATE.user.id)).slice(0, 5);
+                    const myTasks = tasks.filter(t => t.status !== 'Done' && t.status !== 'Idea' && (t.tagged_members||[]).includes(STATE.user.id)).slice(0, 6);
 
                     html = `
                         <div class="row g-4">
                             <div class="col-12 col-lg-6">
                                 <div class="glass-panel p-4 h-100">
-                                    <h6 class="mono-label mb-3">Team Momentum (Avg. Completion)</h6>
+                                    <h6 class="mono-label mb-3">Team Momentum</h6>
                                     <div class="bar-container">${graphHtml}</div>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-6">
                                 <div class="glass-panel p-4 h-100">
                                     <h6 class="mono-label mb-3">Your Priority Queue</h6>
-                                    ${myTasks.length === 0 ? '<div class="text-muted fst-italic">No pending tasks. Good job!</div>' : 
+                                    ${myTasks.length === 0 ? '<div class="text-muted text-center py-4">No pending tasks. Clear skies!</div>' : 
                                       myTasks.map(t => `
                                         <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded bg-dark border border-secondary border-opacity-25">
                                             <div class="text-truncate me-2">
                                                 <div class="fw-bold text-white small">${t.task_title}</div>
-                                                <div class="text-muted text-xs">${t.status}</div>
+                                                <div class="text-muted text-xs badge bg-secondary bg-opacity-25">${t.status}</div>
                                             </div>
                                             <div class="text-primary fw-bold small">${t.progress}%</div>
                                         </div>
@@ -449,7 +446,7 @@
                     `;
                 }
 
-                // 2. CALENDAR
+                // 2. CALENDAR VIEW
                 if(STATE.page === 'cal') {
                     const now = new Date();
                     const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -477,7 +474,7 @@
 
                     html = `
                         <div class="glass-panel p-1">
-                            <div class="p-3 text-center fw-bold text-white">${now.toLocaleString('default',{month:'long'})} ${now.getFullYear()}</div>
+                            <div class="p-3 text-center fw-bold text-white border-bottom border-secondary border-opacity-25 mb-1">${now.toLocaleString('default',{month:'long'})} ${now.getFullYear()}</div>
                             <div class="cal-grid">
                                 ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(h => `<div class="p-2 text-center mono-label bg-dark">${h}</div>`).join('')}
                                 ${days}
@@ -486,33 +483,31 @@
                     `;
                 }
 
-                // 3. TASKS
+                // 3. TASKS VIEW
                 if(STATE.page === 'task') {
-                    // Filter out Ideas
                     const activeTasks = tasks.filter(t => t.status !== 'Idea' && t.status !== 'Done');
-                    
                     html = `<div class="row g-3">
-                        ${activeTasks.length === 0 ? '<div class="col-12 text-center text-muted">All clear.</div>' : ''}
+                        ${activeTasks.length === 0 ? '<div class="col-12 text-center text-muted py-5">All tasks completed.</div>' : ''}
                         ${activeTasks.map(t => {
                             const isMyTask = (t.tagged_members||[]).includes(STATE.user.id);
                             
-                            // Determine buttons based on role/status
+                            // Action Buttons Logic
                             let actionBtns = '';
                             if(STATE.user.role === 'LEADER' && t.status === 'ApprovalReq') {
-                                actionBtns = `<button onclick="updateStatus(${t.id}, 'Pending')" class="btn btn-primary btn-sm w-100 mt-2">Approve</button>`;
+                                actionBtns = `<button onclick="updateStatus(${t.id}, 'Pending')" class="btn btn-primary btn-sm w-100 mt-2">Approve Task</button>`;
                             } else if (t.status === 'Review') {
                                 actionBtns = STATE.user.role === 'LEADER' 
                                     ? `<div class="d-flex gap-2 mt-2"><button onclick="updateStatus(${t.id}, 'Done')" class="btn btn-success btn-sm flex-fill">Accept</button><button onclick="updateStatus(${t.id}, 'Pending')" class="btn btn-outline-danger btn-sm flex-fill">Reject</button></div>`
-                                    : `<div class="alert alert-info py-1 px-2 mt-2 small mb-0 text-center">Under Review</div>`;
+                                    : `<div class="alert alert-info py-1 px-2 mt-2 small mb-0 text-center">Pending Review</div>`;
                             } else {
                                 actionBtns = `<button onclick="openSubmit(${t.id}, '${t.task_title}')" class="btn btn-outline-secondary btn-sm w-100 mt-2">Submit File</button>`;
                             }
 
-                            // Slider Input
+                            // Slider Logic
                             const slider = isMyTask ? `
                                 <div class="mt-3 pt-3 border-top border-secondary border-opacity-25">
                                     <div class="d-flex justify-content-between mb-1">
-                                        <label class="mono-label">My Progress</label>
+                                        <label class="mono-label">Progress</label>
                                         <span class="small fw-bold text-primary" id="prog-txt-${t.id}">${t.progress}%</span>
                                     </div>
                                     <input type="range" min="0" max="100" value="${t.progress}" 
@@ -526,10 +521,10 @@
                                     <div class="glass-panel p-3 h-100 d-flex flex-column">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <span class="badge bg-secondary text-white">${t.status}</span>
-                                            ${t.priority === 'High' ? '<span class="text-danger small fw-bold">HIGH</span>' : ''}
+                                            ${t.priority === 'High' ? '<span class="text-danger small fw-bold">HIGH PRIORITY</span>' : ''}
                                         </div>
                                         <h5 class="fw-bold mb-1">${t.task_title}</h5>
-                                        <p class="text-muted small mb-auto">${t.description}</p>
+                                        <p class="text-muted small mb-auto">${t.description || 'No description'}</p>
                                         ${slider}
                                         ${actionBtns}
                                     </div>
@@ -539,13 +534,12 @@
                     </div>`;
                 }
 
-                // 4. IDEAS
+                // 4. IDEAS VIEW
                 if(STATE.page === 'idea') {
                     const ideas = tasks.filter(t => t.status === 'Idea');
-                    
                     html = `
                         <div class="text-center mb-4">
-                            <button onclick="openCreate('idea')" class="btn btn-outline-secondary dashed-border py-3 px-5">
+                            <button onclick="openCreate('idea')" class="btn btn-outline-secondary py-3 px-5 border-dashed">
                                 <i data-lucide="plus-circle" class="me-2"></i> Add New Idea
                             </button>
                         </div>
@@ -557,21 +551,24 @@
                                             <div>
                                                 <h5 class="fw-bold mb-1">${t.task_title}</h5>
                                                 <p class="text-muted small mb-2">${t.description}</p>
+                                                <div class="d-flex gap-2">
+                                                    ${(t.tagged_members||[]).map(m => `<span class="badge bg-dark border border-secondary text-secondary">${TEAM.find(x=>x.id==m)?.name.split(' ')[0]}</span>`).join('')}
+                                                </div>
                                             </div>
-                                            <button onclick="updateStatus(${t.id}, 'Pending')" class="btn btn-sm btn-primary ms-2" title="Move to Tasks"><i data-lucide="arrow-up-right" size="16"></i> Active</button>
+                                            <button onclick="updateStatus(${t.id}, 'Pending')" class="btn btn-sm btn-primary ms-2" title="Move to Tasks"><i data-lucide="arrow-up-right" size="16"></i></button>
                                         </div>
                                     </div>
                                 </div>
                             `).join('')}
-                            ${ideas.length === 0 ? '<p class="text-center text-muted">No ideas in the backlog.</p>' : ''}
+                            ${ideas.length === 0 ? '<p class="text-center text-muted">No ideas yet.</p>' : ''}
                         </div>
                     `;
                 }
 
-                // 5. TEAM FEED
+                // 5. FEED VIEW
                 if(STATE.page === 'feed') {
                     html = `
-                        <div class="glass-panel p-3 mb-3" style="max-height:70vh; overflow-y:auto">
+                        <div class="glass-panel p-3 mb-3 d-flex flex-column-reverse" style="height:65vh; overflow-y:auto">
                             ${feed.map(f => `
                                 <div class="chat-bubble ${f.subject.includes('LEADER') ? 'leader' : ''}">
                                     <div class="d-flex justify-content-between mb-1">
@@ -582,23 +579,20 @@
                                 </div>
                             `).join('')}
                         </div>
-                        <button onclick="openCreate('feed')" class="btn btn-primary w-100">Post Message</button>
+                        <button onclick="openCreate('feed')" class="btn btn-primary w-100 py-3"><i data-lucide="send" class="me-2" size="18"></i>Post Message</button>
                     `;
                 }
 
-                // 6. DRIVE
+                // 6. DRIVE VIEW
                 if(STATE.page === 'drive') {
-                    // Refined logic for rendered finished tasks
                     const doneTasks = tasks.filter(t => t.status === 'Done').sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at));
                     
                     const driveCards = Object.keys(DRIVE_LINKS).map(k => `
                         <div class="col-6 col-md-3">
-                            <a href="${DRIVE_LINKS[k]}" target="_blank" class="text-decoration-none">
-                                <div class="glass-panel p-4 text-center h-100 hover-panel">
-                                    <i data-lucide="folder" class="text-primary mb-2" size="32"></i>
-                                    <div class="text-white fw-bold">${k}</div>
-                                </div>
-                            </a>
+                            <div onclick="openDriveLink('${k}')" class="glass-panel p-4 text-center h-100 hover-panel cursor-pointer">
+                                <i data-lucide="folder" class="text-primary mb-2" size="32"></i>
+                                <div class="text-white fw-bold">${k}</div>
+                            </div>
                         </div>
                     `).join('');
 
@@ -607,9 +601,9 @@
                         <h6 class="mono-label mb-3">Completed Archive</h6>
                         <div class="glass-panel overflow-hidden">
                             <table class="table table-dark table-hover mb-0 small">
-                                <thead><tr><th>Task</th><th class="text-end">Date</th></tr></thead>
+                                <thead><tr><th class="bg-transparent text-secondary">Task</th><th class="bg-transparent text-end text-secondary">Completed</th></tr></thead>
                                 <tbody>
-                                    ${doneTasks.map(t => `<tr><td class="p-3">${t.task_title}</td><td class="p-3 text-end text-muted">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}
+                                    ${doneTasks.map(t => `<tr><td class="p-3 bg-transparent">${t.task_title}</td><td class="p-3 text-end text-muted bg-transparent">${new Date(t.updated_at).toLocaleDateString()}</td></tr>`).join('')}
                                 </tbody>
                             </table>
                         </div>
@@ -620,28 +614,33 @@
                 lucide.createIcons();
             } catch (e) {
                 console.error(e);
-                container.innerHTML = `<div class="alert alert-danger">Error loading data: ${e.message}</div>`;
+                container.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
             }
         }
 
-        // --- ACTIONS & LOGIC ---
+        // --- INTERACTION LOGIC ---
         function openCreate(type) {
             if(type) {
                 document.getElementById('ct-'+ (type==='feed'?'msg':type)).checked = true;
                 toggleForm(type === 'feed' ? 'feed' : type);
             }
-            // Populate Members
+            
+            // Populate Members Checkboxes
             const memDiv = document.getElementById('div-mems');
             memDiv.innerHTML = TEAM.map(u => `
                 <input type="checkbox" class="btn-check" id="chk-${u.id}" value="${u.id}">
                 <label class="btn btn-outline-secondary btn-sm" for="chk-${u.id}">${u.name.split(' ')[0]}</label>
             `).join('');
             
+            // Default Date = Today
+            document.getElementById('inp-date').valueAsDate = new Date();
+            
             MODAL_CREATE.show();
         }
 
         function openCreateWithDate(date) {
             openCreate('task');
+            // Small delay to ensure modal logic runs first
             setTimeout(() => {
                 document.getElementById('inp-date').value = date;
             }, 100);
@@ -660,12 +659,14 @@
             
             if(!title) return alert('Title required');
 
+            // 1. POST MESSAGE
             if(STATE.createMode === 'feed') {
                 await sbClient.from('decisions').insert({
                     subject: `${STATE.user.name} [${STATE.user.role}]`,
                     details: `${title} - ${desc}`
                 });
             } else {
+                // 2. CREATE TASK/IDEA
                 const status = STATE.createMode === 'idea' ? 'Idea' : (STATE.user.role === 'LEADER' ? 'Pending' : 'ApprovalReq');
                 const mems = [...document.querySelectorAll('#div-mems input:checked')].map(c => parseInt(c.value));
                 
@@ -681,18 +682,14 @@
                 };
 
                 const { error } = await sbClient.from('tasks').insert(payload);
-                if(error) {
-                    alert('Error saving: ' + error.message);
-                    return;
-                }
+                if(error) return alert(error.message);
             }
             
             MODAL_CREATE.hide();
-            // Clear inputs
             document.getElementById('inp-title').value = '';
             document.getElementById('inp-desc').value = '';
-            showToast('Item created successfully');
-            render();
+            showToast('Created Successfully');
+            // No need to manual render() because Realtime listener will trigger it
         }
 
         async function updateProgress(id, val) {
@@ -702,10 +699,8 @@
         async function updateStatus(id, status) {
             await sbClient.from('tasks').update({ status: status, updated_at: new Date() }).eq('id', id);
             showToast(`Status updated to ${status}`);
-            render();
         }
 
-        // --- SUBMISSION LOGIC ---
         function openSubmit(id, title) {
             STATE.activeTaskForSub = { id, title };
             MODAL_SUBMIT.show();
@@ -720,7 +715,11 @@
             if(!STATE.selectedDrive) return alert('Please click a drive folder first');
             
             const note = document.getElementById('sub-note').value;
+            
+            // Update Task
             await sbClient.from('tasks').update({ status: 'Review', updated_at: new Date() }).eq('id', STATE.activeTaskForSub.id);
+            
+            // Log in Feed
             await sbClient.from('decisions').insert({
                 subject: `FILE SUBMISSION: ${STATE.activeTaskForSub.title}`,
                 details: `Uploaded to ${STATE.selectedDrive}. Note: ${note}`
@@ -728,7 +727,6 @@
 
             MODAL_SUBMIT.hide();
             showToast('Submitted for Review');
-            render();
         }
 
         function showToast(msg) {
@@ -736,7 +734,6 @@
             const toast = new bootstrap.Toast(document.getElementById('sysToast'));
             toast.show();
         }
-
     </script>
 </body>
 </html>
